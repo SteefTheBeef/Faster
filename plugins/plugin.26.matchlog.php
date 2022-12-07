@@ -4,11 +4,11 @@
 // File:      FAST 3.2 (First Automatic Server for Trackmania)
 // Date:      06.04.2011
 // Author:    Gilles Masson
-// 
+//
 ////////////////////////////////////////////////////////////////
 //
 // FAST3.2 Matchlog plugin
-// 
+//
 //
 if(!$_is_relay) registerPlugin('matchlog',26,1.0);
 
@@ -66,7 +66,7 @@ function matchlogBeginRace($event,$GameInfos){
 
 
 //------------------------------------------
-// BeginRound : 
+// BeginRound :
 //------------------------------------------
 function matchlogBeginRound(){
 	global $_debug,$_PlayerList,$_Ranking,$_matchlog_Ranking,$_GameInfos,$_Status,$_team_color,$_teamcolor,$do_match_log,$_WarmUp,$_FWarmUp;
@@ -92,12 +92,12 @@ function matchlogBeginRound(){
 		}
 		$_matchlog_Ranking = $_Ranking;
 	}
-	
+
 }
 
 
 //------------------------------------------
-// EndRound : 
+// EndRound :
 //------------------------------------------
 function matchlogEndRound($event,$Ranking,$ChallengeInfo,$GameInfos,$SpecialRestarting){
 	global $_debug,$_players,$_GameInfos,$_team_color,$do_match_log,$_players_round_current,$_Game,$_teams,$_WarmUp,$_FWarmUp,$_FGameModes,$_FGameMode;
@@ -187,7 +187,7 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 	global $_debug,$_players,$_PlayerList,$_Ranking,$do_match_log,$_NumberOfChecks,$_players_round_current,$_lapspoints_points,$_lapspoints_finishbonus,$_lapspoints_notfinishmultiplier,$_lapspoints_rule,$_WarmUp,$_FWarmUp,$_GameInfos,$_players_round_time,$_currentTime,$_FGameModes,$_FGameMode;
 	if(!$do_match_log || $_WarmUp || $_FWarmUp > 0)
 		return;
-	
+
 	if(isset($_FGameModes[$_FGameMode]['MatchLogEndRace']) && $_FGameModes[$_FGameMode]['MatchLogEndRace'] != '' &&
 		 function_exists($_FGameModes[$_FGameMode]['MatchLogEndRace'])){
 		// call FGameMode matchlog callback if exists
@@ -257,7 +257,7 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 		}
 		matchlog($msg1."\n\n");
 
-	
+
 		// rounds match log
 	}elseif($GameInfos['GameMode'] == 0 || $GameInfos['GameMode'] == 5){ // rounds
 
@@ -297,7 +297,7 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 		}
 		matchlog($msg1."\n\n");
 
-		
+
 		// timeattack match log
 	}elseif($GameInfos['GameMode'] == 1){ // timeattack
 
@@ -315,7 +315,7 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 		}
 		matchlog($msg1."\n\n");
 
-		
+
 	}elseif($GameInfos['GameMode'] == 4){ // stunts
 
 		$cuid = isset($ChallengeInfo['UId']) ? $ChallengeInfo['UId'] : 'UID';
@@ -332,7 +332,7 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 		}
 		matchlog($msg1."\n\n");
 
-		
+
 		// laps match log
 	}elseif($GameInfos['GameMode'] == 3){
 		if($_NumberOfChecks > 0){
@@ -387,7 +387,7 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 							$bestlapi = $i;
 					}
 				}
-				
+
 				//if($_debug>8) debugPrint("matchlogEndRace - Laps - times",$times);
 				//
 				$cuid = isset($ChallengeInfo['UId']) ? $ChallengeInfo['UId'] : 'UID';
@@ -486,7 +486,7 @@ function matchlogEndResult($event){
 			console("Copy fastlog/$htmlmatchfilename ($nb/".strlen($datas).")...");
 
 			if(isset($_matchlog_url))
-				$addcall = array(null,'ChatSendServerMessage', 
+				$addcall = array(null,'ChatSendServerMessage',
 											localeText(null,'server_message').'$l['.$_matchlog_url.$htmlmatchfilename.']matchlog copied.');
 			else
 				$addcall = null;
@@ -531,7 +531,7 @@ function matchlogRecCompareLaps($a, $b)
 function matchlog($text){
 	global $matchfile,$do_match_log;
 	if($do_match_log){
-		fwrite($matchfile,"[".date("m/d,H:i:s")."] $text\n");
+		fwrite($matchfile,"[".date("Y-m-d, H:i:s")."] $text\n");
 		fflush($matchfile);
 	}
 }
