@@ -1,11 +1,35 @@
-# Fast4
-Next generation server Controller for Trackmania Forever dedicated server
-Built on top of Fast3.
+# Fast3
+Controler for Trackmania Forever dedicated server
+
+FAST3 is a controler for use with a Trackmania Forever dedicated server, allowing to add various fonctionalities.
+
+It does not replace the dedicated server, but is connected to it and use its API to extend things. 
+
+FAST3 is for TM FOREVER only !!! (United and Nations)
+
+
+
 
 REPOSITORY
 ----------
-github :  https://github.com/SteefTheBeef/Fast4
-Fast3 :  https://github.com/Slig06/Fast3
+github :  https://github.com/Slig06/Fast3
+
+( Original repository :  http://slig.info/fast3.2/ )
+ 
+
+FORUM : updates/bugs/ideas
+-----
+
+You can acces directly to forum there :
+
+	http://dedimania.com/SITE/forum/viewforum.php?id=5
+	
+
+You must connect first into the site to be able to post in
+the forum.
+
+	http://dedimania.net/
+
 
 INSTALLATION
 ------------
