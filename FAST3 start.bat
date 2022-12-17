@@ -10,7 +10,7 @@ echo Starting Fast3.2.x...
 
 rem Replace 'dedconfig.cfg' below with your real dedicated file name !!!
 
-"php5\php5.exe" fast.php   dedconfig.cfg   update_stop10
+"TrackmaniaServer\php5\php5.exe" fast.php   TrackmaniaServer/GameData/Config/dedconfig.txt   update_stop10
 
 
 
