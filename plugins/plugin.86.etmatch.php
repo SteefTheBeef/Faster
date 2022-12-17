@@ -110,12 +110,14 @@ function etmatchPlayerConnect($event,$login,$pinfo,$pdetailedinfo,$pranking){
 		// not in a team nor admin, and match is started
 		console("Match started ({$_match_map}) and not in team : ban {$login}");
 		addCall(null,'Kick',''.$login,'Match is started and you are not in a team : go on relay please !');
+
 		//addCall(null,'Ban',''.$login,'Match is started and you are not in a team : go on relay please !');
 	}
 }
 
 
-function etmatchLoadTeams($etcompetname){
+function
+etmatchLoadTeams($etcompetname, $userLogin){
 	global $_debug,$_players,$_match_map,$_fteams_rules,$_match_mode,$_match_config,$_etmatch_players,$_etmatch_teams,$_etmatch_matches,$_etmatch_div_id,$_etmatch_div2_id,$_etmatch_match_id,$_FGameMode,$_FGameModes,$prevresults,$_etmatch_bonuses;
 
 	console("etmatchLoadTeams:: div={$_etmatch_div_id} , div2={$_etmatch_div2_id} , match={$_etmatch_match_id}");
@@ -276,11 +278,13 @@ function etmatchLoadTeams($etcompetname){
 	print_r($_etmatch_teams);
 	file_put_contents("{$etcompetname}.d{$_etmatch_div_id}.{$_etmatch_div2_id}.m{$_etmatch_match_id}.teamlist.txt",	print_r($_etmatch_teams,true));
 
+
+
 	if($_etmatch_match_id >= 0)
 		console("etmatchLoadTeams:: etmatch_matches ({$_etmatch_match_id}): ".print_r($_etmatch_matches));
 
 	console("etmatchLoadTeams:: {$etcompetname}: ".count($_etmatch_players)." players in ".count($_etmatch_teams)." teams !");
-
+	sendChatMessageToLogin($userLogin, $etcompetname.": ".count($_etmatch_players)." players in ".count($_etmatch_teams)." teams !");
 	etmatchPrevScores();
 	etmatchBonuses();
 
@@ -301,8 +305,7 @@ function chat_et($author, $login, $params1, $params){
 	global $_debug,$_is_relay,$_match_config,$_match_map,$_match_mode,$_etmatch_players,$_etmatch_teams,$_etmatch_div_id,$_etmatch_div2_id,$_etmatch_match_id;
 	
 	if(!verifyAdmin($login)){
-		$msg = localeText(null,'server_message').localeText(null,'interact').'need admin permissions !';
-		addCall(null,'ChatSendToLogin', $msg, $login);
+		sendChatMessageToLogin($login, 'need admin permissions !');
 	}
 
 	if($_is_relay)
@@ -313,7 +316,7 @@ function chat_et($author, $login, $params1, $params){
 			$_etmatch_teams = array();
 			$_etmatch_players = array();
 			fteamsClearAllTeams();
-	
+			sendChatMessageToLogin($login, "Teams and players cleared.");
 		}else{
 			if(!isset($_match_config[$params[0]]['GameMode'])){
 				matchReadConfigs('plugins/match.configs.xml.txt');
@@ -342,7 +345,8 @@ function chat_et($author, $login, $params1, $params){
 						$_etmatch_match_id = $params[2] + 0;
 				}
 
-				etmatchLoadTeams($_match_mode);
+				sendChatMessageToLogin($login, "ET Match mode {$params[0]} loaded");
+				etmatchLoadTeams($_match_mode, $login);
 			}
 		}
 
@@ -350,8 +354,11 @@ function chat_et($author, $login, $params1, $params){
 		$msg = localeText(null,'server_message').localeText(null,'interact')."/et gamename, clearall";
 		addCall(null,'ChatSendToLogin', $msg, $login);
 	}
-
 }
 
+function sendChatMessageToLogin($login, $msg) {
+	$message = localeText(null,'server_message').localeText(null,'interact').$msg;
+	addCall(null,'ChatSendToLogin', $message, $login);
+}
 
 ?>
