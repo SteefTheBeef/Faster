@@ -77,10 +77,7 @@ class MatchlogTeams {
 
     }
 
-    private static function endRound() {
-
-    }
-
+    private static function endRound() {}
 
     private static function getTeamName($rankingItem){
         return ''.stripColors(''.$rankingItem['NickName']);

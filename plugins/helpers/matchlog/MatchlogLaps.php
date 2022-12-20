@@ -15,9 +15,8 @@ class MatchlogLaps {
         }
     }
 
-    private static function beginRound() {
+    private static function beginRound() {}
 
-    }
     private static function endRace($challengeInfo) {
         global $_players,$_PlayerList, $_NumberOfChecks,$_GameInfos,$_players_round_time,$_currentTime;
 
@@ -102,6 +101,7 @@ class MatchlogLaps {
         matchlog($matchlogMessage."\n\n");
         console("to matchlog: ".$matchlogMessage);
     }
+
     private static function getBestLapsAsString($bestLaps, $GameInfos) {
         $result = "\n* BestLaps\n";
         // the number of laps should be the maximum.
@@ -113,6 +113,7 @@ class MatchlogLaps {
 
         return $result;
     }
+
     private static function createFinishedPlayer($player) {
         return array(
             'Login'=>$player['Login'],
@@ -134,6 +135,7 @@ class MatchlogLaps {
 
         );
     }
+
     private static function getTimeHasFinished($lapsTimeLimit, $currentTime, $playersRoundTime, $lastTime) {
         if($lapsTimeLimit < 0) {
             return false;
@@ -164,10 +166,6 @@ class MatchlogLaps {
         }
 
         return $bestLapIndex;
-    }
-
-    private static function createChatMessage($finishedPlayers) {
-        $chatMessage = '$i$s$n$dfdRace$cc0>> ';
     }
 
     private static function getChatMessageForBestLap($player, $index) {
@@ -234,6 +232,7 @@ class MatchlogLaps {
         return $playerLapsPoints;
     }
 }
+
 function sortLaps($a, $b) {
     if($a['LapTimeMs']<$b['LapTimeMs'])
         return -1;
