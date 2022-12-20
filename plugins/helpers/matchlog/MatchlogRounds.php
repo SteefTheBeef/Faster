@@ -31,13 +31,13 @@ class MatchlogRounds {
     private static function endRace($challengeInfo, $ranking) {
         global $_players_round_current, $_PlayerList, $_players;
 
-        $matchlogMessage = getMatchlogTitle($challengeInfo, 'ROUNDS',  '['.$_players_round_current.'r]');
+        $matchlogMessage = MatchlogUtils::getMatchlogTitle($challengeInfo, 'ROUNDS',  '['.$_players_round_current.'r]');
 
         for($i = 0; $i < sizeof($ranking); $i++){
             $matchlogMessage .= "\n".$ranking[$i]['Rank'].','.$ranking[$i]['Score'].','.MwTimeToString($ranking[$i]['BestTime']).','.stripColors($ranking[$i]['Login']).','.stripColors($ranking[$i]['NickName']);
         }
 
-        $matchlogMessage .= getTextSpectators($_PlayerList);
+        $matchlogMessage .= MatchlogUtils::getTextSpectators($_PlayerList);
 
         $sep = "\n* Results: "; // pos in each round
         foreach($_players as $login => &$pl){

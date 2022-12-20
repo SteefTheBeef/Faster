@@ -19,13 +19,13 @@ class MatchlogStunts {
      */
     private static function endRace($challengeInfo, $ranking) {
         global $_PlayerList;
-        $matchlogMessage = getMatchlogTitle($challengeInfo, 'STUNTS');
+        $matchlogMessage = MatchlogUtils::getMatchlogTitle($challengeInfo, 'STUNTS');
 
         for($i = 0; $i < sizeof($ranking); $i++){
             $matchlogMessage .= "\n".$ranking[$i]['Rank'].','.$ranking[$i]['Score'].','.stripColors($ranking[$i]['Login']).','.stripColors($ranking[$i]['NickName']);
         }
 
-        $matchlogMessage .= getTextSpectators($_PlayerList);
+        $matchlogMessage .= MatchlogUtils::getTextSpectators($_PlayerList);
         matchlog($matchlogMessage."\n\n");
     }
 }
