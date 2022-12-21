@@ -77,41 +77,40 @@ class MatchlogLaps {
         // sort laps finishedPlayers, then make log and message
         usort($finishedPlayers,'matchlogRecCompareLaps');
 
-        // search player with the best lap
-        $bestLapIndex = self::findIndexOfBestLap($finishedPlayers);
-
-        $chatMessage = '$i$s$n$dfdRace$cc0>> ';
         $matchlogMessage = MatchlogUtils::getMatchlogTitle($challengeInfo, 'LAPS');
 
         for($i = 0; $i < sizeof($finishedPlayers); $i++){
             $currentPlayer = $finishedPlayers[$i];
             $matchlogMessage .= self::getTextRowForPlayer($currentPlayer, $finishedPlayers[0], $i, $minCPdelay);
-
-            if($i==$bestLapIndex){
-                $chatMessage .= self::getChatMessageForBestLap($currentPlayer, $i);
-            }else{
-                $chatMessage .= self::getChatMessageForRegularLap($currentPlayer, $i);
-            }
         }
 
         $matchlogMessage .= MatchlogUtils::getTextSpectators($playerList);
         $matchlogMessage .= self::getBestLapsAsString($lapsArr, $gameInfo);
-
-        addCall(null,'ChatSendServerMessage', $chatMessage);
+        self::chatMessageBestLaps($lapsArr, $gameInfo);
         matchlog($matchlogMessage."\n\n");
         console("to matchlog: ".$matchlogMessage);
     }
-
-    private static function getBestLapsAsString($bestLaps, $GameInfos) {
+    private static function getBestLapsAsString($bestLaps, $GameInfos, $chatMessage = false) {
         $result = "\n* BestLaps\n";
         // the number of laps should be the maximum.
         $count = min(sizeof($bestLaps), $GameInfos['LapsNbLaps']);
         for($i = 0; $i < $count; $i++){
             $place = $i+1;
-            $result .= $place.",".$bestLaps[$i]['LapTime'].",".$bestLaps[$i]['Login'].",".$bestLaps[$i]['NickName']."\n";
+                $result .= "\n".$place.", ".$bestLaps[$i]['LapTime'].", ".$bestLaps[$i]['Login'].", ".$bestLaps[$i]["NickName"];
         }
 
         return $result;
+    }
+    private static function chatMessageBestLaps($bestLaps, $GameInfos) {
+        addCall(null,'ChatSendServerMessage', '$i* Best laps');
+        // the number of laps should be the maximum.
+        $count = min(sizeof($bestLaps), $GameInfos['LapsNbLaps']);
+        for($i = 0; $i < $count; $i++){
+            $place = $i+1;
+            $msg = '$i$n$0f0'.$place.'. $ecc'.$bestLaps[$i]['LapTime'].", ".$bestLaps[$i]["NickNameWithColor"];
+            addCall(null,'ChatSendServerMessage', $msg);
+
+        }
     }
 
     private static function createFinishedPlayer($player) {
@@ -128,8 +127,9 @@ class MatchlogLaps {
 
     private static function createLapItem($player, $lapTime) {
         return array(
-            'Login' => $player['Login'],
+            'Login' => $player['Login'],/*//*/
             'NickName' => stripColors($player['NickName']),
+            'NickNameWithColor' => $player['NickName'],
             'LapTimeMs' => $lapTime,
             'LapTime' => MwTimeToString($lapTime),
 
@@ -152,34 +152,7 @@ class MatchlogLaps {
         }
 
     }
-
-
-    private static function findIndexOfBestLap($finishedPlayers) {
-        // search bestlap player
-        $bestLapIndex = 0;
-        for($i = 0; $i < sizeof($finishedPlayers); $i++){
-            if($finishedPlayers[$i]['BestLap']>0){
-                if($finishedPlayers[$bestLapIndex]['BestLap']<=0 || $finishedPlayers[$bestLapIndex]['BestLap']>$finishedPlayers[$i]['BestLap']) {
-                    $bestLapIndex = $i;
-                }
-            }
-        }
-
-        return $bestLapIndex;
-    }
-
-    private static function getChatMessageForBestLap($player, $index) {
-        return ''.'$0f0 '.($index+1).'.$ecc'.stripColors($player['NickName'])
-            .' $aaa('.$player['Check'].','.MwTimeToString($player['Time'])
-            .',$ecc'.MwTimeToString($player['BestLap']).'$aaa)';
-
-    }
-
-    private static function getChatMessageForRegularLap($player, $index) {
-        return ''.'$0f0 '.($index+1).'.$ddd'.stripColors($player['NickName'])
-            .' $aaa('.$player['Check'].','.MwTimeToString($player['Time']).')';
-    }
-
+    
     private static function getTextRowForPlayer($player, $firstFinishedPlayer, $index, $minCPdelay) {
         $text = "\n".($index+1).','.$player['Lap'].','.$player['Check'].','
             .MwTimeToString($player['Time']).','.MwTimeToString($player['BestLap']).','
@@ -266,3 +239,5 @@ function matchlogRecCompareLaps($a, $b)
         return 1;
     return -1;
 }
+
+
