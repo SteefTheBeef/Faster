@@ -96,7 +96,7 @@ class MatchlogLaps {
         $count = min(sizeof($bestLaps), $GameInfos['LapsNbLaps']);
         for($i = 0; $i < $count; $i++){
             $place = $i+1;
-                $result .= "\n".$place.", ".$bestLaps[$i]['LapTime'].", ".$bestLaps[$i]['Login'].", ".$bestLaps[$i]["NickName"];
+                $result .= $place.", ".$bestLaps[$i]['LapTime'].", ".$bestLaps[$i]['Login'].", ".$bestLaps[$i]["NickName"]."\n";
         }
 
         return $result;
@@ -152,7 +152,7 @@ class MatchlogLaps {
         }
 
     }
-    
+
     private static function getTextRowForPlayer($player, $firstFinishedPlayer, $index, $minCPdelay) {
         $text = "\n".($index+1).','.$player['Lap'].','.$player['Check'].','
             .MwTimeToString($player['Time']).','.MwTimeToString($player['BestLap']).','
