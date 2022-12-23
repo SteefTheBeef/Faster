@@ -37,7 +37,9 @@ class MatchlogLaps {
         $finishedPlayers = array();
         $numberOfFinishers = 0;
         $minCPdelay = 99999;
-        $lapsArr = array();
+        $lapsList= array();
+        $lapsGroupedByLogin = array();
+
 
         foreach($players as $login => &$player){
             if($player['CheckpointNumber'] > 0 && $player['LastCpTime'] > 0 && $player['LapNumber'] >= 0){
@@ -46,10 +48,17 @@ class MatchlogLaps {
                 }
 
                 $finishedPlayers[] = self::createFinishedPlayer($player);
+                $allPlayerLapsAsString = "";
+                $playerLaps = array();
+                $lapNumber = 1;
                 foreach($player['Laps'] as $key => $lapTime) {
-                    $lapsArr[] = self::createLapItem($player, $lapTime);
+                    $lap = self::createLapItem($player, $lapTime, $lapNumber);
+                    $playerLaps[] = $lap;
+                    $lapsList[] = $lap;
+                    $lapNumber++;
                 }
 
+                $lapsGroupedByLogin[] = self::getPlayerLapsAsOneLineString($playerLaps);
                 if($player['LastCpTime'] > $lastTime) {
                     $lastTime = $player['LastCpTime'];
                 }
@@ -72,7 +81,7 @@ class MatchlogLaps {
         }
 
         // sort all laps, the best ones first.
-        usort($lapsArr, 'sortLaps');
+        usort($lapsList, 'sortLaps');
 
         // sort laps finishedPlayers, then make log and message
         usort($finishedPlayers,'matchlogRecCompareLaps');
@@ -85,21 +94,47 @@ class MatchlogLaps {
         }
 
         $matchlogMessage .= MatchlogUtils::getTextSpectators($playerList);
-        $matchlogMessage .= self::getBestLapsAsString($lapsArr, $gameInfo);
-        self::chatMessageBestLaps($lapsArr, $gameInfo);
+        $matchlogMessage .= self::getPlayerLapsLogText($lapsGroupedByLogin);
+        $matchlogMessage .= self::getBestLapsLogText($lapsList, $gameInfo);
+        self::chatMessageBestLaps($lapsList, $gameInfo);
         matchlog($matchlogMessage."\n\n");
         console("to matchlog: ".$matchlogMessage);
     }
-    private static function getBestLapsAsString($bestLaps, $GameInfos, $chatMessage = false) {
+
+    private static function getBestLapsLogText($bestLaps, $GameInfos) {
         $result = "\n* BestLaps\n";
+        $result .= "Rank,LapTime,LapNumber,Login,NickName\n";
+
         // the number of laps should be the maximum.
         $count = min(sizeof($bestLaps), $GameInfos['LapsNbLaps']);
         for($i = 0; $i < $count; $i++){
             $place = $i+1;
-                $result .= $place.", ".$bestLaps[$i]['LapTime'].", ".$bestLaps[$i]['Login'].", ".$bestLaps[$i]["NickName"]."\n";
+            $bestLap = $bestLaps[$i];
+            $result .= $place.",".$bestLap['LapTime'].",".$bestLap['LapNumber'].",".$bestLap['Login'].",".$bestLap["NickName"]."\n";
         }
 
         return $result;
+    }
+
+    private static function getPlayerLapsLogText($lapsGroupedByLogin) {
+        $result = "\n* Laps grouped by player\n";
+        $count = count($lapsGroupedByLogin);
+        for($i = 0; $i < $count; $i++){
+            $sep = $i < $count - 1 ? "\n" : "";
+            $result .= $lapsGroupedByLogin[$i].$sep;
+        }
+
+        return $result;
+    }
+
+    private static function getPlayerLapsAsOneLineString($playerLaps) {
+        $result = "";
+        for($i = 0; $i < count($playerLaps); $i++){
+            $result .= $playerLaps[$i]['LapTime'].',' ;
+        }
+
+        return $playerLaps[0]['Login'].",".$playerLaps[0]["NickName"].",".$result;
+
     }
     private static function chatMessageBestLaps($bestLaps, $GameInfos) {
         addCall(null,'ChatSendServerMessage', '$i* Best laps');
@@ -125,13 +160,14 @@ class MatchlogLaps {
         );
     }
 
-    private static function createLapItem($player, $lapTime) {
+    private static function createLapItem($player, $lapTime, $lapNumber) {
         return array(
             'Login' => $player['Login'],/*//*/
             'NickName' => stripColors($player['NickName']),
             'NickNameWithColor' => $player['NickName'],
             'LapTimeMs' => $lapTime,
             'LapTime' => MwTimeToString($lapTime),
+            'LapNumber' => $lapNumber,
 
         );
     }
