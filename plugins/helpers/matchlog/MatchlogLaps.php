@@ -50,13 +50,14 @@ class MatchlogLaps {
                 $finishedPlayers[] = self::createFinishedPlayer($player);
                 $allPlayerLapsAsString = "";
                 $playerLaps = array();
+                $lapNumber = 1;
                 foreach($player['Laps'] as $key => $lapTime) {
-                    $lap = self::createLapItem($player, $lapTime);
+                    $lap = self::createLapItem($player, $lapTime, $lapNumber);
                     $playerLaps[] = $lap;
                     $lapsList[] = $lap;
+                    $lapNumber++;
                 }
 
-                usort($playerLaps, 'sortLaps');
                 $lapsGroupedByLogin[] = self::getPlayerLapsAsOneLineString($playerLaps);
                 if($player['LastCpTime'] > $lastTime) {
                     $lastTime = $player['LastCpTime'];
@@ -102,11 +103,14 @@ class MatchlogLaps {
 
     private static function getBestLapsLogText($bestLaps, $GameInfos) {
         $result = "\n* BestLaps\n";
+        $result .= "Rank,LapTime,LapNumber,Login,NickName\n";
+
         // the number of laps should be the maximum.
         $count = min(sizeof($bestLaps), $GameInfos['LapsNbLaps']);
         for($i = 0; $i < $count; $i++){
             $place = $i+1;
-                $result .= $place.", ".$bestLaps[$i]['LapTime'].", ".$bestLaps[$i]['Login'].", ".$bestLaps[$i]["NickName"]."\n";
+            $bestLap = $bestLaps[$i];
+            $result .= $place.",".$bestLap['LapTime'].",".$bestLap['LapNumber'].",".$bestLap['Login'].",".$bestLap["NickName"]."\n";
         }
 
         return $result;
@@ -129,8 +133,8 @@ class MatchlogLaps {
             $result .= $playerLaps[$i]['LapTime'].',' ;
         }
 
-        $result .= $playerLaps[0]['Login'].",".$playerLaps[0]["NickName"];
-        return $result;
+        return $playerLaps[0]['Login'].",".$playerLaps[0]["NickName"].",".$result;
+
     }
     private static function chatMessageBestLaps($bestLaps, $GameInfos) {
         addCall(null,'ChatSendServerMessage', '$i* Best laps');
@@ -156,13 +160,14 @@ class MatchlogLaps {
         );
     }
 
-    private static function createLapItem($player, $lapTime) {
+    private static function createLapItem($player, $lapTime, $lapNumber) {
         return array(
             'Login' => $player['Login'],/*//*/
             'NickName' => stripColors($player['NickName']),
             'NickNameWithColor' => $player['NickName'],
             'LapTimeMs' => $lapTime,
             'LapTime' => MwTimeToString($lapTime),
+            'LapNumber' => $lapNumber,
 
         );
     }
