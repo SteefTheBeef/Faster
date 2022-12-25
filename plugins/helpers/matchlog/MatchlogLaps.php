@@ -39,6 +39,7 @@ class MatchlogLaps {
         $minCPdelay = 99999;
         $lapsList= array();
         $lapsGroupedByLogin = array();
+        $checkpointsPerLapGroupedByPlayer = array();
 
 
         foreach($players as $login => &$player){
@@ -48,7 +49,6 @@ class MatchlogLaps {
                 }
 
                 $finishedPlayers[] = self::createFinishedPlayer($player);
-                $allPlayerLapsAsString = "";
                 $playerLaps = array();
                 $lapNumber = 1;
                 foreach($player['Laps'] as $key => $lapTime) {
@@ -58,6 +58,7 @@ class MatchlogLaps {
                     $lapNumber++;
                 }
 
+                $checkpointsPerLapGroupedByPlayer[]  = self::getPlayerCheckpointsAsOneLineString($player, $challengeInfo);
                 $lapsGroupedByLogin[] = self::getPlayerLapsAsOneLineString($playerLaps);
                 if($player['LastCpTime'] > $lastTime) {
                     $lastTime = $player['LastCpTime'];
@@ -95,6 +96,7 @@ class MatchlogLaps {
 
         $matchlogMessage .= MatchlogUtils::getTextSpectators($playerList);
         $matchlogMessage .= self::getPlayerLapsLogText($lapsGroupedByLogin);
+        $matchlogMessage .= self::getPlayerCheckpointsAsLogText($checkpointsPerLapGroupedByPlayer);
         $matchlogMessage .= self::getBestLapsLogText($lapsList, $gameInfo);
         self::chatMessageBestLaps($lapsList, $gameInfo);
         matchlog($matchlogMessage."\n\n");
@@ -134,8 +136,29 @@ class MatchlogLaps {
         }
 
         return $playerLaps[0]['Login'].",".$playerLaps[0]["NickName"].",".$result;
-
     }
+
+    private static function getPlayerCheckpointsAsOneLineString($player, $challengeInfo) {
+        $result = "";
+        for($i = -1; $i < count($player['Checkpoints']) - 1; $i++){
+            $sep = $i % $challengeInfo["NbCheckpoints"] === 1 ? "#" : ",";
+            $result .= MwTimeToString($player['Checkpoints'][$i]).$sep ;
+        }
+
+        return $player['Login'].",".stripColors($player["NickName"]).",".$result;
+    }
+
+    private static function getPlayerCheckpointsAsLogText($checkpointsPerLapGroupedByPlayer) {
+        $result = "\n* Checkpoints grouped by player\n";
+        $count = count($checkpointsPerLapGroupedByPlayer);
+        for($i = 0; $i < $count; $i++){
+            $sep = $i < $count - 1 ? "\n" : "";
+            $result .= $checkpointsPerLapGroupedByPlayer[$i].$sep ;
+        }
+
+        return $result;
+    }
+
     private static function chatMessageBestLaps($bestLaps, $GameInfos) {
         addCall(null,'ChatSendServerMessage', '$i* Best laps');
         // the number of laps should be the maximum.
