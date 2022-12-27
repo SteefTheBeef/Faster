@@ -88,16 +88,20 @@ class MatchlogLaps {
         usort($finishedPlayers,'matchlogRecCompareLaps');
 
         $matchlogMessage = MatchlogUtils::getMatchlogTitle($challengeInfo, 'LAPS');
+        $matchlogMessage .= "\nRank,Lap,Checkpoints,Time,BestLap,CPdelay,Points,Login,NickName";
 
         for($i = 0; $i < sizeof($finishedPlayers); $i++){
             $currentPlayer = $finishedPlayers[$i];
             $matchlogMessage .= self::getTextRowForPlayer($currentPlayer, $finishedPlayers[0], $i, $minCPdelay);
         }
-
+        $matchlogMessage .= "\n--------------------";
         $matchlogMessage .= MatchlogUtils::getTextSpectators($playerList);
         $matchlogMessage .= self::getPlayerLapsLogText($lapsGroupedByLogin);
+        $matchlogMessage .= "\n--------------------";
         $matchlogMessage .= self::getPlayerCheckpointsAsLogText($checkpointsPerLapGroupedByPlayer);
+        $matchlogMessage .= "\n--------------------";
         $matchlogMessage .= self::getBestLapsLogText($lapsList, $gameInfo);
+        $matchlogMessage .= "\n--------------------";
         self::chatMessageBestLaps($lapsList, $gameInfo);
         matchlog($matchlogMessage."\n\n");
         console("to matchlog: ".$matchlogMessage);
@@ -141,7 +145,7 @@ class MatchlogLaps {
     private static function getPlayerCheckpointsAsOneLineString($player, $challengeInfo) {
         $result = "";
         for($i = -1; $i < count($player['Checkpoints']) - 1; $i++){
-            $sep = $i % $challengeInfo["NbCheckpoints"] === 1 ? "#" : ",";
+            $sep = $i % $challengeInfo["NbCheckpoints"] === 1 ? "#," : ",";
             $result .= MwTimeToString($player['Checkpoints'][$i]).$sep ;
         }
 
