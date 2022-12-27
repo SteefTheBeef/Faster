@@ -101,7 +101,7 @@ class MatchlogLaps {
         $matchlogMessage .= self::getPlayerCheckpointsAsLogText($checkpointsPerLapGroupedByPlayer);
         $matchlogMessage .= "\n--------------------";
         $matchlogMessage .= self::getBestLapsLogText($lapsList, $gameInfo);
-        $matchlogMessage .= "\n--------------------";
+        $matchlogMessage .= "--------------------";
         self::chatMessageBestLaps($lapsList, $gameInfo);
         matchlog($matchlogMessage."\n\n");
         console("to matchlog: ".$matchlogMessage);
