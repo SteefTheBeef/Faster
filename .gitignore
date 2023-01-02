@@ -1,5 +1,5 @@
 .idea
-matchlog
+/matchlog
 fastlog
 TrackmaniaServer
 playerlist.txt
@@ -13,3 +13,7 @@ FAST3 start.bat
 msf4a.d1.-1.m-1.teamlist.txt
 
 store.tmu.BlackCatTest.fast
+
+um.d1.-1.m-1.teamlist.txt
+
+lapstest.d1.-1.m-1.teamlist.txt

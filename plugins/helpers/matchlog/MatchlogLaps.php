@@ -86,51 +86,56 @@ class MatchlogLaps {
 
         // sort laps finishedPlayers, then make log and message
         usort($finishedPlayers,'matchlogRecCompareLaps');
+        $date = date("Y-m-d H:i:s");
 
         $matchlogMessage = MatchlogUtils::getMatchlogTitle($challengeInfo, 'LAPS');
-        $matchlogMessage .= "\nRank,Lap,Checkpoints,Time,BestLap,CPdelay,Points,Login,NickName";
-
-        for($i = 0; $i < sizeof($finishedPlayers); $i++){
-            $currentPlayer = $finishedPlayers[$i];
-            $matchlogMessage .= self::getTextRowForPlayer($currentPlayer, $finishedPlayers[0], $i, $minCPdelay);
-        }
-        $matchlogMessage .= "\n--------------------";
-        $matchlogMessage .= MatchlogUtils::getTextSpectators($playerList);
-        $matchlogMessage .= self::getPlayerLapsLogText($lapsGroupedByLogin);
-        $matchlogMessage .= "\n--------------------";
-        $matchlogMessage .= self::getPlayerCheckpointsAsLogText($checkpointsPerLapGroupedByPlayer);
-        $matchlogMessage .= "\n--------------------";
-        $matchlogMessage .= self::getBestLapsLogText($lapsList, $gameInfo);
-        $matchlogMessage .= "--------------------";
+        $matchlogMessage .= self::writeAllPlayersScore($finishedPlayers, $minCPdelay);
+        $matchlogMessage .= MatchlogUtils::writeSpectators($playerList);
+        $matchlogMessage .= self::writePlayerLaps($lapsGroupedByLogin);
+        $matchlogMessage .= self::writePlayerCheckpoints($checkpointsPerLapGroupedByPlayer);
+        $matchlogMessage .= self::writeBestLaps($lapsList, $gameInfo);
+        $matchlogMessage .= MatchlogUtils::writePlayers($playerList);
+        $matchlogMessage .= self::writeRaceInfo($challengeInfo, $date);
         self::chatMessageBestLaps($lapsList, $gameInfo);
-        matchlog($matchlogMessage."\n\n");
+        matchlog($matchlogMessage."\n\n", $date);
         console("to matchlog: ".$matchlogMessage);
     }
 
-    private static function getBestLapsLogText($bestLaps, $GameInfos) {
-        $result = "\n* BestLaps\n";
-        $result .= "Rank,LapTime,LapNumber,Login,NickName\n";
+    private static function writeRaceInfo($challengeInfo, $date) {
+        $result = "\n* Race info:";
+        $result .= "\nDate, GameMode, ChallengeName, ChallengeNameWithColor, ChallengeID, ChallengeAuthor, Environment";
+        $result .= "\n".$date.",LAPS,".stripColors($challengeInfo["Name"]).",".
+            $challengeInfo["Name"].",".getChallengeID($challengeInfo).",".
+            $challengeInfo["Author"].",".$challengeInfo['Environnement'];
+
+        return $result.MatchlogUtils::writeSectionDelimiter();
+    }
+
+    private static function writeBestLaps($bestLaps, $GameInfos) {
+        $result = "\n* Best laps:\n";
+        $result .= "Login,Rank,LapTime,LapNumber";
 
         // the number of laps should be the maximum.
         $count = min(sizeof($bestLaps), $GameInfos['LapsNbLaps']);
         for($i = 0; $i < $count; $i++){
             $place = $i+1;
             $bestLap = $bestLaps[$i];
-            $result .= $place.",".$bestLap['LapTime'].",".$bestLap['LapNumber'].",".$bestLap['Login'].",".$bestLap["NickName"]."\n";
+            $result .= "\n".$bestLap['Login'].",".$place.",".$bestLap['LapTime'].",".$bestLap['LapNumber'];
         }
 
-        return $result;
+        return $result.MatchlogUtils::writeSectionDelimiter();
     }
 
-    private static function getPlayerLapsLogText($lapsGroupedByLogin) {
-        $result = "\n* Laps grouped by player\n";
+    private static function writePlayerLaps($lapsGroupedByLogin) {
+        $result = "\n* Laps grouped by player:\n";
+        $result .= "Login,Laps\n";
         $count = count($lapsGroupedByLogin);
         for($i = 0; $i < $count; $i++){
             $sep = $i < $count - 1 ? "\n" : "";
             $result .= $lapsGroupedByLogin[$i].$sep;
         }
 
-        return $result;
+        return $result.MatchlogUtils::writeSectionDelimiter();
     }
 
     private static function getPlayerLapsAsOneLineString($playerLaps) {
@@ -139,7 +144,7 @@ class MatchlogLaps {
             $result .= $playerLaps[$i]['LapTime'].',' ;
         }
 
-        return $playerLaps[0]['Login'].",".$playerLaps[0]["NickName"].",".$result;
+        return $playerLaps[0]['Login'].",".$result;
     }
 
     private static function getPlayerCheckpointsAsOneLineString($player, $challengeInfo) {
@@ -152,15 +157,16 @@ class MatchlogLaps {
         return $player['Login'].",".stripColors($player["NickName"]).",".$result;
     }
 
-    private static function getPlayerCheckpointsAsLogText($checkpointsPerLapGroupedByPlayer) {
-        $result = "\n* Checkpoints grouped by player\n";
+    private static function writePlayerCheckpoints($checkpointsPerLapGroupedByPlayer) {
+        $result = "\n* Checkpoints grouped by player:\n";
+        $result .= "Login,Checkpoints\n";
         $count = count($checkpointsPerLapGroupedByPlayer);
         for($i = 0; $i < $count; $i++){
             $sep = $i < $count - 1 ? "\n" : "";
             $result .= $checkpointsPerLapGroupedByPlayer[$i].$sep ;
         }
 
-        return $result;
+        return $result.MatchlogUtils::writeSectionDelimiter();
     }
 
     private static function chatMessageBestLaps($bestLaps, $GameInfos) {
@@ -216,12 +222,24 @@ class MatchlogLaps {
 
     }
 
-    private static function getTextRowForPlayer($player, $firstFinishedPlayer, $index, $minCPdelay) {
-        $text = "\n".($index+1).','.$player['Lap'].','.$player['Check'].','
+    private static function writeAllPlayersScore($finishedPlayers, $minCPdelay) {
+        $result = "\n* Scores:";
+        $result .= "\nLogin,Rank,Lap,Checkpoints,Time,BestLap,CPdelay,Points\n";
+
+        for($i = 0; $i < sizeof($finishedPlayers); $i++){
+            $currentPlayer = $finishedPlayers[$i];
+            $result .= self::writePlayerScore($currentPlayer, $finishedPlayers[0], $i, $minCPdelay);
+        }
+
+        return $result.MatchlogUtils::writeSectionDelimiter();
+    }
+
+    private static function writePlayerScore($player, $firstFinishedPlayer, $index, $minCPdelay) {
+        $text = ($index+1).','.$player['Lap'].','.$player['Check'].','
             .MwTimeToString($player['Time']).','.MwTimeToString($player['BestLap']).','
             .(($player['CPdelay']-$minCPdelay)/1000).',';
 
-        return $text.''.self::getPointsForPlayer($player, $firstFinishedPlayer, $index).','.stripColors($player['Login']).','.stripColors($player['NickName']);
+        return "\n".stripColors($player['Login']).",".$text.''.self::getPointsForPlayer($player, $firstFinishedPlayer, $index).','.stripColors($player['NickName']);
     }
 
     private static function getPointsForPlayer($player, $firstFinishedPlayer, $index) {
