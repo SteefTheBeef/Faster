@@ -120,6 +120,7 @@ function roundspointsInit($event){
 	$_roundspoints_points['fet'] = array(15,12,11,10,9,8,7,6,6,5,5,4,4,3,3,3,2,2,2,2,1,1,0); // FET style points
 	$_roundspoints_points['fet2'] = array(20,17,16,15,14,13,12,11,11,10,10,9,9,8,8,7,7,6,6,5,5,4,4,3,3,2); // mFET2 style points
 	$_roundspoints_points['fet3'] = array(25,22,20,19,18,17,16,15,14,13,12,11,10,10,9,9,8,8,7,7,6,6,5,5,4,4,3,3,2,2,1); // FET6 style points
+	$_roundspoints_points['um16'] = um16();
 	$_roundspoints_points['time1000'] = array(-1000,-100); // TM-Lique style points (1000 for author time)
 	$_roundspoints_points['time2000'] = array(-2000,-100); // TM-Lique style points (2000 for author time)
 	
@@ -133,6 +134,21 @@ function roundspointsInit($event){
 	$_roundspoints_manual = false;
 
 	registerCommand('rpoints','/rpoints ['.implode(',',array_keys($_roundspoints_points)).'] : customise Rounds points.',true);
+}
+
+/**
+ * array(512,480,448,416,...);
+ * @return void
+ */
+function um16() {
+	$i = 1024;
+	$result = array();
+	while($i > 0) {
+		$result[] = $i;
+		$i = $i - 10;
+	}
+
+	return $result;
 }
 
 //--------------------------------------------------------------
