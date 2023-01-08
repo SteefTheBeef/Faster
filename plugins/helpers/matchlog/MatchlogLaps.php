@@ -58,7 +58,7 @@ class MatchlogLaps {
                     $lapNumber++;
                 }
 
-                $checkpointsPerLapGroupedByPlayer[]  = self::getPlayerCheckpointsAsOneLineString($player, $challengeInfo);
+                $checkpointsPerLapGroupedByPlayer[]  = self::getPlayerCheckpointsAsOneLineString($player, $challengeInfo, $playerLaps);
                 $lapsGroupedByLogin[] = self::getPlayerLapsAsOneLineString($playerLaps);
                 if($player['LastCpTime'] > $lastTime) {
                     $lastTime = $player['LastCpTime'];
@@ -147,14 +147,32 @@ class MatchlogLaps {
         return $playerLaps[0]['Login'].",".$result;
     }
 
-    private static function getPlayerCheckpointsAsOneLineString($player, $challengeInfo) {
+    private static function getPlayerCheckpointsAsOneLineString($player, $challengeInfo, $playerLaps) {
         $result = "";
+        $index = 0;
+        foreach($playerLaps as $login => &$lap){
+            $lap["HasBeenPassed"] = false;
+            if ($index === 0) {
+                $lap["AbsoluteTimeMs"] = $lap["LapTimeMs"];
+            } else {
+                $lap["AbsoluteTimeMs"] = $playerLaps[$index - 1]["AbsoluteTimeMs"] +  $lap["LapTimeMs"];
+            }
+
+            $index++;
+        }
+
+        $index = 0;
         for($i = -1; $i < count($player['Checkpoints']) - 1; $i++){
-            $sep = $i % $challengeInfo["NbCheckpoints"] === 1 ? "#," : ",";
+            $sep = ",";
+            if($playerLaps[$index]["AbsoluteTimeMs"] === $player['Checkpoints'][$i]) {
+                $sep = "#,";
+                $index++;
+            }
+            //$sep = $i % $challengeInfo["NbCheckpoints"] === 0 ? "#," : ",";
             $result .= MwTimeToString($player['Checkpoints'][$i]).$sep ;
         }
 
-        return $player['Login'].",".stripColors($player["NickName"]).",".$result;
+        return $player['Login'].",".$result;
     }
 
     private static function writePlayerCheckpoints($checkpointsPerLapGroupedByPlayer) {
@@ -224,7 +242,7 @@ class MatchlogLaps {
 
     private static function writeAllPlayersScore($finishedPlayers, $minCPdelay) {
         $result = "\n* Scores:";
-        $result .= "\nLogin,Rank,Lap,Checkpoints,Time,BestLap,CPdelay,Points\n";
+        $result .= "\nLogin,Rank,Lap,Checkpoints,Time,BestLap,CPdelay,Points";
 
         for($i = 0; $i < sizeof($finishedPlayers); $i++){
             $currentPlayer = $finishedPlayers[$i];
@@ -239,7 +257,7 @@ class MatchlogLaps {
             .MwTimeToString($player['Time']).','.MwTimeToString($player['BestLap']).','
             .(($player['CPdelay']-$minCPdelay)/1000).',';
 
-        return "\n".stripColors($player['Login']).",".$text.''.self::getPointsForPlayer($player, $firstFinishedPlayer, $index).','.stripColors($player['NickName']);
+        return "\n".stripColors($player['Login']).",".$text.''.self::getPointsForPlayer($player, $firstFinishedPlayer, $index);
     }
 
     private static function getPointsForPlayer($player, $firstFinishedPlayer, $index) {
