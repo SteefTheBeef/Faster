@@ -13,17 +13,52 @@ class MatchlogUtils {
         return $prefix.' MATCH on ['.stripColors($challengeInfo['Name']).'] ('.$challengeInfo['Environnement'].',' .$cuid.','.stripColors($challengeInfo['Author']).')'.$suffix;
     }
 
-    static function getTextSpectators($playersList) {
+    static function getChallengeNameText($challengeInfo) {
+        $stripped = stripColors($challengeInfo['Name']);
+        $suffix = $stripped === $challengeInfo['Name'] ? "" : ",".$challengeInfo['Name'];
+        return "\nChallenge name: ".stripColors($challengeInfo['Name']).$suffix;
+    }
+
+    static function getChallengeIDText($challengeInfo) {
+        return "\nChallenge ID: ".getChallengeID($challengeInfo);
+    }
+    static function getChallengeEnviText($challengeInfo) {
+        return "\nChallenge envi: ".$challengeInfo['Environnement'];
+    }
+
+    static function getChallengeAuthorText($challengeInfo) {
+        return "\nChallenge author: ".$challengeInfo['Author'];
+    }
+
+    static function writePlayers($playersList) {
+        $result = "\n* Players:\n";
+        $result .= "Login, NickName, NickNameWithColor";
+        for($i = 0; $i < sizeof($playersList); $i++){
+            if((isset($playersList[$i]['IsSpectator']) && ($playersList[$i]['IsSpectator'] == 1)) === false) {
+                $result .= "\n".stripColors($playersList[$i]['Login']).','
+                    .stripColors($playersList[$i]['NickName']).','
+                    .$playersList[$i]['NickName'];
+            }
+        }
+
+        return $result.self::writeSectionDelimiter();
+    }
+
+    static function writeSpectators($playersList) {
         $text = "";
         $separator = "\n* Spectators: ";
         for($i = 0; $i < sizeof($playersList); $i++){
             if(isset($playersList[$i]['IsSpectator']) && ($playersList[$i]['IsSpectator'] == 1)){
-                $text .= $separator.stripColors($playersList[$i]['Login']).'['.stripColors($playersList[$i]['NickName']).']';
+                $text .= $separator.stripColors($playersList[$i]['Login']);
                 $separator = ', ';
             }
         }
 
-        return $text;
+        if ($text) {
+            return $text.self::writeSectionDelimiter();
+        }
+
+        return "";
     }
 
     static function endRound() {
@@ -82,6 +117,10 @@ class MatchlogUtils {
         }
 
         return $times;
+    }
+
+    static function writeSectionDelimiter() {
+        return "\n--------------------";
     }
 
 }
