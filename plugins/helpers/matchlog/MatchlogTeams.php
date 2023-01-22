@@ -44,7 +44,7 @@ class MatchlogTeams {
         $matchlogMessage2 .= self::getTextTeamLineUp($_PlayerList, 'Red');
 
         // These are not used very often I think. could be removed?
-        $matchlogMessage2 .= MatchlogUtils::getTextSpectators($_PlayerList);
+        $matchlogMessage2 .= MatchlogUtils::writeSpectators($_PlayerList);
         $matchlogMessage2 .= self::getTextAllPlayers($_PlayerList);
 
         // * Results: jonny666777(3,3,5,2,6,4,3,5,2,3,5,2,2,4), bo.omz0r(1,1,1,5,1,1,5,2,4,5,1,3,5,1), zickman13(2,4,6,3,2,2,6,4,1,4,3,1,1,3),

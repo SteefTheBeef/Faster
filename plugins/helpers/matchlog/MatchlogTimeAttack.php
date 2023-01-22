@@ -25,7 +25,7 @@ class MatchlogTimeAttack {
             $matchlogMessage .= "\n".$ranking[$i]['Rank'].','.MwTimeToString($ranking[$i]['BestTime']).','.stripColors($ranking[$i]['Login']).','.stripColors($ranking[$i]['NickName']);
         }
 
-        $matchlogMessage .= MatchlogUtils::getTextSpectators($_PlayerList);
+        $matchlogMessage .= MatchlogUtils::writeSpectators($_PlayerList);
 
         matchlog($matchlogMessage."\n\n");
     }

@@ -60,10 +60,11 @@ function matchlogInit(){
 // BeginRace :
 //--------------------------------------------------------------
 function matchlogBeginRace($event,$GameInfos){
-	global $_matchlog_Ranking,$do_match_log,$matchfile,$matchfilename;
+	global $_matchlog_Ranking,$do_match_log,$matchfile,$matchfilename, $_GameInfos;
 	$_matchlog_Ranking[0]['Score'] = -1;
 	$_matchlog_Ranking[1]['Score'] = -1;
-
+    console("_GameInfos");
+    console(print_r($_GameInfos));
 	// re-open log file (sometimes usefull if the file was modified externally after fast init)
 	if($do_match_log){
 		if($matchfile !== false) {
@@ -103,6 +104,12 @@ function matchlogEndRound($event,$Ranking,$ChallengeInfo,$GameInfos,$SpecialRest
 // RaceFinish
 //------------------------------------------
 function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
+	global $_players,$_PlayerList;
+
+	console("_players");
+	console(print_r($_players,true));
+	console("_PlayerList");
+	console(print_r($_PlayerList,true));
 	if(isMatchlogDisabled() || hasFGameMode("MatchLogEndRace",$event,$Ranking,$ChallengeInfo,$GameInfos, null)) {
 		return;
 	}
@@ -149,7 +156,7 @@ function matchlogEndResult($event){
 function matchlog($text){
 	global $matchfile,$do_match_log;
 	if($do_match_log){
-		fwrite($matchfile,"[".date("Y-m-d, H:i:s")."] $text\n");
+		fwrite($matchfile,"###\n[".date("Y-m-d, H:i:s")."] $text\n");
 		fflush($matchfile);
 	}
 }

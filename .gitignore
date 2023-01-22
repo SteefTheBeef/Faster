@@ -1,6 +1,8 @@
 .idea
 /matchlog
+/data/um
 fastlog
+/fastlog-download
 TrackmaniaServer
 playerlist.txt
 teamlist.txt

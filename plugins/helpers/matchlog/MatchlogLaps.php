@@ -43,6 +43,7 @@ class MatchlogLaps {
 
 
         foreach($players as $login => &$player){
+            console(print_r($player, true));
             if($player['CheckpointNumber'] > 0 && $player['LastCpTime'] > 0 && $player['LapNumber'] >= 0){
                 if($player['FinalTime'] > 0) {
                     $numberOfFinishers++;
@@ -95,18 +96,18 @@ class MatchlogLaps {
         $matchlogMessage .= self::writePlayerCheckpoints($checkpointsPerLapGroupedByPlayer);
         $matchlogMessage .= self::writeBestLaps($lapsList, $gameInfo);
         $matchlogMessage .= MatchlogUtils::writePlayers($playerList);
-        $matchlogMessage .= self::writeRaceInfo($challengeInfo, $date);
+        $matchlogMessage .= self::writeRaceInfo($challengeInfo, $date, $_GameInfos);
         self::chatMessageBestLaps($lapsList, $gameInfo);
         matchlog($matchlogMessage."\n\n", $date);
         console("to matchlog: ".$matchlogMessage);
     }
 
-    private static function writeRaceInfo($challengeInfo, $date) {
+    private static function writeRaceInfo($challengeInfo, $date, $gameInfo) {
         $result = "\n* Race info:";
-        $result .= "\nDate, GameMode, ChallengeName, ChallengeNameWithColor, ChallengeID, ChallengeAuthor, Environment";
-        $result .= "\n".$date.",LAPS,".stripColors($challengeInfo["Name"]).",".
+        $result .= "\nDate, ChallengeName, ChallengeNameWithColor, ChallengeID, ChallengeAuthor, Environment, GameMode, NumberOfLaps";
+        $result .= "\n".$date.",".stripColors($challengeInfo["Name"]).",".
             $challengeInfo["Name"].",".getChallengeID($challengeInfo).",".
-            $challengeInfo["Author"].",".$challengeInfo['Environnement'];
+            $challengeInfo["Author"].",".$challengeInfo['Environnement'].",LAPS,".$gameInfo["LapsNbLaps"];
 
         return $result.MatchlogUtils::writeSectionDelimiter();
     }
@@ -190,13 +191,15 @@ class MatchlogLaps {
     private static function chatMessageBestLaps($bestLaps, $GameInfos) {
         addCall(null,'ChatSendServerMessage', '$i* Best laps');
         // the number of laps should be the maximum.
+        $msg = "";
         $count = min(sizeof($bestLaps), $GameInfos['LapsNbLaps']);
         for($i = 0; $i < $count; $i++){
             $place = $i+1;
-            $msg = '$i$n$0f0'.$place.'. $ecc'.$bestLaps[$i]['LapTime'].", ".$bestLaps[$i]["NickNameWithColor"];
-            addCall(null,'ChatSendServerMessage', $msg);
-
+            $delimeter = $place % 6 === 0 ? "\n" : ",";
+            $msg .= '$i$n$0f0'.$place.'. $ecc'.$bestLaps[$i]['LapTime'].", ".$bestLaps[$i]["NickNameWithColor"].$delimeter;
         }
+
+        addCall(null,'ChatSendServerMessage', $msg);
     }
 
     private static function createFinishedPlayer($player) {
