@@ -61,7 +61,7 @@ function welcomePlayerConnect_Reverse($event,$login){
 
 	// send welcome message to player
 	$msg = localeText(null,'server_message').localeText($login,'welcome.message',$_FASTver,$_players[$login]['NickName']);
-	addCall(null,'ChatSendServerMessageToLogin', $msg, $login);
+	//addCall(null,'ChatSendServerMessageToLogin', $msg, $login);
 
 	if($_players_actives+$_players_spec < $_welcome_connect){
 		// send connect message to all

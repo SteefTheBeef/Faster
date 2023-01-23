@@ -8,7 +8,7 @@
 ////////////////////////////////////////////////////////////////
 // uncomment the next line to activate the um plugin and see all events in log !
 
-registerPlugin('um',27);
+registerPlugin('um',41);
 
 
 
@@ -159,6 +159,10 @@ registerPlugin('um',27);
 // $_pdebug['fteamrelay']['BeginRound']['debug'] = 1; // except fteamrelayBeginRound() will have $_debug = 1
 // $_pdebug['players']['PlayerCheckpoint']['debug'] = 2; // except fteamrelayBeginRound() will have $_debug = 1
 // $_pdebug['players']['PlayerFinish']['debug'] = 2; // except fteamrelayBeginRound() will have $_debug = 1
+function sendChatMessageToLogin2($login, $msg) {
+	$message = localeText(null,'server_message').localeText(null,'interact').$msg;
+	addCall(null,'ChatSendToLogin', $message, $login);
+}
 
 function sendLeaderboardRankChat($login) {
 	global $_ChallengeInfo;
@@ -168,8 +172,8 @@ function sendLeaderboardRankChat($login) {
 		$line = explode(",", fgets($leaderboard));
 		if ($line[0] === $login) {
 			console(print_r($line));
-			$msg = '$sWelcome back to United Masters, '.$line[1].'$z$s$fff'."\n".'Your current leaderboard rank is $0f0'.$line[2].'$fff with $0f0'.trim($line[3]).' $fffpoints';
-			addCall($login,'ChatSendServerMessage', $msg);
+			$msg = 'Your current leaderboard rank is $0f0'.$line[2].'$fff with $0f0'.trim($line[3]).' $fffpoints';
+			sendChatMessageToLogin2($login, $msg);
 			fclose($leaderboard);
 			break;
 		}
@@ -183,7 +187,8 @@ function sendEnviRankChat($login) {
 		$line = explode(",", fgets($currentChallengeFile));
 		if ($line[0] === $login) {
 			$msg = '$s$fffYour current rank on '.$_ChallengeInfo["Environnement"].' is $0f0'.$line[2].' $fffwith a race time of: $0f0'.trim($line[3]);
-			addCall($login,'ChatSendServerMessage', $msg);
+			//addCall('ChatSendToLogin', $msg, $login);
+			sendChatMessageToLogin2($login, $msg);
 			fclose($currentChallengeFile);
 			return;
 		}
@@ -258,26 +263,14 @@ function umBeginRound($event){
 // PlayerConnect($event,$login,$pinfo,$pdetailedinfo,$pranking): player has connected
 // (from TrackMania.PlayerConnect callback, or Fast simulated)
 function umPlayerConnect($event,$login,$pinfo,$pdetailedinfo,$pranking){
-	global $_debug, $_ChallengeInfo;
+	global $_debug, $_ChallengeInfo, $_players;
 
 	if($_debug>0) console("um.Event[$event]('$login')");
 		console(print_r($pinfo));
 
-
-	$leaderboard = fopen("data/um/leaderboard.txt", "r") or die("Unable to open file!");
-
-	while(!feof($leaderboard)) {
-		$line = explode(",", fgets($leaderboard));
-		if ($line[0] === $login) {
-			console(print_r($line));
-			$msg = '$sWelcome back to United Masters, '.$line[1].'$z$s$fff';
-			addCall($login,'ChatSendServerMessage', $msg);
-			fclose($leaderboard);
-			return;
-		}
-	}
-
-	addCall($login,'ChatSendServerMessage', '$sWelcome to United Masters, '.$pinfo["NickName"]);
+	sendChatMessageToLogin2($login, '$sWelcome to United Masters, ' . $pinfo["NickName"]);
+	sendLeaderboardRankChat($login);
+	sendEnviRankChat($login);
 }
 
 // PlayerMenuBuild($event,$login): build player menu
