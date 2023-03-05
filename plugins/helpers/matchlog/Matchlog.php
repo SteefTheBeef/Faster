@@ -15,7 +15,7 @@ class Matchlog {
      * @param $ranking
      * @return void
      */
-    static function create($logState, $gameMode, $challengeInfo, $ranking) {
+    static function create($logState, $gameMode, $challengeInfo, $ranking, $isMatch = false) {
         switch($gameMode) {
             case 0:
             case 5: // Rounds
@@ -28,7 +28,7 @@ class Matchlog {
                 MatchlogTeams::create($logState, $challengeInfo, $ranking);
                 break;
             case 3: // Laps
-                MatchlogLaps::create($logState, $challengeInfo);
+                MatchlogLaps::create($logState, $challengeInfo, $isMatch);
                 break;
             case 4: // Stunts
                 MatchlogStunts::create($logState, $challengeInfo, $ranking);

@@ -37,7 +37,7 @@ class MatchlogRounds {
             $matchlogMessage .= "\n".$ranking[$i]['Rank'].','.$ranking[$i]['Score'].','.MwTimeToString($ranking[$i]['BestTime']).','.stripColors($ranking[$i]['Login']).','.stripColors($ranking[$i]['NickName']);
         }
 
-        $matchlogMessage .= MatchlogUtils::getTextSpectators($_PlayerList);
+        $matchlogMessage .= MatchlogUtils::writeSpectators($_PlayerList);
 
         $sep = "\n* Results: "; // pos in each round
         foreach($_players as $login => &$pl){

@@ -7,51 +7,141 @@
 -->
 
 <fast>
-<matchconfig><ident>msf4a</ident>
-        <title>MSF4 (Round 1)</title>
+    <matchconfig>
+        <ident>um_grand_final_2</ident>
+        <title>UM_GRAND_FINAL_DAY_2</title>
         <imgurl>http://maniacup.net/logos/ETall.png</imgurl>
         <locale_info></locale_info>
         <global_score>true</global_score>
-        <matchsettings>msf4a.txt</matchsettings>
+        <matchsettings>um_grand_final_2.txt</matchsettings>
         <show_nextmaps>3</show_nextmaps>
         <map_falsestart>1</map_falsestart>
         <match_falsestart>2</match_falsestart>
         <ladder_mode>1</ladder_mode>
-        <number_of_maps>3</number_of_maps>
-        <map>speed</map>
-        <map>stadium</map>
+        <number_of_maps>4</number_of_maps>
+        <map>rally</map>
         <map>island</map>
-        <break_before_map>5</break_before_map>
-        <break_chattime>120000</break_chattime>
-
-        <fgamemode>TeamLaps</fgamemode>
-        <fteam_points_rule>msf4</fteam_points_rule>
-        <fteam_notfinish_multiplier>1</fteam_notfinish_multiplier>
-        <fteam_max_players>4</fteam_max_players>
-        <fteam_max_playing>2</fteam_max_playing>
-        <fteam_max_playing_rule>mapcp</fteam_max_playing_rule>
-        <fteam_max_playing_keep>true</fteam_max_playing_keep>
-        <fteam_draw_rule>Average</fteam_draw_rule>
-        <fteam_ranks_rule>Points</fteam_ranks_rule>
-        <fteam_scores_rule>Points</fteam_scores_rule>
-        <fteam_join_mode>Script</fteam_join_mode>
-        <fteam_lock_mode>Script</fteam_lock_mode>
-        <fteam_lock_name>true</fteam_lock_name>
-        <fteam_autoleave>ForceOnly</fteam_autoleave>
-
-        <chat_time>15000</chat_time>
-        <finishtimeout>300000</finishtimeout>
+        <map>snow</map>
+        <map>coast</map>
+	    <game_mode>3</game_mode>
+	    <custom_points>motogp</custom_points>
         <disablerespawn>0</disablerespawn>
         <forceshowallopponents>4</forceshowallopponents>
-        <allwarmupduration>2</allwarmupduration>
+        <chat_time>150000</chat_time>
+        <finishtimeout>300000</finishtimeout>
+        <allwarmupduration>4</allwarmupduration>
         <laps_nblaps>24</laps_nblaps>
         <laps_timelimit>0</laps_timelimit>
-
         <freeplay>
           <fteam_max_playing>4</fteam_max_playing>
           <fteam_max_playing_rule>free</fteam_max_playing_rule>
         </freeplay>
     </matchconfig>
+
+    <matchconfig>
+        <ident>um_grand_final_1</ident>
+        <title>UM_GRAND_FINAL_DAY_1</title>
+        <imgurl>http://maniacup.net/logos/ETall.png</imgurl>
+        <locale_info></locale_info>
+        <global_score>true</global_score>
+        <matchsettings>um_grand_final_1.txt</matchsettings>
+        <show_nextmaps>3</show_nextmaps>
+        <map_falsestart>1</map_falsestart>
+        <match_falsestart>2</match_falsestart>
+        <ladder_mode>1</ladder_mode>
+        <number_of_maps>3</number_of_maps>
+        <map>stadium</map>
+        <map>desert</map>
+        <map>bay</map>
+	    <game_mode>3</game_mode>
+	    <custom_points>motogp</custom_points>
+        <disablerespawn>0</disablerespawn>
+        <forceshowallopponents>4</forceshowallopponents>
+        <chat_time>150000</chat_time>
+        <finishtimeout>300000</finishtimeout>
+        <allwarmupduration>4</allwarmupduration>
+        <laps_nblaps>24</laps_nblaps>
+        <laps_timelimit>0</laps_timelimit>
+        <freeplay>
+          <fteam_max_playing>4</fteam_max_playing>
+          <fteam_max_playing_rule>free</fteam_max_playing_rule>
+        </freeplay>
+    </matchconfig>
+
+    <matchconfig>
+        <ident>um_cons</ident>
+        <title>UM_CONS</title>
+        <imgurl>http://maniacup.net/logos/ETall.png</imgurl>
+        <locale_info></locale_info>
+        <global_score>true</global_score>
+        <matchsettings>um_po.txt</matchsettings>
+        <show_nextmaps>3</show_nextmaps>
+        <map_falsestart>1</map_falsestart>
+        <match_falsestart>2</match_falsestart>
+        <ladder_mode>1</ladder_mode>
+        <number_of_maps>7</number_of_maps>
+        <map>stadium</map>
+        <map>desert</map>
+        <map>bay</map>
+        <map>rally</map>
+        <map>island</map>
+        <map>snow</map>
+        <map>coast</map>
+        <break_warmup>2</break_warmup>
+        <break_chattime>180000</break_chattime>
+        <break_before_map>4</break_before_map>
+	    <game_mode>3</game_mode>
+	    <custom_points>motogp</custom_points>
+        <disablerespawn>0</disablerespawn>
+        <forceshowallopponents>4</forceshowallopponents>
+        <chat_time>60000</chat_time>
+        <finishtimeout>150000</finishtimeout>
+        <allwarmupduration>2</allwarmupduration>
+        <laps_nblaps>12</laps_nblaps>
+        <laps_timelimit>0</laps_timelimit>
+        <freeplay>
+          <fteam_max_playing>4</fteam_max_playing>
+          <fteam_max_playing_rule>free</fteam_max_playing_rule>
+        </freeplay>
+    </matchconfig>
+
+    <matchconfig>
+        <ident>um_po</ident>
+        <title>UM_PO</title>
+        <imgurl>http://maniacup.net/logos/ETall.png</imgurl>
+        <locale_info></locale_info>
+        <global_score>true</global_score>
+        <matchsettings>um_po.txt</matchsettings>
+        <show_nextmaps>3</show_nextmaps>
+        <map_falsestart>1</map_falsestart>
+        <match_falsestart>2</match_falsestart>
+        <ladder_mode>1</ladder_mode>
+        <number_of_maps>7</number_of_maps>
+        <map>stadium</map>
+        <map>desert</map>
+        <map>bay</map>
+        <map>rally</map>
+        <map>island</map>
+        <map>snow</map>
+        <map>coast</map>
+        <break_warmup>2</break_warmup>
+        <break_chattime>180000</break_chattime>
+        <break_before_map>4</break_before_map>
+	    <game_mode>3</game_mode>
+	    <custom_points>motogp</custom_points>
+        <disablerespawn>0</disablerespawn>
+        <forceshowallopponents>4</forceshowallopponents>
+        <chat_time>60000</chat_time>
+        <finishtimeout>150000</finishtimeout>
+        <allwarmupduration>2</allwarmupduration>
+        <laps_nblaps>12</laps_nblaps>
+        <laps_timelimit>0</laps_timelimit>
+        <freeplay>
+          <fteam_max_playing>4</fteam_max_playing>
+          <fteam_max_playing_rule>free</fteam_max_playing_rule>
+        </freeplay>
+    </matchconfig>
+
 	<matchconfig><ident>custom</ident>
 		<title>CUP</title>
 		<imgurl></imgurl>

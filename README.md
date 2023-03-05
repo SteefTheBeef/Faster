@@ -17,6 +17,12 @@ so having fast.php in the same directory as the dedicated binary.
 You will make or modify your start script yourself...
 
 
+HOW TO RUN
+-------------
+
+First start Fast4/TrackmaniaServer/start.bat.
+Then start  Fast4/FAST4 start.bat
+
 CONFIGURATION
 -------------
 

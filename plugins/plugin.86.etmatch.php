@@ -284,7 +284,7 @@ etmatchLoadTeams($etcompetname, $userLogin){
 		console("etmatchLoadTeams:: etmatch_matches ({$_etmatch_match_id}): ".print_r($_etmatch_matches));
 
 	console("etmatchLoadTeams:: {$etcompetname}: ".count($_etmatch_players)." players in ".count($_etmatch_teams)." teams !");
-	sendChatMessageToLogin($userLogin, $etcompetname.": ".count($_etmatch_players)." players in ".count($_etmatch_teams)." teams !");
+	sendChatMessageToLogin2($userLogin, $etcompetname.": ".count($_etmatch_players)." players in ".count($_etmatch_teams)." teams !");
 	etmatchPrevScores();
 	etmatchBonuses();
 
@@ -305,7 +305,7 @@ function chat_et($author, $login, $params1, $params){
 	global $_debug,$_is_relay,$_match_config,$_match_map,$_match_mode,$_etmatch_players,$_etmatch_teams,$_etmatch_div_id,$_etmatch_div2_id,$_etmatch_match_id;
 	
 	if(!verifyAdmin($login)){
-		sendChatMessageToLogin($login, 'need admin permissions !');
+		sendChatMessageToLogin2($login, 'need admin permissions !');
 	}
 
 	if($_is_relay)
@@ -316,7 +316,7 @@ function chat_et($author, $login, $params1, $params){
 			$_etmatch_teams = array();
 			$_etmatch_players = array();
 			fteamsClearAllTeams();
-			sendChatMessageToLogin($login, "Teams and players cleared.");
+			sendChatMessageToLogin2($login, "Teams and players cleared.");
 		}else{
 			if(!isset($_match_config[$params[0]]['GameMode'])){
 				matchReadConfigs('plugins/match.configs.xml.txt');
@@ -345,7 +345,7 @@ function chat_et($author, $login, $params1, $params){
 						$_etmatch_match_id = $params[2] + 0;
 				}
 
-				sendChatMessageToLogin($login, "ET Match mode {$params[0]} loaded");
+				sendChatMessageToLogin2($login, "ET Match mode {$params[0]} loaded");
 				etmatchLoadTeams($_match_mode, $login);
 			}
 		}

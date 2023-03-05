@@ -1,4 +1,5 @@
 <?php
+require_once "helpers/matchlog/Matchlog.php";
 ////////////////////////////////////////////////////////////////
 //¤
 // File:      FAST 3.2 (First Automatic Server for Trackmania)
@@ -1559,17 +1560,19 @@ function matchEndRace($event,$Ranking,$ChallengeInfo,$GameInfos,$continuecup,$wa
 		// -------------------------------------------------------------------------
 		if($_match_conf['EndMatch'] || $timemin > 0){
 			// Laps, a player have finished
+
+			Matchlog::create("END_RACE", $GameInfos["GameMode"], $ChallengeInfo, $Ranking, true);
+
+			//$cuid = isset($ChallengeInfo['UId']) ? $ChallengeInfo['UId'] : 'UID';
+			//$msg1 = "MULTIMAP LAPS MATCH [{$_match_map}/{$_match_conf['NumberOfMaps']}] on [".stripColors($ChallengeInfo['Name']).'] ('.$ChallengeInfo['Environnement'].','.$cuid.','.stripColors($ChallengeInfo['Author']).')';
 			
-			$cuid = isset($ChallengeInfo['UId']) ? $ChallengeInfo['UId'] : 'UID';
-			$msg1 = "MULTIMAP LAPS MATCH [{$_match_map}/{$_match_conf['NumberOfMaps']}] on [".stripColors($ChallengeInfo['Name']).'] ('.$ChallengeInfo['Environnement'].','.$cuid.','.stripColors($ChallengeInfo['Author']).')';
-			
-			foreach($_match_scores as &$pls){
-				$msg1 .= "\n".$pls['Rank'].','.($pls['FullScore']+$pls['Bonus']+$pls['MapScore']).','.MwTimeToString($pls['BestTime']).','.$pls['MapScore'].','.stripColors($pls['Login']).','.stripColors($pls['NickName']);
-			}
-			match_log($msg1."\n\n");
+			//foreach($_match_scores as &$pls){
+			//	$msg1 .= "\n".$pls['Rank'].','.($pls['FullScore']+$pls['Bonus']+$pls['MapScore']).','.MwTimeToString($pls['BestTime']).','.$pls['MapScore'].','.stripColors($pls['Login']).','.stripColors($pls['NickName']);
+			//}
+			//match_log($msg1."\n\n");
 			
 			// store in database (if available)
-			matchDbStore($Ranking,$ChallengeInfo,$GameInfos);
+			//matchDbStore($Ranking,$ChallengeInfo,$GameInfos);
 			
 			if($_match_map < $_match_conf['NumberOfMaps']){
 				$msg = localeText(null,'server_message').localeText(null,'interact')."\$f00\$o Challenge {$_match_map}/{$_match_conf['NumberOfMaps']} finished !";
@@ -1760,11 +1763,10 @@ function matchInitLog(){
 			$name[$i] = '_';
 	}
 	
-	if(!file_exists('matchlog'))
-		mkdir('matchlog');
-	$date = date('md.Hi');
-	$match_filename = "matchlog/{$title}.{$date}.{$name}.{$_DedConfig['login']}.txt";
-	$htmlmatch_filename = "{$title}.{$date}.{$name}.{$_DedConfig['login']}.html";
+	if(!file_exists('fastlog/match'))
+		mkdir('fastlog/match');
+	$match_filename = "fastlog/match/{$title}.{$_DedConfig['login']}.txt";
+	$htmlmatch_filename = "{$title}.{$_DedConfig['login']}.html";
 }
 
 
