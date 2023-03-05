@@ -2,219 +2,79 @@
 <teamlist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<team>
 		<id>1</id>
-		<tag>Bomboclaat</tag>
-		<name>Bomboclaat</name>
+		<tag>Team 1</tag>
+		<name>Team 1</name>
 		<division>1</division>
 		<division2>1</division2>
 	</team>
 	<team>
 		<id>2</id>
-		<tag>CLOWNE</tag>
-		<name>Coast Lovers of West and North Europe</name>
+		<tag>Team 2</tag>
+		<name>Team 2</name>
 		<division>1</division>
 		<division2>2</division2>
 	</team>
 	<team>
 		<id>3</id>
-		<tag>no!faculties</tag>
-		<name>no!faculties</name>
+		<tag>Team 3</tag>
+		<name>Team 3</name>
 		<division>1</division>
 		<division2>1</division2>
 	</team>
 	<team>
 		<id>4</id>
-		<tag>TSM</tag>
-		<name>Team SloMo</name>
+		<tag>Team 4</tag>
+		<name>Team 4</name>
 		<division>1</division>
 		<division2>2</division2>
 	</team>
 	<team>
 		<id>5</id>
-		<tag>Pouet</tag>
-		<name>Pouet </name>
+		<tag>Team 5</tag>
+		<name>Team 5</name>
 		<division>1</division>
 		<division2>1</division2>
 	</team>
 	<team>
 		<id>6</id>
-		<tag>wreck</tag>
-		<name>world's renowned expert crash kings</name>
+		<tag>Team 6</tag>
+		<name>Team 6</name>
 		<division>1</division>
 		<division2>2</division2>
 	</team>
 	<team>
 		<id>7</id>
-		<tag>SOB</tag>
-		<name>Stadium Only, Bitches!</name>
+		<tag>Team 7</tag>
+		<name>Team 7</name>
 		<division>1</division>
 		<division2>1</division2>
 	</team>
 	<team>
 		<id>8</id>
-		<tag>Angl</tag>
-		<name>Angl</name>
+		<tag>Team 8</tag>
+		<name>Team 8</name>
 		<division>1</division>
 		<division2>2</division2>
 	</team>
 	<team>
 		<id>9</id>
-		<tag>W2W</tag>
-		<name>Wall 2 Wall</name>
+		<tag>Team 9</tag>
+		<name>Team 9</name>
 		<division>1</division>
 		<division2>1</division2>
 	</team>
 	<team>
 		<id>10</id>
-		<tag>Team NDC</tag>
-		<name>Team NDC</name>
+		<tag>Team 10</tag>
+		<name>Team 10</name>
 		<division>1</division>
 		<division2>2</division2>
 	</team>
 	<team>
 		<id>11</id>
-		<tag>Dont Ltd</tag>
-		<name>Don't Let them Drive</name>
+		<tag>Team 11</tag>
+		<name>Team 11</name>
 		<division>1</division>
 		<division2>1</division2>
-	</team>
-	<team>
-		<id>12</id>
-		<tag>All Hail the Lords</tag>
-		<name>All Hail the Lords</name>
-		<division>1</division>
-		<division2>2</division2>
-	</team>
-	<team>
-		<id>13</id>
-		<tag>27z</tag>
-		<name>Kaksseiskatseta</name>
-		<division>1</division>
-		<division2>1</division2>
-	</team>
-	<team>
-		<id>14</id>
-		<tag>SMUF</tag>
-		<name>ShootMania United Forever</name>
-		<division>1</division>
-		<division2>2</division2>
-	</team>
-	<team>
-		<id>15</id>
-		<tag>CONS</tag>
-		<name>Competing Only for Nice Stats</name>
-		<division>1</division>
-		<division2>1</division2>
-	</team>
-	<team>
-		<id>16</id>
-		<tag>WTF</tag>
-		<name>We Tried Finishing</name>
-		<division>1</division>
-		<division2>2</division2>
-	</team>
-	<team>
-		<id>17</id>
-		<tag>TMU But Better</tag>
-		<name>TMU But Better</name>
-		<division>1</division>
-		<division2>1</division2>
-	</team>
-	<team>
-		<id>18</id>
-		<tag>doggystyle</tag>
-		<name>doggystyle</name>
-		<division>1</division>
-		<division2>2</division2>
-	</team>
-	<team>
-		<id>19</id>
-		<tag>CWC</tag>
-		<name>Crazy Washed-Up Clowns</name>
-		<division>1</division>
-		<division2>1</division2>
-	</team>
-	<team>
-		<id>20</id>
-		<tag>phy-CRC</tag>
-		<name>phy from Coruscant Retirement Center</name>
-		<division>1</division>
-		<division2>2</division2>
-	</team>
-	<team>
-		<id>21</id>
-		<tag>4FW</tag>
-		<name>Four Flat Wheels</name>
-		<division>1</division>
-		<division2>1</division2>
-	</team>
-	<team>
-		<id>22</id>
-		<tag>SOSmurf</tag>
-		<name>Super Optimistic Smurfs</name>
-		<division>1</division>
-		<division2>2</division2>
-	</team>
-	<team>
-		<id>23</id>
-		<tag>Le Schtroumpf</tag>
-		<name>Le Schtroumpf</name>
-		<division>1</division>
-		<division2>1</division2>
-	</team>
-	<team>
-		<id>24</id>
-		<tag>CMC</tag>
-		<name>Crazy Machine Chicks</name>
-		<division>1</division>
-		<division2>2</division2>
-	</team>
-	<team>
-		<id>25</id>
-		<tag>2Fast4Smurf</tag>
-		<name>2Fast4Smurf</name>
-		<division>1</division>
-		<division2>1</division2>
-	</team>
-	<team>
-		<id>26</id>
-		<tag>Kremlina</tag>
-		<name>Kremlina</name>
-		<division>1</division>
-		<division2>2</division2>
-	</team>
-	<team>
-		<id>27</id>
-		<tag>Didi Kent</tag>
-		<name>Didi Kent</name>
-		<division>1</division>
-		<division2>1</division2>
-	</team>
-	<team>
-		<id>28</id>
-		<tag>Olympians TXicos</tag>
-		<name>Independant Olympians Traxicos</name>
-		<division>1</division>
-		<division2>2</division2>
-	</team>
-	<team>
-		<id>29</id>
-		<tag>UzKEKistan</tag>
-		<name>UzKEKistan</name>
-		<division>1</division>
-		<division2>2</division2>
-	</team>
-	<team>
-		<id>30</id>
-		<tag>ADMIN1</tag>
-		<name>ADMIN1</name>
-		<division>1</division>
-		<division2>1</division2>
-	</team>
-	<team>
-		<id>31</id>
-		<tag>ADMIN2</tag>
-		<name>ADMIN2</name>
-		<division>1</division>
-		<division2>2</division2>
 	</team>
 </teamlist>

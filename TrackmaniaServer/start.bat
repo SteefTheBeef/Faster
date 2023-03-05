@@ -1,0 +1,1 @@
+TrackmaniaServer /dedicated_cfg=dedconfig.txt /game_settings=MatchSettings/um.txt /lan

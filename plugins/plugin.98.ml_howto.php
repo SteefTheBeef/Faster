@@ -70,7 +70,7 @@ function ml_howtoPlayerManialinkPageAnswer($event,$login,$answer,$action){
 	if($_mldebug>0) console("ml_howto.Event[$event]('$login',$answer,$action)");
 
 	if($action=='ml_howto.quit'){
-		ml_howtoUpdateXml($login,'remove');
+		ml_howtoUpdateXml($login,'hide');
 
 	}elseif($action=='ml_howto.force'){
 		$_ml_howto_force = !$_ml_howto_force;
@@ -106,11 +106,9 @@ function ml_howtoUpdateXml($login,$action='show'){
 	}
 
 	// show/refresh
-	$xml = sprintf('<frame posn="0 10 5">'
-								 .'<quad  sizen="60 30" posn="0 0 0" halign="center" valign="center" style="Bgs1" substyle="BgWindow2"/>'
-								 .'<quad  sizen="57 5" posn="0 11 0.1" halign="center" valign="center" style="Bgs1" substyle="BgTitle2"/>'
-								 .'<label sizen="50 3" posn="0 11 0.11" halign="center" valign="center" style="TextTitle2" text="Example"/>'
-								 .'<label sizen="50 3" posn="0 0 0.1" halign="center" style="TextRaceMessage" text="Hello !  :)"/>'
+	$xml = sprintf('<frame posn="35 10 5">'
+								 .'<label posn="0 0 0.1" textsize="1" text="[TnT]BlackCat12345678912345679"/>'
+								 .'<label posn="0 -2  0.4" textsize="1" text="[CMC]Roa"/>'
 								 .'<label posn="-2 -9 0.1" halign="right" style="CardButtonMedium" action="%d" text="%s"/>'
 								 .'<label posn="2 -9 0.1" halign="left" style="CardButtonMedium" action="%d" text="Quit"/>'
 								 .'</frame>',
@@ -199,6 +197,12 @@ function ml_howtoPlayerMenuAction($event,$login,$action,$state){
 		addCall(null,'ChatSendToLogin', "HowTo: \$fff$action = $state", $login);
 	}
 }
+
+function ml_howtoEndRace($event,$Ranking,$ChallengeInfo,$GameInfos,$continuecup,$warmup,$fwarmup){
+	console("ml_howtoEndRace::".print_r($Ranking, true));
+	ml_howtoUpdateXml("blackcat111",'show');
+}
+
 
 
 

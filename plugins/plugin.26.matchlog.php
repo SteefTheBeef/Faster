@@ -63,8 +63,7 @@ function matchlogBeginRace($event,$GameInfos){
 	global $_matchlog_Ranking,$do_match_log,$matchfile,$matchfilename, $_GameInfos;
 	$_matchlog_Ranking[0]['Score'] = -1;
 	$_matchlog_Ranking[1]['Score'] = -1;
-    console("_GameInfos");
-    console(print_r($_GameInfos));
+
 	// re-open log file (sometimes usefull if the file was modified externally after fast init)
 	if($do_match_log){
 		if($matchfile !== false) {
@@ -107,9 +106,8 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 	global $_players,$_PlayerList;
 
 	console("_players");
-	console(print_r($_players,true));
+
 	console("_PlayerList");
-	console(print_r($_PlayerList,true));
 	if(isMatchlogDisabled() || hasFGameMode("MatchLogEndRace",$event,$Ranking,$ChallengeInfo,$GameInfos, null)) {
 		return;
 	}
@@ -153,11 +151,30 @@ function matchlogEndResult($event){
 //------------------------------------------
 // write in match log with time
 //------------------------------------------
-function matchlog($text){
-	global $matchfile,$do_match_log;
+function matchlog($text, $isMatch){
+	global $matchfile,$do_match_log, $_match_conf, $_DedConfig;
+	$fileName = "";
+	if ($isMatch) {
+		$title = stripColors($_match_conf['Title']);
+		// keep only alphanum chars
+		for($i=0; $i < strlen($title); $i++){
+			if(!ctype_alnum($title[$i]))
+				$title[$i] = '_';
+		}
+
+		$fileName = "fastlog/match/".$title.".txt";
+	} else {
+		$fileName = "fastlog/matchlog.txt";
+	}
+
+
+	console("MATCHFILE START!!!");
+	console($fileName);
+	console("MATCHFILE End!!!");
 	if($do_match_log){
-		fwrite($matchfile,"###\n[".date("Y-m-d, H:i:s")."] $text\n");
-		fflush($matchfile);
+		$myfile = fopen($fileName, "a");
+		fwrite($myfile,"###\n[".date("Y-m-d, H:i:s")."] $text\n");
+		fclose($myfile);
 	}
 }
 

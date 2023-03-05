@@ -7,8 +7,9 @@
 //
 ////////////////////////////////////////////////////////////////
 // uncomment the next line to activate the um plugin and see all events in log !
+require_once "helpers/replay/ReplayManager.php";
 
-registerPlugin('um',41);
+//registerPlugin('um',41);
 
 
 
@@ -159,6 +160,9 @@ registerPlugin('um',41);
 // $_pdebug['fteamrelay']['BeginRound']['debug'] = 1; // except fteamrelayBeginRound() will have $_debug = 1
 // $_pdebug['players']['PlayerCheckpoint']['debug'] = 2; // except fteamrelayBeginRound() will have $_debug = 1
 // $_pdebug['players']['PlayerFinish']['debug'] = 2; // except fteamrelayBeginRound() will have $_debug = 1
+
+
+
 function sendChatMessageToLogin2($login, $msg) {
 	$message = localeText(null,'server_message').localeText(null,'interact').$msg;
 	addCall(null,'ChatSendToLogin', $message, $login);
@@ -204,6 +208,7 @@ function sendEnviRankChat($login) {
 function umInit($event){
 	global $_debug;
 	if($_debug>0) console("um.Event[$event]");
+
 }
 
 // StartToServe($event): called at beginning, before the main loop, but after plugins Init
@@ -226,10 +231,9 @@ function umBeginRace($event,$GameInfos,$ChallengeInfo,$newcup,$warmup,$fwarmup){
 	global $_debug, $_players;
 	if($_debug>0) console("um.Event[$event]($newcup,$warmup,$fwarmup)");
 	foreach($_players as $login => &$player) {
-		sendLeaderboardRankChat($login);
-		sendEnviRankChat($login);
+		//sendLeaderboardRankChat($login);
+		//sendEnviRankChat($login);
 	}
-
 }
 
 // StartRace($event,$tm_db_n,$chalinfo,$ChallengeInfo): $chalinfo is the array returned by the database server
@@ -262,15 +266,16 @@ function umBeginRound($event){
 
 // PlayerConnect($event,$login,$pinfo,$pdetailedinfo,$pranking): player has connected
 // (from TrackMania.PlayerConnect callback, or Fast simulated)
-function umPlayerConnect($event,$login,$pinfo,$pdetailedinfo,$pranking){
+function umPlayerConnect($event,$login,$pinfo,$pdetailedinfo,$pranking)
+{
 	global $_debug, $_ChallengeInfo, $_players;
 
-	if($_debug>0) console("um.Event[$event]('$login')");
-		console(print_r($pinfo));
+	if ($_debug > 0) console("um.Event[$event]('$login')");
 
-	sendChatMessageToLogin2($login, '$sWelcome to United Masters, ' . $pinfo["NickName"]);
-	sendLeaderboardRankChat($login);
-	sendEnviRankChat($login);
+	//sendChatMessageToLogin2($login, '$sWelcome to United Masters, ' . $pinfo["NickName"]);
+	//sendChatMessageToLogin2($login, 'Visit us at $Lhttp://united-masters.herokuapp.com$l');
+	//sendLeaderboardRankChat($login);
+	//sendEnviRankChat($login);
 }
 
 // PlayerMenuBuild($event,$login): build player menu
@@ -312,6 +317,7 @@ function umEveryminute($event,$minutes,$is2min,$is5min){
 // (Fast event)
 function umEvery5seconds($event,$seconds){
 	global $_debug;
+	//addCall(null,'SetCallVoteTimeOut',0);
 	//if($_debug>2) console("um.Event[$event]($seconds)");
 }
 
@@ -350,6 +356,7 @@ function umPlayerStart($event,$login,$starttime){
 function umPlayerCheckpoint($event,$login,$time,$lapnum,$checkpt,$hiddenabort=false){
 	global $_debug;
 	if($_debug>0) console("um.Event[$event]('$login',$time,$lapnum,$checkpt,$hiddenabort)");
+	addCall(null,'SetCallVoteTimeOut',60000);
 }
 
 // PlayerLap($event,$login,$time,$lapnum,$checkpt): player lap time (in Laps mode only)
@@ -470,8 +477,13 @@ function umEndRound($event,$Ranking,$ChallengeInfo,$GameInfos,$SpecialRestarting
 // EndRace($event,$Ranking,$ChallengeInfo,$GameInfos,$continuecup,$warmup,$fwarmup)
 // (from TrackMania.EndRace callback)
 function umEndRace($event,$Ranking,$ChallengeInfo,$GameInfos,$continuecup,$warmup,$fwarmup){
-	global $_debug;
+	global $_debug, $_match_scores, $_players;
+
 	if($_debug>0) console("um.Event[$event]($continuecup,$warmup,$fwarmup)");
+
+	// TrackmaniaServer/GameData/Tracks/Replays/UM /TMF07885/Tracks/Replays/UM
+	$replayManager = new ReplayManager("/TMF07885/Tracks/Replays/UM");
+	$replayManager->saveBetterReplay($event, $Ranking, $ChallengeInfo, $GameInfos);
 }
 
 // EndMatch($event,$match_map,$players_round_current,$maxscore,$match_scores,$match_config): called at end of match
@@ -543,5 +555,6 @@ function umRestoreInfos($event,$restoretype,$liveage,$playerschanged,$rankingcha
 	global $_StoredInfos,$_debug;
 	if($_debug>0) console("um.Event[$event]");
 }
+
 
 ?>

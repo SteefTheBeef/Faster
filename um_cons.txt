@@ -1,0 +1,29 @@
+###
+[2023-02-20, 11:26:08] MULTIMAP LAPS MATCH on [UM Altai] (Stadium,Ys6fXGBDQS2_RGn8DtCpPgK1Rre,jea_wormi)
+* Scores:
+Login,Rank,Lap,Checkpoints,Time,BestLap,CPdelay,Points
+blackcat111,1,2,32,02:18.02,01:08.46,0,25
+--------------------
+* Laps grouped by player:
+Login,Laps
+blackcat111,01:09.56,01:08.46,
+--------------------
+* Checkpoints grouped by player:
+Login,Checkpoints
+blackcat111,00:00.00,00:07.82,00:12.02,00:14.78,00:19.12,00:24.77,00:30.70,00:36.12,00:40.25,00:43.59,00:49.16,00:54.04,00:58.43,01:01.84,01:05.22,01:08.03,01:09.56#,01:13.73,01:17.74,01:20.43,01:24.74,01:30.47,01:36.46,01:41.80,01:45.77,01:48.93,01:56.62,02:03.32,02:07.43,02:10.22,02:13.52,02:16.47,02:18.02#,
+--------------------
+* Best laps:
+Login,Rank,LapTime,LapNumber
+blackcat111,1,01:08.46,2
+blackcat111,2,01:09.56,1
+--------------------
+* Players:
+Login, NickName, NickNameWithColor
+blackcat111,[TnT]BlackCat,$0f3[TnT]$000BlackCat
+--------------------
+* Race info:
+Date, ChallengeName, ChallengeNameWithColor, ChallengeID, ChallengeAuthor, Environment, GameMode, NumberOfLaps, IsMatch, MatchMapNumber
+2023-02-20 11:26:08,UM Altai,$fffUM $06FAltai,Ys6fXGBDQS2_RGn8DtCpPgK1Rre,jea_wormi,Stadium,LAPS,12,1,1/7
+--------------------
+
+
