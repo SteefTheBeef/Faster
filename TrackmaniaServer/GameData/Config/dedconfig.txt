@@ -17,8 +17,8 @@
 	</authorization_levels>
 	
  	<masterserver_account>
-		<login>BlackCatTest</login>
-		<password>blackcat12</password>
+		<login>nod32Test</login>
+		<password>nod333222</password>
 		<validation_key>F9M</validation_key>
 	</masterserver_account>
 	
