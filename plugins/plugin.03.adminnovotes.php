@@ -59,7 +59,7 @@ function adminnovotesVerifyAdmins(){
 			if($pl['Active'] && !$pl['Relayed'] && verifyAdmin(''.$login) && ($_currentTime - $pl['PlayerActionTime'] < $_adminnovotes_delay/2)){
 				addCall(null,'SetCallVoteTimeOut',0);
 				console("Active admin : disable callvotes !");
-				ChatSendServerMessageToAdmins(localeText(null,'server_message').'CallVotes are now disabled (active admins).');
+				//ChatSendServerMessageToAdmins(localeText(null,'server_message').'CallVotes are now disabled (active admins).');
 				break;
 			}
 		}
@@ -72,9 +72,9 @@ function adminnovotesVerifyAdmins(){
 				$nbadmin++;
 		}
 		if($nbadmin<=0){
-			addCall(null,'SetCallVoteTimeOut',-$_CallVoteTimeOut);
-			console("No active admin : enable callvotes !");
-			ChatSendServerMessageToAdmins(localeText(null,'server_message').'CallVotes are now enabled (no active admin).');
+			//addCall(null,'SetCallVoteTimeOut',-$_CallVoteTimeOut);
+			//console("No active admin : enable callvotes !");
+			//ChatSendServerMessageToAdmins(localeText(null,'server_message').'CallVotes are now enabled (no active admin).');
 		}
 	}
 }
@@ -89,7 +89,7 @@ function adminnovotesPlayerConnect($event,$login){
 	if($_CallVoteTimeOut<0 && verifyAdmin(''.$login)){
 		if($_ServerOptions['NextCallVoteTimeOut']>0){
 			addCall(null,'SetCallVoteTimeOut',0);
-			ChatSendServerMessageToAdmins(localeText(null,'server_message').'CallVotes are now disabled (active admin).');
+			//ChatSendServerMessageToAdmins(localeText(null,'server_message').'CallVotes are now disabled (active admin).');
 		}
 	}
 }
