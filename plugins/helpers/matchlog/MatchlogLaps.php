@@ -41,7 +41,6 @@ class MatchlogLaps {
         $lapsGroupedByLogin = array();
         $checkpointsPerLapGroupedByPlayer = array();
 
-
         foreach($players as $login => &$player){
             //console(print_r($player, true));
             if($player['CheckpointNumber'] > 0 && $player['LastCpTime'] > 0 && $player['LapNumber'] >= 0){
@@ -98,7 +97,7 @@ class MatchlogLaps {
         $matchlogMessage .= MatchlogUtils::writePlayers($playerList);
         $matchlogMessage .= self::writeRaceInfo($challengeInfo, $date, $_GameInfos, $isMatch);
         if (!$isMatch) {
-            // to preven this being sent two times in a row.
+            // to prevent this being sent two times in a row.
             // TODO: prevent this in a better way.
             self::chatMessageBestLaps($lapsList, $gameInfo);
         }
@@ -106,7 +105,55 @@ class MatchlogLaps {
 
         matchlog($matchlogMessage."\n\n", $isMatch);
         console("to matchlog: ".$matchlogMessage);
+
+        //Write checkpoints to local files
+        self::WriteBest6LapsToFile($players, $checkpointsPerLapGroupedByPlayer, $challengeInfo);
     }
+
+    private static function best6LapsOutput($player, $cps, $challengeInfo) {
+        $output = trim($player['LastCpTime'])."\n".trim($cps);
+        $challengeDetails = $challengeInfo["Name"].", ".$challengeInfo['Environnement'];
+        return "[".date("Y-m-d, H:i:s")."]". $challengeDetails."\n$output\n";
+    }
+    private static function WriteBest6LapsToFile($players, $checkpointsPerLapGroupedByPlayer, $challengeInfo){
+        $cuid = getChallengeID($challengeInfo);
+        global $matchfile,$do_match_log, $_match_conf, $_DedConfig;
+
+
+        foreach ($players as $login => &$player) {
+            $result = "";
+
+            if ($player['FinalTime'] > 0) {
+                for($i = -1; $i < count($player['Checkpoints']) - 1; $i++) {
+                    $result .= $player['Checkpoints'][$i].",";
+                }
+
+                $fileName = "fastlog/6laps/".$cuid."_".$player['Login'].".txt";
+
+                if (!file_exists($fileName)) {
+                    $myfile = fopen($fileName, "x+");
+                    fwrite($myfile,MatchlogLaps::best6LapsOutput($player, $result, $challengeInfo));
+                    fclose($myfile);
+                    return;
+                }
+
+                $myfile = fopen($fileName, "r");
+                $fileLines = array();
+
+                while(!feof($myfile)) {
+                    array_push($fileLines,fgets($myfile));
+                }
+
+                if (!$fileLines || count($fileLines) <= 2 || count($fileLines) > 4 || $player['LastCpTime'] < $fileLines[1]) {
+                    $myfile = fopen($fileName, "w+");
+                    fwrite($myfile,MatchlogLaps::best6LapsOutput($player, $result, $challengeInfo));
+                    fclose($myfile);
+                }
+            }
+        }
+    }
+
+
 
     private static function writeRaceInfo($challengeInfo, $date, $gameInfo, $isMatch) {
         global $_match_conf,$_match_map;

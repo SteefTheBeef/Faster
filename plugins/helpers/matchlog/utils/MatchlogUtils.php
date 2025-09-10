@@ -30,6 +30,21 @@ class MatchlogUtils {
         return "\nChallenge author: ".$challengeInfo['Author'];
     }
 
+    static function writeRaceInfo($challengeInfo, $date, $gameInfo, $gameMode) {
+        //console($challengeInfo);
+        //console($date);
+        //console($gameInfo);
+        //console($gameMode);
+
+        $result = "\n* Race info:";
+        $result .= "\nDate, ChallengeName, ChallengeNameWithColor, ChallengeID, ChallengeAuthor, Environment, GameMode, NumberOfLaps";
+        $result .= "\n".$date.",".stripColors($challengeInfo["Name"]).",".
+            $challengeInfo["Name"].",".getChallengeID($challengeInfo).",".
+            $challengeInfo["Author"].",".$challengeInfo['Environnement'].",".$gameMode.",".$gameInfo["LapsNbLaps"];
+
+        return $result.MatchlogUtils::writeSectionDelimiter();
+    }
+
     static function writePlayers($playersList) {
         $result = "\n* Players:\n";
         $result .= "Login, NickName, NickNameWithColor";
