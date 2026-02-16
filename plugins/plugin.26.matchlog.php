@@ -60,9 +60,11 @@ function matchlogInit(){
 // BeginRace :
 //--------------------------------------------------------------
 function matchlogBeginRace($event,$GameInfos){
-	global $_matchlog_Ranking,$do_match_log,$matchfile,$matchfilename, $_GameInfos;
+	global $_matchlog_Ranking,$do_match_log,$matchfile,$matchfilename, $_GameInfos, $_Ranking;
 	$_matchlog_Ranking[0]['Score'] = -1;
 	$_matchlog_Ranking[1]['Score'] = -1;
+
+    Matchlog::create("BEGIN_RACE", $_GameInfos['GameMode'], null, $_Ranking);
 
 	// re-open log file (sometimes usefull if the file was modified externally after fast init)
 	if($do_match_log){
