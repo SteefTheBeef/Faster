@@ -107,7 +107,7 @@ class MatchlogLaps {
         console("to matchlog: ".$matchlogMessage);
 
         //Write checkpoints to local files
-        self::WriteBest6LapsToFile($players, $checkpointsPerLapGroupedByPlayer, $challengeInfo);
+        self::WriteBest6LapsToFile($players, $challengeInfo, $_GameInfos);
     }
 
     private static function best6LapsOutput($player, $cps, $challengeInfo) {
@@ -115,7 +115,7 @@ class MatchlogLaps {
         $challengeDetails = $challengeInfo["Name"].", ".$challengeInfo['Environnement'];
         return "[".date("Y-m-d, H:i:s")."]". $challengeDetails."\n$output\n";
     }
-    private static function WriteBest6LapsToFile($players, $checkpointsPerLapGroupedByPlayer, $challengeInfo){
+    private static function WriteBest6LapsToFile($players, $challengeInfo, $gameInfo){
         $cuid = getChallengeID($challengeInfo);
         global $matchfile,$do_match_log, $_match_conf, $_DedConfig;
 
@@ -128,7 +128,13 @@ class MatchlogLaps {
                     $result .= $player['Checkpoints'][$i].",";
                 }
 
-                $fileName = "fastlog/6laps/".$cuid."_".$player['Login'].".txt";
+                //$fileName = "fastlog/6laps/".$cuid."_".$player['Login'].".txt";
+                //$fileName = "fastlog/".$gameInfo["LapsNbLaps"]."laps/".$cuid."_".$player['Login'].".txt";
+                $fileName = MatchlogUtils::getCheckpointsFileNameForPlayer($login);
+
+                if (!is_dir(dirname($fileName))) {
+                    mkdir(dirname($fileName), 0777, true);
+                }
 
                 if (!file_exists($fileName)) {
                     $myfile = fopen($fileName, "x+");
