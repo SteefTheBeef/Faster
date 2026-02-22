@@ -64,10 +64,31 @@ class MatchlogUtils
         return "\n--------------------";
     }
 
-    static function getCheckpointsFileNameForPlayer($playerLogin)
+    static function getCheckpointsFromFileForPlayer($playerLogin)
     {
         global $_GameInfos, $_ChallengeInfo;
-        return "fastlog/" . $_GameInfos["LapsNbLaps"] . "laps/" . $_ChallengeInfo['UId'] . "_" . $playerLogin . ".txt";
+        $filename = "fastlog/" . $_GameInfos["LapsNbLaps"] . "laps/" . $_ChallengeInfo['UId'] . "_" . $playerLogin . ".txt";
+
+        if (!file_exists($filename)) {
+            return;
+        }
+
+        $cpFile = fopen($filename, "r");
+        if (!$cpFile) {
+            return;
+        }
+
+        $fileArray = array();
+
+        while (!feof($cpFile)) {
+            $fileArray[] = fgets($cpFile);
+        }
+
+        $checkpointArray = explode(",", $fileArray[2]);
+        array_shift($checkpointArray);
+        array_pop($checkpointArray);
+
+        return $checkpointArray;
     }
 
 // -----------------------------------

@@ -128,9 +128,7 @@ class MatchlogLaps {
                     $result .= $player['Checkpoints'][$i].",";
                 }
 
-                //$fileName = "fastlog/6laps/".$cuid."_".$player['Login'].".txt";
-                //$fileName = "fastlog/".$gameInfo["LapsNbLaps"]."laps/".$cuid."_".$player['Login'].".txt";
-                $fileName = MatchlogUtils::getCheckpointsFileNameForPlayer($login);
+                $fileName = MatchlogUtils::getCheckpointsFromFileForPlayer($login);
 
                 if (!is_dir(dirname($fileName))) {
                     mkdir(dirname($fileName), 0777, true);
