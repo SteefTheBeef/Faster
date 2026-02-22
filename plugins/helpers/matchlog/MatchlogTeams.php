@@ -156,7 +156,7 @@ class MatchlogTeams {
                 $rend = $_players_round_current;
             }
 
-            $result .= $sep.toString($login).'(';
+            $result .= $sep.StringUtils::toString($login).'(';
             $sep2 = '';
 
             for($rnum=1; $rnum<=$rend; $rnum++){
