@@ -1,5 +1,6 @@
 <?php
 require_once 'layout/Layout.php';
+require_once __DIR__ . '/../utils/StringUtils.php';
 
 class SubMenuBuilder {
     /**
@@ -61,7 +62,7 @@ class SubMenuBuilder {
             // Center text vertically in the row
             $textY = $y - ($rowH / 2.0);
 
-            $xml .= "<label posn='" . ($submenuX + $padX) . " {$textY} 0.20' sizen='" . ($submenuW - 2 * $padX) . " {$rowH}' halign='left' valign='center' textsize='1' text='\$fff\$o" . safeString($itTitle) . "'/>";
+            $xml .= "<label posn='" . ($submenuX + $padX) . " {$textY} 0.20' sizen='" . ($submenuW - 2 * $padX) . " {$rowH}' halign='left' valign='center' textsize='1' text='\$fff\$o" . StringUtils::safeString($itTitle) . "'/>";
 
             $y -= ($rowH);
         }
