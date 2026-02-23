@@ -1,12 +1,13 @@
 <?php
 require_once __DIR__ . '/../../utils/StringUtils.php';
 require_once __DIR__ . '/../UMPanel.php';
+require_once __DIR__ . '/../layout/Layout.php';
 
 class TableBuilder {
-    static function build($layout, $rows, $reserveRightW, $topOffset, $columns, $preferredRowH = null) {
-        $panelW = isset($layout['panelW']) ? (float)$layout['panelW'] : 0.0;
-        $topY = isset($layout['panelBodyTopY']) ? (float)$layout['panelBodyTopY'] : -5.0;
-        $bodyH = isset($layout['panelBodyHeight']) ? (float)$layout['panelBodyHeight'] : 0.0;
+    static function build(Layout $layout, $rows, $reserveRightW, $topOffset, $columns, $preferredRowH = null) {
+        $panelW = isset($layout->geometry->panelWidth) ? (float)$layout->geometry->panelWidth : 0.0;
+        $topY = isset($layout->geometry->panelBodyTopY) ? (float)$layout->geometry->panelBodyTopY : -5.0;
+        $bodyH = isset($layout->geometry->panelHeight) ? (float)$layout->geometry->panelBodyHeight : 0.0;
 
         $contentL = 1.2;
         $contentR = 1.2;

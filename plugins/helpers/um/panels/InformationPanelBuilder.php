@@ -1,9 +1,10 @@
 <?php
 require_once __DIR__ . '/../../utils/StringUtils.php';
 require_once __DIR__ . '/../UMPanel.php';
+require_once __DIR__ . '/../layout/Layout.php';
 
 class InformationPanelBuilder {
-    static function getInformationPanel($layout) {
+    static function getInformationPanel(Layout $layout) {
         $p1 = "\$fffRace against the greatest legends of Trackmania United Forever."
             . " This cup is not just a contest of skill, but truly a battle of wills and perseverance."
             . " Who will claim the right to call themselves a grand master?";

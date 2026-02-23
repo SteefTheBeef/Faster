@@ -1,9 +1,10 @@
 <?php
 require_once __DIR__ . '/../../utils/StringUtils.php';
 require_once __DIR__ . '/../UMPanel.php';
+require_once __DIR__ . '/../layout/Layout.php';
 
 class SchedulePanelBuilder {
-    static function schedule($layout, UMConfig $umConfig) {
+    static function schedule(Layout $layout, UMConfig $umConfig) {
         $raceDist = is_array($umConfig->um4Semi->pointsDistribution)
             ? $umConfig->um4QualiBestRace->pointsDistribution
             : array();
@@ -78,14 +79,16 @@ class SchedulePanelBuilder {
             2.2
         );
 
+        $accentColor = $layout->theme->accentTextColor;
+
         $xml .= UMPanel::textLabel($layout, '$fffMap Order', 20.5,true);
-        $xml .= UMPanel::textLabel($layout, "{$layout['greenTextColor']}Semi-final", 24,true);
+        $xml .= UMPanel::textLabel($layout, "{$accentColor}Semi-final", 24,true);
         $xml .= UMPanel::textLabel($layout, "Island, Rally, Desert, Snow, Bay, Coast, Stadium", 26);
 
-        $xml .= UMPanel::textLabel($layout, "{$layout['greenTextColor']}Grand-final Day One", 29,true);
+        $xml .= UMPanel::textLabel($layout, "{$accentColor}Grand-final Day One", 29,true);
         $xml .= UMPanel::textLabel($layout, "Island, Desert, Stadium", 31);
 
-        $xml .= UMPanel::textLabel($layout, "{$layout['greenTextColor']}Grand-final Day Two", 34,true);
+        $xml .= UMPanel::textLabel($layout, "{$accentColor}Grand-final Day Two", 34,true);
         $xml .= UMPanel::textLabel($layout, "Rally, Bay, Snow, Coast", 36);
 
         return $xml;

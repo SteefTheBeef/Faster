@@ -1,15 +1,16 @@
 <?php
+require_once 'layout/Layout.php';
 
 class SubMenuBuilder {
     /**
      * Build a generic "sub menu on the right" INSIDE the panel body.
      * Returns array('xml' => ..., 'contentW' => float, 'submenuW' => float)
      */
-    static function build($login, $layout, $menuKey, $items, $opts = array()) {
+    static function build($login, Layout $layout, $menuKey, $items, $opts = array()) {
         global $_players, $_ml_act;
 
-        $panelW = (float)$layout['panelW'];
-        $topY = (float)$layout['panelBodyTopY'];
+        $panelW = (float)$layout->geometry->panelWidth;
+        $topY = (float)$layout->geometry->panelBodyTopY;
 
         $contentL = isset($opts['contentL']) ? (float)$opts['contentL'] : 1.2;
         $contentR = isset($opts['contentR']) ? (float)$opts['contentR'] : 1.2;
