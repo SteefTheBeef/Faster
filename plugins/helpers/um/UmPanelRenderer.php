@@ -308,7 +308,13 @@ class UmPanelRenderer {
         return self::buildRacesTableXml($login, $selectedPlayer['Races'], $layout, $mlAct);
     }
 
-    private static function buildRacesTableXml($login, $races, Layout $layout, array $mlAct) {
+    /**
+     * Geometry/layout-only: compute all column widths / x positions / constants for the races table.
+     *
+     * @param Layout $layout
+     * @return array<string, float|int|string>
+     */
+    private static function computeRacesTableLayout(Layout $layout) {
         $panelW = $layout->geometry->panelWidth;
         $topY = $layout->geometry->panelBodyTopY;
 
@@ -346,74 +352,130 @@ class UmPanelRenderer {
         $rowH = 2.4;
         $headerY = $topY;
 
-        $page = (int)self::mlGet($login, UmPanelKeys::ML_RACES_PAGE, 0);
-        $pageCount = UMPanel::racesPageCount($races);
-        $page = UMPanel::clampInt($page, 0, $pageCount - 1);
-        self::mlSet($login, UmPanelKeys::ML_RACES_PAGE, $page);
+        return array(
+            'panelW' => $panelW,
+            'topY' => $topY,
 
-        $racesToShow = is_array($races) ? UMPanel::racesSliceForPage($races, $page) : array();
+            'contentL' => $contentL,
+            'contentR' => $contentR,
 
-        $xml = '';
-        $headerFont = '$cf0$o';
+            'gutter' => $gutter,
+            'gutterAfterIdx' => $gutterAfterIdx,
 
-        $xml .= XmlTag::quad($tableX, $headerY, $tableW, $rowH, '0006');
-        $xml .= XmlTag::label($xIdxLeft, $headerY - 0.6, $idxW - $idxPadL, $rowH, $headerFont . '#');
-        $xml .= XmlTag::label($xEnv, $headerY - 0.6, $colW, $rowH, $headerFont . 'Environment');
-        $xml .= XmlTag::labelRight($xRank, $headerY - 0.6, $colW, $rowH, $headerFont . 'Rank');
-        $xml .= XmlTag::labelRight($xPts, $headerY - 0.6, $colW, $rowH, $headerFont . 'Points');
-        $xml .= XmlTag::labelRight($xTimeRight, $headerY - 0.6, $colW - $timePadR, $rowH, $headerFont . 'Time');
+            'idxW' => $idxW,
+            'colW' => $colW,
 
-        $i = 0;
-        foreach ($racesToShow as $race) {
-            $rowY = $headerY - (($i + 1) * $rowH);
+            'idxPadL' => $idxPadL,
+            'timePadR' => $timePadR,
 
-            $raceIdx = isset($race['RaceIndex']) ? (string)(((int)$race['RaceIndex']) + 1) : (string)($i + 1);
+            'xIdxLeft' => $xIdxLeft,
+            'xEnv' => $xEnv,
+            'xRank' => $xRank,
+            'xPts' => $xPts,
+            'xTimeRight' => $xTimeRight,
 
-            $env = '';
-            if (isset($race['RaceInfo']) && is_array($race['RaceInfo']) && isset($race['RaceInfo']['Environment'])) {
-                $env = $race['RaceInfo']['Environment'];
-            }
+            'tableX' => $tableX,
+            'tableW' => $tableW,
 
-            $rank = isset($race['Rank']) ? (string)$race['Rank'] : '';
+            'rowH' => $rowH,
+            'headerY' => $headerY,
+        );
+    }
 
-            $time = '';
-            if (isset($race['Score']) && is_array($race['Score'])) {
-                if (isset($race['Score']['Time']) && $race['Score']['Time'] !== '') {
-                    $time = $race['Score']['Time'];
-                } elseif (isset($race['Score']['RaceTime']) && $race['Score']['RaceTime'] !== '') {
-                    $time = $race['Score']['RaceTime'];
-                }
-            }
+    /**
+     * Data-only: normalize a raw $race array into fields the renderer can consume.
+     *
+     * @param array $race
+     * @param int   $fallbackIndex 0-based index in the visible page
+     * @return array<string, mixed>
+     */
+    private static function formatRaceRow(array $race, $fallbackIndex) {
+        $raceIdx = isset($race['RaceIndex'])
+            ? (string)(((int)$race['RaceIndex']) + 1)
+            : (string)(((int)$fallbackIndex) + 1);
 
-            $pts = isset($race['AwardedPoints']) ? (string)$race['AwardedPoints'] : '';
-
-            $enviFont = '$390$o';
-            $otherFont = ((int)$rank > 3) ? '$fff$o' : '$fc0$o';
-            $bg = (($i % 2) === 0) ? '0003' : '0000';
-
-            $xml .= XmlTag::quad($tableX, $rowY, $tableW, $rowH, $bg);
-            $xml .= XmlTag::label($xIdxLeft, $rowY - 0.6, $idxW - $idxPadL, $rowH, $otherFont . $raceIdx);
-            $xml .= XmlTag::label($xEnv, $rowY - 0.6, $colW, $rowH, $enviFont . $env);
-            $xml .= XmlTag::labelRight($xRank, $rowY - 0.6, $colW, $rowH, $otherFont . $rank);
-            $xml .= XmlTag::labelRight($xPts, $rowY - 0.6, $colW, $rowH, $otherFont . $pts);
-            $xml .= XmlTag::labelRight($xTimeRight, $rowY - 0.6, $colW - $timePadR, $rowH, $otherFont . $time);
-
-            $i++;
+        $env = '';
+        if (isset($race['RaceInfo']) && is_array($race['RaceInfo']) && isset($race['RaceInfo']['Environment'])) {
+            $env = (string)$race['RaceInfo']['Environment'];
         }
 
-        if (is_array($races) && count($races) > RACES_PER_PAGE) {
-            $pageCount = UMPanel::racesPageCount($races);
-            $page = (int)self::mlGet($login, 'player.races.page', 0);
+        $rank = isset($race['Rank']) ? (string)$race['Rank'] : '';
+        $rankInt = (int)$rank;
 
-            $canPrev = ($page > 0);
-            $canNext = ($page < $pageCount - 1);
+        $time = '';
+        if (isset($race['Score']) && is_array($race['Score'])) {
+            if (isset($race['Score']['Time']) && $race['Score']['Time'] !== '') {
+                $time = (string)$race['Score']['Time'];
+            } elseif (isset($race['Score']['RaceTime']) && $race['Score']['RaceTime'] !== '') {
+                $time = (string)$race['Score']['RaceTime'];
+            }
+        }
 
-            $pagerY = $headerY - (($i + 1) * $rowH) - 1.2;
+        $pts = isset($race['AwardedPoints']) ? (string)$race['AwardedPoints'] : '';
+
+        return array(
+            'idx' => $raceIdx,
+            'env' => $env,
+            'rank' => $rank,
+            'rankInt' => $rankInt,
+            'pts' => $pts,
+            'time' => $time,
+        );
+    }
+
+    /**
+     * XML-only: emit the races table XML given layout vars + normalized rows.
+     *
+     * @param array $v Layout vars from computeRacesTableLayout()
+     * @param array<int, array<string,mixed>> $rows Normalized rows from formatRaceRow()
+     * @param int $page 0-based
+     * @param int $pageCount
+     * @param bool $showPager
+     * @param array $mlAct
+     * @param bool $canPrev
+     * @param bool $canNext
+     * @return string
+     */
+    private static function renderRacesTable(array $v, array $rows, $page, $pageCount, $showPager, array $mlAct, $canPrev, $canNext) {
+        $xml = '';
+
+        $headerFont = '$cf0$o';
+        $xml .= XmlTag::quad($v['tableX'], $v['headerY'], $v['tableW'], $v['rowH'], '0006');
+        $xml .= XmlTag::label($v['xIdxLeft'], $v['headerY'] - 0.6, $v['idxW'] - $v['idxPadL'], $v['rowH'], $headerFont . '#');
+        $xml .= XmlTag::label($v['xEnv'], $v['headerY'] - 0.6, $v['colW'], $v['rowH'], $headerFont . 'Environment');
+        $xml .= XmlTag::labelRight($v['xRank'], $v['headerY'] - 0.6, $v['colW'], $v['rowH'], $headerFont . 'Rank');
+        $xml .= XmlTag::labelRight($v['xPts'], $v['headerY'] - 0.6, $v['colW'], $v['rowH'], $headerFont . 'Points');
+        $xml .= XmlTag::labelRight($v['xTimeRight'], $v['headerY'] - 0.6, $v['colW'] - $v['timePadR'], $v['rowH'], $headerFont . 'Time');
+
+        $enviFont = '$390$o';
+
+        $i = 0;
+        $count = count($rows);
+        for ($i = 0; $i < $count; $i++) {
+            $row = $rows[$i];
+
+            $rowY = $v['headerY'] - (($i + 1) * $v['rowH']);
+            $bg = (($i % 2) === 0) ? '0003' : '0000';
+
+            $rankInt = isset($row['rankInt']) ? (int)$row['rankInt'] : 0;
+            $otherFont = ($rankInt > 3) ? '$fff$o' : '$fc0$o';
+
+            $xml .= XmlTag::quad($v['tableX'], $rowY, $v['tableW'], $v['rowH'], $bg);
+            $xml .= XmlTag::label($v['xIdxLeft'], $rowY - 0.6, $v['idxW'] - $v['idxPadL'], $v['rowH'], $otherFont . (string)$row['idx']);
+            $xml .= XmlTag::label($v['xEnv'], $rowY - 0.6, $v['colW'], $v['rowH'], $enviFont . (string)$row['env']);
+            $xml .= XmlTag::labelRight($v['xRank'], $rowY - 0.6, $v['colW'], $v['rowH'], $otherFont . (string)$row['rank']);
+            $xml .= XmlTag::labelRight($v['xPts'], $rowY - 0.6, $v['colW'], $v['rowH'], $otherFont . (string)$row['pts']);
+            $xml .= XmlTag::labelRight($v['xTimeRight'], $rowY - 0.6, $v['colW'] - $v['timePadR'], $v['rowH'], $otherFont . (string)$row['time']);
+        }
+
+        if ($showPager) {
+            $pagerY = $v['headerY'] - (($count + 1) * $v['rowH']) - 1.2;
 
             $labelW = 2.0;
             $gap = 0.25;
 
-            $nextX = $tableW - 1.6;
+            // NOTE: keep original behavior: pager is aligned relative to table width (not panel width).
+            $nextX = $v['tableW'] - 1.6;
             $prevX = $nextX - 1.6 - $gap - $labelW - $gap - 1.6;
 
             $prevCenterX = $prevX + (1.6 / 2.0);
@@ -424,14 +486,43 @@ class UmPanelRenderer {
             $prevAct = ($canPrev && isset($mlAct[UmPanelKeys::ACT_RACES_PREV])) ? (int)$mlAct[UmPanelKeys::ACT_RACES_PREV] : null;
             $nextAct = ($canNext && isset($mlAct[UmPanelKeys::ACT_RACES_NEXT])) ? (int)$mlAct[UmPanelKeys::ACT_RACES_NEXT] : null;
 
-
             $pagerInner = XmlTag::quadIcon64($prevX, 0, 1.6, 'ArrowPrev', $prevAct);
-            $pagerInner .= XmlTag::labelCenterCenter($midX, $midY, $labelW, 1.6, "\$aaa" . ($page + 1) . "/" . $pageCount);
+            $pagerInner .= XmlTag::labelCenterCenter($midX, $midY, $labelW, 1.6, "\$aaa" . ((int)$page + 1) . "/" . (int)$pageCount);
             $pagerInner .= XmlTag::quadIcon64($nextX, 0, 1.6, 'ArrowNext', $nextAct);
 
-            $xml .= XmlTag::frame($tableX, $pagerY, 0.2, $pagerInner);
+            $xml .= XmlTag::frame($v['tableX'], $pagerY, 0.2, $pagerInner);
         }
 
         return $xml;
+    }
+    private static function buildRacesTableXml($login, $races, Layout $layout, array $mlAct) {
+        $v = self::computeRacesTableLayout($layout);
+
+        $page = (int)self::mlGet($login, UmPanelKeys::ML_RACES_PAGE, 0);
+        $pageCount = UMPanel::racesPageCount($races);
+        $page = UMPanel::clampInt($page, 0, $pageCount - 1);
+        self::mlSet($login, UmPanelKeys::ML_RACES_PAGE, $page);
+
+        $racesToShow = is_array($races) ? UMPanel::racesSliceForPage($races, $page) : array();
+
+        $rows = array();
+        $i = 0;
+        foreach ($racesToShow as $race) {
+            if (is_array($race)) {
+                $rows[] = self::formatRaceRow($race, $i);
+            }
+            $i++;
+        }
+
+        $showPager = (is_array($races) && count($races) > RACES_PER_PAGE);
+        $canPrev = false;
+        $canNext = false;
+
+        if ($showPager) {
+            $canPrev = ($page > 0);
+            $canNext = ($page < $pageCount - 1);
+        }
+
+        return self::renderRacesTable($v, $rows, $page, $pageCount, $showPager, $mlAct, $canPrev, $canNext);
     }
 }
