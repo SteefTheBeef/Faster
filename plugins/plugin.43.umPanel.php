@@ -121,7 +121,6 @@ function umPanelPlayerConnect($event, $login) {
     for ($i = 0; $i < count($umScoreBoardPlayers); $i++) {
 
         if ($umScoreBoardPlayers[$i]['Login'] == $login) {
-            console("PLAYER FOUND IN umScoreBoardPlayers");
             $umScoreBoardSelectedPlayerRow[$login] = $i;
             $selectedPlayer[$login] = $umScoreBoardPlayers[$i];
         }
@@ -163,11 +162,7 @@ function umPanelPlayerShowML($event, $login, $ShowML) {
 //--------------------------------------------------------------
 function umPanelPlayerManialinkPageAnswer($event, $login, $answer, $action) {
     global $umScoreBoardSelectedPlayerRow, $selectedPlayer;
-
-    console("selectedPlayer" . print_r($selectedPlayer, true));
-
     UmPanelRenderer::handleAction($login, $action, $answer, $umScoreBoardSelectedPlayerRow, $selectedPlayer);
-
     umPanelUpdateXml($login, 'show');
 }
 
@@ -188,13 +183,23 @@ function umPanelUpdateXml($login, $action = 'show') {
 
 function getUMPanelXml($login) {
     global $umScoreBoardPlayerActions, $umScoreBoardSelectedPlayerRow, $umScoreBoardPlayers, $selectedPlayer;
+    global $_ml_act, $umConfig;
 
     $layout = Layout::build();
 
     $players = $umScoreBoardPlayers;
     $selectedRow = isset($umScoreBoardSelectedPlayerRow[$login]) ? (int)$umScoreBoardSelectedPlayerRow[$login] : -1;
-    //console("UMPanel.getUMPanelXml" . print_r($selectedPlayer, true));
-    return UmPanelRenderer::buildPanelXml($login, $layout, $players, $selectedRow, $selectedPlayer[$login], $umScoreBoardPlayerActions);
+
+    return UmPanelRenderer::buildPanelXml(
+        $login,
+        $layout,
+        $players,
+        $selectedRow,
+        isset($selectedPlayer[$login]) ? $selectedPlayer[$login] : null,
+        $umScoreBoardPlayerActions,
+        $_ml_act,
+        $umConfig
+    );
 }
 
 function umPanelPlayerMenuBuild($event, $login) {

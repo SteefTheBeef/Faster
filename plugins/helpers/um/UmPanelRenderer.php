@@ -46,10 +46,10 @@ class UmPanelRenderer {
         $_players[$login]['ML'][$key] = $value;
     }
 
-    public static function buildPanelXml($login, Layout $layout, array $players, $selectedRow, array $actionIds) {
+    public static function buildPanelXml($login, Layout $layout, array $players, $selectedRow, $selectedPlayerForLogin, array $actionIds, array $mlAct, $umConfig) {
         $isClosed = ((int)self::mlGet($login, 'um.panel.closed', 0) === 1);
         if ($isClosed) {
-            return self::buildClosedToggleXml($layout);
+            return self::buildClosedToggleXml($layout, $mlAct);
         }
 
         $bordersXml = self::buildPanelBordersXml($layout);
@@ -57,12 +57,7 @@ class UmPanelRenderer {
         $listBuild = self::buildPlayerListXml($layout, $players, (int)$selectedRow, $actionIds);
         $xmlPlayers = $listBuild['xmlPlayers'];
 
-        $selectedPlayer = null;
-        if ($listBuild['selectedPlayerIndex'] !== null && isset($players[$listBuild['selectedPlayerIndex']])) {
-            $selectedPlayer = $players[$listBuild['selectedPlayerIndex']];
-        }
-
-        $rightBuild = self::buildRightPanelXml($login, $layout, $selectedPlayer);
+        $rightBuild = self::buildRightPanelXml($login, $layout, $selectedPlayerForLogin, $mlAct, $umConfig);
         $rightPanelXml =
             $rightBuild['panelFrameStart']
             . $rightBuild['tabsXml']
@@ -81,8 +76,9 @@ class UmPanelRenderer {
         );
     }
 
-    public static function handleAction($login, $action, $answer, array &$selectedRowByLogin, array &$selectedPlayerByLogin) {
-        global $_players;
+    public static function handleAction($login, $action, $answer, array &$selectedRowByLogin, array &$selectedPlayer = null) {
+        global $_players, $umScoreBoardPlayers;
+
         // Panel close/open
         if ($action === 'um.panel.close') {
             self::mlSet($login, 'um.panel.closed', 1);
@@ -94,18 +90,22 @@ class UmPanelRenderer {
             return true;
         }
 
-        // Tabs
+        // Tabs: "um.tab.<key>"
         if (strpos($action, 'um.tab.') === 0) {
-            $parts = explode('.', $action);
-            self::mlSet($login, 'um.tab', isset($parts[2]) ? $parts[2] : 'players');
+            $tabKey = substr($action, strlen('um.tab.'));
+            if ($tabKey === '' || $tabKey === false) {
+                $tabKey = 'players';
+            }
+            self::mlSet($login, 'um.tab', $tabKey);
             return true;
         }
 
-        // Subtabs
+        // Subtabs: "um.subtab.<tabKey>.<subKey>"
         if (strpos($action, 'um.subtab.') === 0) {
-            $parts = explode('.', $action);
-            $tabKey = isset($parts[2]) ? $parts[2] : '';
-            $subKey = isset($parts[3]) ? $parts[3] : '';
+            $rest = substr($action, strlen('um.subtab.'));
+            $parts = explode('.', (string)$rest, 2);
+            $tabKey = isset($parts[0]) ? $parts[0] : '';
+            $subKey = isset($parts[1]) ? $parts[1] : '';
             if ($tabKey !== '' && $subKey !== '') {
                 self::mlSet($login, 'um.subtab.' . $tabKey, $subKey);
             }
@@ -114,11 +114,15 @@ class UmPanelRenderer {
 
         // Paging
         if ($action === 'races.prev' || $action === 'races.next') {
-            if (!isset($selectedPlayerByLogin[$login])) {
-                return true; // handled, nothing to do
+            console("RACES.PAGINATION1");
+            console($action);
+           // console($selectedPlayerByLogin);
+            if (!isset($selectedPlayer[$login])) {
+                return true; // known action, nothing to do
             }
+            console("RACES.PAGINATION2");
 
-            $pageCount = UMPanel::racesPageCount($selectedPlayerByLogin[$login]['Races']);
+            $pageCount = UMPanel::racesPageCount($selectedPlayer[$login]['Races']);
             $page = (int)self::mlGet($login, 'player.races.page', 0);
 
             if ($action === 'races.prev') $page--;
@@ -126,14 +130,36 @@ class UmPanelRenderer {
 
             $page = UMPanel::clampInt($page, 0, $pageCount - 1);
             self::mlSet($login, 'player.races.page', $page);
-
+            console("RACES.PAGINATION3");
             return true;
         }
-        // Scoreboard row selection fallback: "<something>.<rowIndex>"
-        $parts = explode('.', $action);
-        $playerRow = isset($parts[1]) ? (int)$parts[1] : -1;
-        $selectedRowByLogin[$login] = $playerRow;
-        return true;
+
+        // Scoreboard row selection (explicitly accepted):
+        // "umScoreBoardPlayerActions.<rowIndex>"
+        $rowPrefix = 'umScoreBoardPlayerActions.';
+        if (strpos($action, $rowPrefix) === 0) {
+
+            $rowStr = substr($action, strlen($rowPrefix));
+
+            // Validate: digits only (avoid accidental "abc", "1foo", etc.)
+            if ($rowStr !== '' && ctype_digit($rowStr)) {
+                $row = (int)$rowStr;
+
+                // Clamp only if we actually know a safe max (we don't here),
+                // but we can at least prevent negative values.
+                if ($row < 0) $row = 0;
+
+                $selectedRowByLogin[$login] = $row;
+                $selectedPlayer[$login] = isset($umScoreBoardPlayers[$row]) ? $umScoreBoardPlayers[$row] : null;
+                return true;
+            }
+
+            // Prefix matched but row invalid => treat as unhandled
+            return false;
+        }
+
+        // Unknown action => not handled (prevents accidental row changes on "something.with.dots")
+        return false;
     }
 
     // ---------------- Rendering helpers ----------------
@@ -202,25 +228,21 @@ class UmPanelRenderer {
         );
     }
 
-    private static function buildClosedToggleXml(Layout $layout) {
-        global $_ml_act;
-
+    private static function buildClosedToggleXml(Layout $layout, array $mlAct) {
         $x = $layout->geometry->closeButtonX;
         $y = $layout->geometry->closeButtonY;
         $s = $layout->geometry->closeButtonSize;
 
-        $actId = isset($_ml_act['um.panel.open']) ? (int)$_ml_act['um.panel.open'] : 0;
+        $actId = isset($mlAct['um.panel.open']) ? (int)$mlAct['um.panel.open'] : 0;
 
         return XmlTag::frame($x, $y, 5, XmlTag::quadIcon64(0, 0, $s, 'Check', $actId));
     }
 
-    private static function buildRightPanelXml($login, Layout $layout, $selectedPlayer) {
-        global $_ml_act;
-
+    private static function buildRightPanelXml($login, Layout $layout, $selectedPlayerForLogin, array $mlAct, $umConfig) {
         $panelW = $layout->geometry->panelWidth;
         $panelH = $layout->geometry->panelHeight;
 
-        $tabsXml = self::buildTabsXml($login, $layout);
+        $tabsXml = self::buildTabsXml($login, $layout, $mlAct);
 
         $closeSize = 2.2;
         $closeMarginR = 0.25;
@@ -228,7 +250,7 @@ class UmPanelRenderer {
         $closeX = $panelW - $closeMarginR - $closeSize;
         if ($closeX < 0) $closeX = 0;
 
-        $closeActId = isset($_ml_act['um.panel.close']) ? (int)$_ml_act['um.panel.close'] : 0;
+        $closeActId = isset($mlAct['um.panel.close']) ? (int)$mlAct['um.panel.close'] : 0;
 
         $closeXml =
             XmlTag::quadIcon64($closeX, $closeY, $closeSize, 'Circle', $closeActId, array('z' => 0.45))
@@ -239,13 +261,13 @@ class UmPanelRenderer {
         $activeTab = (string)self::mlGet($login, 'um.tab', 'players');
         if ($activeTab === '') $activeTab = 'players';
 
-        $selectedPlayerName = (is_array($selectedPlayer) && isset($selectedPlayer['NickNameWithColor'])) ? $selectedPlayer['NickNameWithColor'] : '';
+        $selectedPlayerName = (is_array($selectedPlayerForLogin) && isset($selectedPlayerForLogin['NickNameWithColor'])) ? $selectedPlayerForLogin['NickNameWithColor'] : '';
         $titleText = ($activeTab === 'players') ? $selectedPlayerName : ucwords($activeTab);
         $font = ($activeTab === 'players') ? '' : $layout->theme->headerFontStyle;
 
         $panelTitle = XmlTag::label(1, -1, $panelW - 2, 3, $font . $titleText, null, array('textsize' => 2));
 
-        $panelBody = self::buildRightPanelBodyXml($login, $activeTab, $selectedPlayer, $layout);
+        $panelBody = self::buildRightPanelBodyXml($login, $activeTab, $selectedPlayerForLogin, $layout, $umConfig, $mlAct);
 
         return array(
             'panelFrameStart' => $layout->markup->panelFrameStart,
@@ -258,8 +280,7 @@ class UmPanelRenderer {
         );
     }
 
-    private static function buildRightPanelBodyXml($login, $activeTab, $selectedPlayer, Layout $layout) {
-        global $umConfig;
+    private static function buildRightPanelBodyXml($login, $activeTab, $selectedPlayer, Layout $layout, $umConfig, array $mlAct) {
         switch ($activeTab) {
             case 'schedule':
                 return SchedulePanelBuilder::schedule($layout, $umConfig);
@@ -271,20 +292,18 @@ class UmPanelRenderer {
                 return '';
             case 'players':
             default:
-                return self::buildPlayerRacesPanelXml($login, $selectedPlayer, $layout);
+                return self::buildPlayerRacesPanelXml($login, $selectedPlayer, $layout, $mlAct);
         }
     }
 
-    private static function buildPlayerRacesPanelXml($login, $selectedPlayer, Layout $layout) {
+    private static function buildPlayerRacesPanelXml($login, $selectedPlayer, Layout $layout, array $mlAct) {
         if (!is_array($selectedPlayer) || !isset($selectedPlayer['Races']) || !is_array($selectedPlayer['Races']) || count($selectedPlayer['Races']) < 1) {
             return UMPanel::textLabel($layout, 'Select a player on the left...');
         }
-        return self::buildRacesTableXml($login, $selectedPlayer['Races'], $layout);
+        return self::buildRacesTableXml($login, $selectedPlayer['Races'], $layout, $mlAct);
     }
 
-    private static function buildTabsXml($login, Layout $layout) {
-        global $_ml_act;
-
+    private static function buildTabsXml($login, Layout $layout, array $mlAct) {
         $tabH = 3;
         $tabGap = 0.0;
         $tabRightMargin = 1.2;
@@ -334,7 +353,7 @@ class UmPanelRenderer {
             $bg = $isActive ? $layout->theme->tabActiveBackgroundColor : $layout->theme->tabBackgroundColor;
 
             $actName = $tabs[$i]['action'];
-            $actId = isset($_ml_act[$actName]) ? (int)$_ml_act[$actName] : 0;
+            $actId = isset($mlAct[$actName]) ? (int)$mlAct[$actName] : 0;
 
             $inner .= XmlTag::quad($x, 0, $w, $tabH, $bg, $actId);
 
@@ -352,9 +371,7 @@ class UmPanelRenderer {
         return XmlTag::frame($tabsX, $tabsY, 0.30, $inner);
     }
 
-    private static function buildRacesTableXml($login, $races, Layout $layout) {
-        global $_ml_act;
-
+    private static function buildRacesTableXml($login, $races, Layout $layout, array $mlAct) {
         $panelW = $layout->geometry->panelWidth;
         $topY = $layout->geometry->panelBodyTopY;
 
@@ -467,8 +484,8 @@ class UmPanelRenderer {
             $midX = ($prevCenterX + $nextCenterX) / 2.0;
             $midY = -0.8;
 
-            $prevAct = ($canPrev && isset($_ml_act['races.prev'])) ? (int)$_ml_act['races.prev'] : null;
-            $nextAct = ($canNext && isset($_ml_act['races.next'])) ? (int)$_ml_act['races.next'] : null;
+            $prevAct = ($canPrev && isset($mlAct['races.prev'])) ? (int)$mlAct['races.prev'] : null;
+            $nextAct = ($canNext && isset($mlAct['races.next'])) ? (int)$mlAct['races.next'] : null;
 
             $pagerInner = XmlTag::quadIcon64($prevX, 0, 1.6, 'ArrowPrev', $prevAct);
             $pagerInner .= XmlTag::labelCenterCenter($midX, $midY, $labelW, 1.6, "\$aaa" . ($page + 1) . "/" . $pageCount);
