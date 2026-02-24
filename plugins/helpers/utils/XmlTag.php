@@ -50,6 +50,19 @@ class XmlTag {
     }
 
     /**
+     * Centralizes border quad creation to make intent obvious and avoid copy/paste bugs.
+     *
+     * @param float|int $x
+     * @param float|int $y
+     * @param float|int $w
+     * @param float|int $h
+     * @param string    $color
+     * @return string
+     */
+    public static function quadBorder($x, $y, $w, $h, $color) {
+        return self::quad($x, $y, $w, $h, $color);
+    }
+    /**
      * Convenience: build a quad when you're using style/substyle instead of bgcolor.
      * (Icons, UI sprites, etc.)
      */

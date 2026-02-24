@@ -3,18 +3,16 @@
 require_once __DIR__ . '/layout/Layout.php';
 require_once __DIR__ . '/../utils/XmlTag.php';
 
-class UmPanelRenderer
-{
+class UmPanelRenderer {
     /**
      * Read per-player ML UI state with a default.
      *
      * @param string $login
-     * @param string $key   Example: 'um.panel.closed'
-     * @param mixed  $default
+     * @param string $key Example: 'um.panel.closed'
+     * @param mixed $default
      * @return mixed
      */
-    private static function mlGet($login, $key, $default = null)
-    {
+    private static function mlGet($login, $key, $default = null) {
         global $_players;
 
         if (!isset($_players[$login]) || !isset($_players[$login]['ML']) || !is_array($_players[$login]['ML'])) {
@@ -32,11 +30,10 @@ class UmPanelRenderer
      *
      * @param string $login
      * @param string $key
-     * @param mixed  $value
+     * @param mixed $value
      * @return void
      */
-    private static function mlSet($login, $key, $value)
-    {
+    private static function mlSet($login, $key, $value) {
         global $_players;
 
         if (!isset($_players[$login])) {
@@ -49,8 +46,7 @@ class UmPanelRenderer
         $_players[$login]['ML'][$key] = $value;
     }
 
-    public static function buildPanelXml($login, Layout $layout, array $players, $selectedRow, array $actionIds)
-    {
+    public static function buildPanelXml($login, Layout $layout, array $players, $selectedRow, array $actionIds) {
         $isClosed = ((int)self::mlGet($login, 'um.panel.closed', 0) === 1);
         if ($isClosed) {
             return self::buildClosedToggleXml($layout);
@@ -85,8 +81,7 @@ class UmPanelRenderer
         );
     }
 
-    public static function handleAction($login, $action, $answer, array &$selectedRowByLogin, array &$selectedPlayerByLogin)
-    {
+    public static function handleAction($login, $action, $answer, array &$selectedRowByLogin, array &$selectedPlayerByLogin) {
         global $_players;
         // Panel close/open
         if ($action === 'um.panel.close') {
@@ -143,30 +138,31 @@ class UmPanelRenderer
 
     // ---------------- Rendering helpers ----------------
 
-    private static function buildPanelBordersXml(Layout $layout)
-    {
+    private static function buildPanelBordersXml(Layout $layout) {
         $t = $layout->geometry->borderThickness;
         $c = $layout->theme->borderColor;
+
         $borderLeftX = $layout->geometry->borderLeftX;
+        $borderRightX = isset($layout->geometry->borderRightX)
+            ? $layout->geometry->borderRightX
+            : ($layout->geometry->borderLeftX + $layout->geometry->borderOuterWidth - $t);
+
         $borderHeight = $layout->geometry->borderHeight;
         $listFrameY = $layout->geometry->listFrameY;
+
         $borderTopWidth = $layout->geometry->borderOuterWidth;
         $borderTopY = $layout->geometry->borderTopY;
         $borderBottomY = $layout->geometry->borderBottomY;
 
-        $left = XmlTag::quad($borderLeftX, $listFrameY, $t, $borderHeight, $c);
-        $top = XmlTag::quad($borderLeftX, $borderTopY, $borderTopWidth, $t, $c);
-        $bottom = XmlTag::quad($borderLeftX, $borderBottomY, $borderTopWidth, $t, $c);
+        $xml = XmlTag::quadBorder($borderLeftX, $listFrameY, $t, $borderHeight, $c); // left
+        $xml .= XmlTag::quadBorder($borderLeftX, $borderTopY, $borderTopWidth, $t, $c); // top
+        $xml .= XmlTag::quadBorder($borderLeftX, $borderBottomY, $borderTopWidth, $t, $c); // bottom
+        $xml .= XmlTag::quadBorder($borderRightX, $listFrameY, $t, $borderHeight, $c); // right
 
-        // Keeping existing geometry (was borderLeftX). If you have a borderRightX in layout,
-        // swap it in here.
-        $right = XmlTag::quad($borderLeftX, $listFrameY, $t, $borderHeight, $c);
-
-        return $left . $top . $bottom . $right;
+        return $xml;
     }
 
-    private static function buildPlayerListXml(Layout $layout, array $players, $selectedRow, array $actionIds)
-    {
+    private static function buildPlayerListXml(Layout $layout, array $players, $selectedRow, array $actionIds) {
         $padX = 1.0;
         $padY = 1.5;
         $rows = (int)$layout->geometry->rowCount;
@@ -206,8 +202,7 @@ class UmPanelRenderer
         );
     }
 
-    private static function buildClosedToggleXml(Layout $layout)
-    {
+    private static function buildClosedToggleXml(Layout $layout) {
         global $_ml_act;
 
         $x = $layout->geometry->closeButtonX;
@@ -219,8 +214,7 @@ class UmPanelRenderer
         return XmlTag::frame($x, $y, 5, XmlTag::quadIcon64(0, 0, $s, 'Check', $actId));
     }
 
-    private static function buildRightPanelXml($login, Layout $layout, $selectedPlayer)
-    {
+    private static function buildRightPanelXml($login, Layout $layout, $selectedPlayer) {
         global $_ml_act;
 
         $panelW = $layout->geometry->panelWidth;
@@ -264,8 +258,7 @@ class UmPanelRenderer
         );
     }
 
-    private static function buildRightPanelBodyXml($login, $activeTab, $selectedPlayer, Layout $layout)
-    {
+    private static function buildRightPanelBodyXml($login, $activeTab, $selectedPlayer, Layout $layout) {
         global $umConfig;
         switch ($activeTab) {
             case 'schedule':
@@ -282,16 +275,14 @@ class UmPanelRenderer
         }
     }
 
-    private static function buildPlayerRacesPanelXml($login, $selectedPlayer, Layout $layout)
-    {
+    private static function buildPlayerRacesPanelXml($login, $selectedPlayer, Layout $layout) {
         if (!is_array($selectedPlayer) || !isset($selectedPlayer['Races']) || !is_array($selectedPlayer['Races']) || count($selectedPlayer['Races']) < 1) {
             return UMPanel::textLabel($layout, 'Select a player on the left...');
         }
         return self::buildRacesTableXml($login, $selectedPlayer['Races'], $layout);
     }
 
-    private static function buildTabsXml($login, Layout $layout)
-    {
+    private static function buildTabsXml($login, Layout $layout) {
         global $_ml_act;
 
         $tabH = 3;
@@ -361,8 +352,7 @@ class UmPanelRenderer
         return XmlTag::frame($tabsX, $tabsY, 0.30, $inner);
     }
 
-    private static function buildRacesTableXml($login, $races, Layout $layout)
-    {
+    private static function buildRacesTableXml($login, $races, Layout $layout) {
         global $_ml_act;
 
         $panelW = $layout->geometry->panelWidth;
