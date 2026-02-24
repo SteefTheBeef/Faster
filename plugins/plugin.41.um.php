@@ -269,7 +269,7 @@ function umBeginRound($event){
 function umPlayerConnect($event,$login,$pinfo,$pdetailedinfo,$pranking)
 {
 	global $_debug, $_ChallengeInfo, $_players;
-
+	addCall($login,'SetCallVoteTimeOut',0);
 	if ($_debug > 0) console("um.Event[$event]('$login')");
 
 	//sendChatMessageToLogin2($login, '$sWelcome to United Masters, ' . $pinfo["NickName"]);
@@ -316,7 +316,22 @@ function umEveryminute($event,$minutes,$is2min,$is5min){
 // Every5seconds($event,$seconds): called once every 5 seconds, after all other events (before Everysecond)
 // (Fast event)
 function umEvery5seconds($event,$seconds){
-	global $_debug;
+	global $_mldebug,$_GameInfos,$_players,$_ChallengeInfo, $_NextChallengeInfo;
+
+	$fileName = "fastlog/feed.txt";
+
+	$myfile = fopen($fileName, "w");
+	$date = date("Y-m-d H:i:s");
+	$result = $_ChallengeInfo['Environnement'].",".stripColors($_ChallengeInfo["Name"]).",".$_NextChallengeInfo['Environnement'].",".stripColors($_NextChallengeInfo["Name"])."\n";
+	$playerStr = "";
+	foreach ($_players as $login => &$player) {
+		$playerStr .= stripColors($player['NickName']).",";
+	}
+
+	fwrite($myfile,$result.$playerStr);
+	fclose($myfile);
+
+
 	//addCall(null,'SetCallVoteTimeOut',0);
 	//if($_debug>2) console("um.Event[$event]($seconds)");
 }
@@ -342,6 +357,7 @@ function umPlayerChat($event,$login,$message,$iscommand){
 	if($_debug>3) console("um.Event[$event]('$login','$message',$iscommand)");
 }
 
+
 // PlayerStart($event,$login,$starttime): send this event when player start (in TA)
 // (from TrackMania.PlayerFinish(login,0))
 function umPlayerStart($event,$login,$starttime){
@@ -356,7 +372,7 @@ function umPlayerStart($event,$login,$starttime){
 function umPlayerCheckpoint($event,$login,$time,$lapnum,$checkpt,$hiddenabort=false){
 	global $_debug;
 	if($_debug>0) console("um.Event[$event]('$login',$time,$lapnum,$checkpt,$hiddenabort)");
-	addCall(null,'SetCallVoteTimeOut',60000);
+	//addCall(null,'SetCallVoteTimeOut',60000);
 }
 
 // PlayerLap($event,$login,$time,$lapnum,$checkpt): player lap time (in Laps mode only)
