@@ -25,7 +25,8 @@ require_once "helpers/um/panels/SchedulePanelBuilder.php";
 require_once "helpers/um/SubMenuBuilder.php";
 require_once "helpers/um/layout/Layout.php";
 require_once "helpers/um/UmPanelRenderer.php";
-registerPlugin('umPanel', 43, 1.0);
+require_once "helpers/um/UmPanelKeys.php";
+registerPlugin(UmPanelKeys::ML_ID_PANEL, 43, 1.0);
 
 function generatePointsArray() {
     $first = 500;
@@ -72,38 +73,24 @@ function umPanelInit($event) {
 
     // get a unique manialink id. Use the same name as for
     // manialinksAddManialink(). It will add its value automatically in <manialink id='xx'>
-    manialinksAddId('umPanel');
+    manialinksAddId(UmPanelKeys::ML_ID_PANEL);
 
     $umScoreBoardPlayerActions = array();
     for ($i = 0; $i < 16; $i++) {
-        $actionName = 'umScoreBoardPlayerActions.' . $i;
-        manialinksAddAction($actionName);          // creates a unique action id
+        $actionName = UmPanelKeys::scoreboardRowAction($i);
+        manialinksAddAction($actionName);                 // creates a unique action id
         $umScoreBoardPlayerActions[$i] = $_ml_act[$actionName]; // numeric action id stored by manialinks plugin
     }
 
     $umScoreBoardPlayers = MatchlogFileParser::getScoreboardPlayersFromMatchlog('fastlog/um3_semi.txt', $umConfig->um3Semi->pointsDistribution);
-    generatePointsArray();
-    // Panel toggle (close/open)
-    manialinksAddAction('um.panel.close');
-    manialinksAddAction('um.panel.open');
+    // generatePointsArray();
 
-    // player races pagination
-    manialinksAddAction('races.prev');
-    manialinksAddAction('races.next');
-    // Tabs (Players / Stints)
-    manialinksAddAction('um.tab.players');
-    manialinksAddAction('um.tab.stints');
-    manialinksAddAction('um.tab.schedule');
-    manialinksAddAction('um.tab.rules');
-    manialinksAddAction('um.tab.information');
-
-    // Submenus (right-side inside rules-panel)
-    manialinksAddAction('um.subtab.rules.qualification');
-    manialinksAddAction('um.subtab.rules.qualification-points');
-    manialinksAddAction('um.subtab.rules.semi-final');
-    manialinksAddAction('um.subtab.rules.misc');
+    $actions = UmPanelKeys::actionsToRegister();
+    $count = count($actions);
+    for ($i = 0; $i < $count; $i++) {
+        manialinksAddAction($actions[$i]);
+    }
 }
-
 
 //--------------------------------------------------------------
 // PlayerConnect : (event from server callback)
@@ -127,18 +114,17 @@ function umPanelPlayerConnect($event, $login) {
     }
 
     // Default: panel open
-    if (!isset($_players[$login]['ML']['um.panel.closed'])) {
-        $_players[$login]['ML']['um.panel.closed'] = 0; // 0=open, 1=closed
+    if (!isset($_players[$login]['ML'][UmPanelKeys::ML_PANEL_CLOSED])) {
+        $_players[$login]['ML'][UmPanelKeys::ML_PANEL_CLOSED] = 0; // 0=open, 1=closed
     }
 
-
-    if (!isset($_players[$login]['ML']['player.races.page'])) {
-        $_players[$login]['ML']['player.races.page'] = 0; // 0-based page index
+    if (!isset($_players[$login]['ML'][UmPanelKeys::ML_RACES_PAGE])) {
+        $_players[$login]['ML'][UmPanelKeys::ML_RACES_PAGE] = 0; // 0-based page index
     }
 
-    // Default tab
-    if (!isset($_players[$login]['ML']['um.tab']) || $_players[$login]['ML']['um.tab'] === '') {
-        $_players[$login]['ML']['um.tab'] = 'players';
+    // Default tab (store action name)
+    if (!isset($_players[$login]['ML'][UmPanelKeys::ML_TAB]) || $_players[$login]['ML'][UmPanelKeys::ML_TAB] === '') {
+        $_players[$login]['ML'][UmPanelKeys::ML_TAB] = UmPanelKeys::ACT_TAB_PLAYERS;
     }
 
     umPanelUpdateXml($login, 'show');
@@ -178,7 +164,7 @@ function umPanelUpdateXml($login, $action = 'show') {
         return;
 
     $xml = getUMPanelXml($login);
-    manialinksSet($login, 'umPanel', $action, $xml);
+    manialinksSet($login, UmPanelKeys::ML_ID_PANEL, $action, $xml);
 }
 
 function getUMPanelXml($login) {
