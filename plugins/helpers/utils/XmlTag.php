@@ -34,8 +34,8 @@ class XmlTag {
     /**
      * Convenience: build a quad using geometry + bgcolor, with sensible defaults.
      */
-    public static function quad($x, $y, $width, $height, $bgColor, array $attrs = array()) {
-        self::setCommonAttrs($attrs, $x, $y);
+    public static function quad($x, $y, $width, $height, $bgColor, $action = null, array $attrs = array()) {
+        self::setCommonAttrs($attrs, $x, $y, $action);
 
         $attrs['bgcolor'] = $bgColor;
         $attrs['sizen'] = "{$width} {$height}";
@@ -43,16 +43,22 @@ class XmlTag {
         return self::tag('quad', $attrs);
     }
 
+    public static function quadCenterLeft($x, $y, $width, $height, $bgColor, $action = null, array $attrs = array()) {
+        $attrs['valign'] = 'top';
+
+        return self::quad($x, $y, $width, $height, $bgColor, $action, $attrs);
+    }
+
     /**
      * Convenience: build a quad when you're using style/substyle instead of bgcolor.
      * (Icons, UI sprites, etc.)
      */
-    public static function quadIcon64($x, $y, $size, $substyle, $action, array $attrs = array()) {
+    public static function quadIcon64($x, $y, $size, $substyle, $action = null, array $attrs = array()) {
         if ($substyle === '') {
             return '';
         }
 
-        self::setCommonAttrs($attrs, $x, $y);
+        self::setCommonAttrs($attrs, $x, $y, $action);
 
         if (!isset($attrs['style'])) $attrs['style'] = 'Icons64x64_1';
         if (!isset($attrs['substyle'])) $attrs['substyle'] = $substyle;
@@ -73,8 +79,8 @@ class XmlTag {
      * - 'autonewline' (default: 1)
      * - any other label attributes supported by the target XML
      */
-    public static function label($x, $y, $width, $height, $text, array $attrs = array()) {
-        self::setCommonAttrs($attrs, $x, $y);
+    public static function label($x, $y, $width, $height, $text, $action = null, array $attrs = array()) {
+        self::setCommonAttrs($attrs, $x, $y, $action);
 
         $attrs['textsize'] = isset($attrs['textsize']) ? $attrs['textsize'] : 1;
         $attrs['autonewline'] = isset($attrs['autonewline']) ? $attrs['autonewline'] : 1;
@@ -85,12 +91,40 @@ class XmlTag {
         return self::tag('label', $attrs);
     }
 
-    public static function frame(array $attrs, $innerXml) {
+    public static function labelRight($x, $y, $width, $height, $text, $action = null, array $attrs = array()) {
+        $attrs['halign'] = 'right';
+
+        return self::label($x, $y, $width, $height, $text, $action, $attrs);
+    }
+    public static function labelCenterLeft($x, $y, $width, $height, $text, $action = null, array $attrs = array()) {
+        $attrs['valign'] = 'center';
+
+        return self::label($x, $y, $width, $height, $text, $action, $attrs);
+    }
+
+    public static function labelCenterRight($x, $y, $width, $height, $text, $action = null, array $attrs = array()) {
+        $attrs['valign'] = 'center';
+        $attrs['halign'] = 'right';
+
+        return self::label($x, $y, $width, $height, $text, $action, $attrs);
+    }
+    public static function labelCenterCenter($x, $y, $width, $height, $text, $action = null, array $attrs = array()) {
+        $attrs['valign'] = 'center';
+        $attrs['halign'] = 'center';
+
+        return self::label($x, $y, $width, $height, $text, $action, $attrs);
+    }
+
+    public static function frame($x, $y, $z = 0, $innerXml = '') {
+        $attrs = array('posn' => "{$x} {$y} {$z}");
         return self::tag('frame', $attrs, $innerXml);
     }
 
-    private static function setCommonAttrs(array &$attrs, $x, $y) {
+    private static function setCommonAttrs(array &$attrs, $x, $y, $action = null) {
         $zIndex = self::popAttr($attrs, 'z', 0);
+        if ($action !== null) {
+            $attrs['action'] = self::getAttr($attrs, 'action', $action);
+        }
 
         $attrs['halign'] = self::getAttr($attrs, 'halign', 'left');
         $attrs['valign'] = self::getAttr($attrs, 'valign', 'top');
@@ -109,6 +143,9 @@ class XmlTag {
     }
 
     private static function escapeAttr($value) {
+        if (is_array($value)) {
+            console(print_r($value, true));
+        }
         $value = (string)$value;
         $value = str_replace(array("\r", "\n", "\t"), ' ', $value);
         return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');

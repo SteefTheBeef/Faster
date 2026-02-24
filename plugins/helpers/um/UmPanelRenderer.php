@@ -55,7 +55,7 @@ class UmPanelRenderer
         if ($isClosed) {
             return self::buildClosedToggleXml($layout);
         }
-        $frameStart = '<frame posn="0 0 5">';
+
         $bordersXml = self::buildPanelBordersXml($layout);
 
         $listBuild = self::buildPlayerListXml($layout, $players, (int)$selectedRow, $actionIds);
@@ -75,14 +75,14 @@ class UmPanelRenderer
             . $rightBuild['panelTitle']
             . $rightBuild['panelBody']
             . $rightBuild['panelFrameEnd'];
-        return
-            $frameStart
-            . $bordersXml
+
+        return XmlTag::frame(0, 0, 5,
+            $bordersXml
             . $layout->markup->playerFrameStart
             . $xmlPlayers
             . $layout->markup->playerFrameEnd
             . $rightPanelXml
-            . $layout->markup->frameEnd;
+        );
     }
 
     public static function handleAction($login, $action, $answer, array &$selectedRowByLogin, array &$selectedPlayerByLogin)
@@ -93,16 +93,19 @@ class UmPanelRenderer
             self::mlSet($login, 'um.panel.closed', 1);
             return true;
         }
+
         if ($action === 'um.panel.open') {
             self::mlSet($login, 'um.panel.closed', 0);
             return true;
         }
+
         // Tabs
         if (strpos($action, 'um.tab.') === 0) {
             $parts = explode('.', $action);
             self::mlSet($login, 'um.tab', isset($parts[2]) ? $parts[2] : 'players');
             return true;
         }
+
         // Subtabs
         if (strpos($action, 'um.subtab.') === 0) {
             $parts = explode('.', $action);
@@ -113,6 +116,7 @@ class UmPanelRenderer
             }
             return true;
         }
+
         // Paging
         if ($action === 'races.prev' || $action === 'races.next') {
             if (!isset($selectedPlayerByLogin[$login])) {
@@ -153,9 +157,10 @@ class UmPanelRenderer
         $left = XmlTag::quad($borderLeftX, $listFrameY, $t, $borderHeight, $c);
         $top = XmlTag::quad($borderLeftX, $borderTopY, $borderTopWidth, $t, $c);
         $bottom = XmlTag::quad($borderLeftX, $borderBottomY, $borderTopWidth, $t, $c);
-        $right = XmlTag::quad($borderLeftX, $listFrameY, $t, $borderHeight, $c);
 
-        return $left . $top . $bottom . $right;
+        // Keeping existing geometry (was borderLeftX). If you have a borderRightX in layout,
+        // swap it in here.
+        $right = XmlTag::quad($borderLeftX, $listFrameY, $t, $borderHeight, $c);
 
         return $left . $top . $bottom . $right;
     }
@@ -185,12 +190,14 @@ class UmPanelRenderer
                 $selectedPlayerIndex = $i;
             }
 
-            $xmlPlayers .= "<quad posn='0 {$rowY} 0' sizen='{$playerW} {$playerH}' halign='left' valign='top' bgcolor='{$bg}' action='{$actionId}'/>";
-            $xmlPlayers .= "<label posn='{$padX} " . ($rowY - $padY) . " 0.2' sizen='" . ($playerW - 1.2) . " {$playerH}' halign='left' valign='center' textsize='1' text='\$fc0" . ($i + 1) . "'/>";
+            $xmlPlayers .= XmlTag::quad(0, $rowY, $playerW, $playerH, $bg, $actionId);
+            $xmlPlayers .= XmlTag::labelCenterLeft($padX, $rowY - $padY, $playerW - 1.2, $playerH, "\$fc0" . ($i + 1));
+
             $nameLeftX = $padX * 3.0;
             $nameW = ($pointsRightX - $pointsW) - $nameLeftX;
-            $xmlPlayers .= "<label posn='{$nameLeftX} " . ($rowY - $padY) . " 0.2' sizen='{$nameW} {$playerH}' halign='left' valign='center' textsize='1' text='" . self::safeString($name) . "'/>";
-            $xmlPlayers .= "<label posn='{$pointsRightX} " . ($rowY - $padY) . " 0.3' sizen='{$pointsW} {$playerH}' halign='right' valign='center' textsize='1' text='" . self::safeString($points) . "'/>";
+
+            $xmlPlayers .= XmlTag::labelCenterLeft($nameLeftX, $rowY - $padY, $nameW, $playerH, $name);
+            $xmlPlayers .= XmlTag::labelCenterRight($pointsRightX, $rowY - $padY, $pointsW, $playerH, $points);
         }
 
         return array(
@@ -209,28 +216,31 @@ class UmPanelRenderer
 
         $actId = isset($_ml_act['um.panel.open']) ? (int)$_ml_act['um.panel.open'] : 0;
 
-        $xml  = "<frame posn='{$x} {$y} 5' halign='left' valign='top'>";
-        $xml .= XmlTag::quadIcon64(0, 0, $s, 'Check', $actId);
-        $xml .= "</frame>";
-
-        return $xml;
+        return XmlTag::frame($x, $y, 5, XmlTag::quadIcon64(0, 0, $s, 'Check', $actId));
     }
 
     private static function buildRightPanelXml($login, Layout $layout, $selectedPlayer)
     {
         global $_ml_act;
+
         $panelW = $layout->geometry->panelWidth;
         $panelH = $layout->geometry->panelHeight;
+
         $tabsXml = self::buildTabsXml($login, $layout);
+
         $closeSize = 2.2;
         $closeMarginR = 0.25;
         $closeY = -0.5;
         $closeX = $panelW - $closeMarginR - $closeSize;
         if ($closeX < 0) $closeX = 0;
+
         $closeActId = isset($_ml_act['um.panel.close']) ? (int)$_ml_act['um.panel.close'] : 0;
-        $closeXml = "<quad posn='{$closeX} {$closeY} 0.45' sizen='{$closeSize} {$closeSize}' style='Icons64x64_1' substyle='Circle' action='{$closeActId}'/>";
-        $closeXml .= "<quad posn='{$closeX} {$closeY} 0.46' sizen='{$closeSize} {$closeSize}' style='Icons64x64_1' substyle='Close' action='{$closeActId}'/>";
-        $panelBgQuad = "<quad posn='0 0 0' sizen='{$panelW} {$panelH}' halign='left' valign='top' bgcolor='{$layout->theme->panelBackgroundColor}'/>";
+
+        $closeXml =
+            XmlTag::quadIcon64($closeX, $closeY, $closeSize, 'Circle', $closeActId, array('z' => 0.45))
+            . XmlTag::quadIcon64($closeX, $closeY, $closeSize, 'Close', $closeActId, array('z' => 0.46));
+
+        $panelBgQuad = XmlTag::quad(0, 0, $panelW, $panelH, $layout->theme->panelBackgroundColor);
 
         $activeTab = (string)self::mlGet($login, 'um.tab', 'players');
         if ($activeTab === '') $activeTab = 'players';
@@ -238,8 +248,11 @@ class UmPanelRenderer
         $selectedPlayerName = (is_array($selectedPlayer) && isset($selectedPlayer['NickNameWithColor'])) ? $selectedPlayer['NickNameWithColor'] : '';
         $titleText = ($activeTab === 'players') ? $selectedPlayerName : ucwords($activeTab);
         $font = ($activeTab === 'players') ? '' : $layout->theme->headerFontStyle;
-        $panelTitle = "<label posn='1 -1 0.2' sizen='" . ($panelW - 2) . " 3' halign='left' valign='top' textsize='2' text='{$font}" . self::safeString($titleText) . "'/>";
+
+        $panelTitle = XmlTag::label(1, -1, $panelW - 2, 3, $font . $titleText, null, array('textsize' => 2));
+
         $panelBody = self::buildRightPanelBodyXml($login, $activeTab, $selectedPlayer, $layout);
+
         return array(
             'panelFrameStart' => $layout->markup->panelFrameStart,
             'panelFrameEnd' => $layout->markup->panelFrameEnd,
@@ -280,12 +293,14 @@ class UmPanelRenderer
     private static function buildTabsXml($login, Layout $layout)
     {
         global $_ml_act;
+
         $tabH = 3;
         $tabGap = 0.0;
         $tabRightMargin = 1.2;
         $tabTextPrefix = '$fff$o';
         $tabLift = 0.5;
         $tabTextY = -($tabH / 1.5) + $tabLift;
+
         $tabs = array(
             array('key' => 'players', 'title' => 'Players', 'action' => 'um.tab.players'),
             array('key' => 'stints', 'title' => 'Stints', 'action' => 'um.tab.stints'),
@@ -305,64 +320,85 @@ class UmPanelRenderer
             $totalW += $tabs[$i]['w'];
             if ($i > 0) $totalW += $tabGap;
         }
+
         $tabsX = $layout->geometry->panelWidth - $tabRightMargin - $totalW;
         if ($tabsX < 0) $tabsX = 0;
+
         $tabsY = $tabH;
-        $xml = "<frame posn='{$tabsX} {$tabsY} 0.30' halign='left' valign='top'>";
+
         $borderT = 0.12;
         $dividerT = 0.10;
-        $xml .= "<quad posn='0 0 0.02' sizen='{$totalW} {$borderT}' halign='left' valign='top' bgcolor='{$layout->theme->borderColor}'/>";
-        $xml .= "<quad posn='0 0 0.02' sizen='{$borderT} {$tabH}' halign='left' valign='top' bgcolor='{$layout->theme->borderColor}'/>";
+
+        $inner = XmlTag::quad(0, 0, $totalW, $borderT, $layout->theme->borderColor);
+        $inner .= XmlTag::quad(0, 0, $borderT, $tabH, $layout->theme->borderColor);
+
         $rightX = $totalW - $borderT;
         if ($rightX < 0) $rightX = 0;
-        $xml .= "<quad posn='{$rightX} 0 0.02' sizen='{$borderT} {$tabH}' halign='left' valign='top' bgcolor='{$layout->theme->borderColor}'/>";
+        $inner .= XmlTag::quad($rightX, 0, $borderT, $tabH, $layout->theme->borderColor);
+
         $x = 0.0;
         for ($i = 0; $i < $count; $i++) {
             $w = $tabs[$i]['w'];
             $isActive = ($activeTab === $tabs[$i]['key']);
             $bg = $isActive ? $layout->theme->tabActiveBackgroundColor : $layout->theme->tabBackgroundColor;
+
             $actName = $tabs[$i]['action'];
             $actId = isset($_ml_act[$actName]) ? (int)$_ml_act[$actName] : 0;
-            $xml .= "<quad posn='{$x} 0 0' sizen='{$w} {$tabH}' halign='left' valign='top' bgcolor='{$bg}' action='{$actId}'/>";
+
+            $inner .= XmlTag::quad($x, 0, $w, $tabH, $bg, $actId);
+
             if ($i < ($count - 1)) {
                 $divX = $x + $w - ($dividerT / 2.0);
-                $xml .= "<quad posn='{$divX} 0 0.015' sizen='{$dividerT} {$tabH}' halign='left' valign='top' bgcolor='{$layout->theme->borderColor}'/>";
+                $inner .= XmlTag::quad($divX, 0, $dividerT, $tabH, $layout->theme->borderColor);
             }
+
             $centerX = $x + ($w / 2.0);
-            $xml .= "<label posn='{$centerX} {$tabTextY} 0.1' sizen='{$w} {$tabH}' halign='center' valign='center' textsize='1' text='{$tabTextPrefix}{$tabs[$i]['title']}'/>";
+            $inner .= XmlTag::labelCenterCenter($centerX, $tabTextY, $w, $tabH, $tabTextPrefix . $tabs[$i]['title']);
+
             $x += $w + $tabGap;
         }
-        $xml .= "</frame>";
-        return $xml;
+
+        return XmlTag::frame($tabsX, $tabsY, 0.30, $inner);
     }
 
     private static function buildRacesTableXml($login, $races, Layout $layout)
     {
         global $_ml_act;
+
         $panelW = $layout->geometry->panelWidth;
-        $panelH = $layout->geometry->panelHeight;
         $topY = $layout->geometry->panelBodyTopY;
+
         $contentL = 1.2;
         $contentR = 1.2;
+
         $gutter = 0.5;
         $gutterAfterIdx = 0.9;
+
         $idxW = 3.0;
+
         $usableW = $panelW - $contentL - $contentR - (3 * $gutter) - $gutterAfterIdx;
         if ($usableW < 0) $usableW = 0;
+
         if ($idxW > $usableW) $idxW = $usableW;
+
         $otherW = $usableW - $idxW;
         if ($otherW < 0) $otherW = 0;
+
         $colW = $otherW / 4.0;
+
         $idxPadL = 0.4;
         $timePadR = $idxPadL;
+
         $xIdxLeft = $contentL + $idxPadL;
         $xEnv = $contentL + $idxW + $gutterAfterIdx;
         $xRank = $xEnv + $colW + $gutter;
         $xPts = $xRank + $colW + $gutter;
         $xTimeRight = $panelW - $contentR - $timePadR;
+
         $tableX = $contentL;
         $tableW = $panelW - $contentL - $contentR;
         if ($tableW < 0) $tableW = 0;
+
         $rowH = 2.4;
         $headerY = $topY;
 
@@ -372,23 +408,30 @@ class UmPanelRenderer
         self::mlSet($login, 'player.races.page', $page);
 
         $racesToShow = is_array($races) ? UMPanel::racesSliceForPage($races, $page) : array();
+
         $xml = '';
         $headerFont = '$cf0$o';
-        $xml .= "<quad posn='{$tableX} {$headerY} 0.15' sizen='{$tableW} {$rowH}' halign='left' valign='top' bgcolor='0006'/>";
-        $xml .= "<label posn='{$xIdxLeft} " . ($headerY - 0.6) . " 0.2' sizen='" . ($idxW - $idxPadL) . " {$rowH}' halign='left' valign='top' textsize='1' text='{$headerFont}#'/>";
-        $xml .= "<label posn='{$xEnv} " . ($headerY - 0.6) . " 0.2' sizen='{$colW} {$rowH}' halign='left'  valign='top' textsize='1' text='{$headerFont}Environment'/>";
-        $xml .= "<label posn='{$xRank} " . ($headerY - 0.6) . " 0.2' sizen='{$colW} {$rowH}' halign='right' valign='top' textsize='1' text='{$headerFont}Rank'/>";
-        $xml .= "<label posn='{$xPts} " . ($headerY - 0.6) . " 0.2' sizen='{$colW} {$rowH}' halign='right' valign='top' textsize='1' text='{$headerFont}Points'/>";
-        $xml .= "<label posn='{$xTimeRight} " . ($headerY - 0.6) . " 0.2' sizen='" . ($colW - $timePadR) . " {$rowH}' halign='right' valign='top' textsize='1' text='{$headerFont}Time'/>";
+
+        $xml .= XmlTag::quad($tableX, $headerY, $tableW, $rowH, '0006');
+        $xml .= XmlTag::label($xIdxLeft, $headerY - 0.6, $idxW - $idxPadL, $rowH, $headerFont . '#');
+        $xml .= XmlTag::label($xEnv, $headerY - 0.6, $colW, $rowH, $headerFont . 'Environment');
+        $xml .= XmlTag::labelRight($xRank, $headerY - 0.6, $colW, $rowH, $headerFont . 'Rank');
+        $xml .= XmlTag::labelRight($xPts, $headerY - 0.6, $colW, $rowH, $headerFont . 'Points');
+        $xml .= XmlTag::labelRight($xTimeRight, $headerY - 0.6, $colW - $timePadR, $rowH, $headerFont . 'Time');
+
         $i = 0;
         foreach ($racesToShow as $race) {
             $rowY = $headerY - (($i + 1) * $rowH);
+
             $raceIdx = isset($race['RaceIndex']) ? (string)(((int)$race['RaceIndex']) + 1) : (string)($i + 1);
+
             $env = '';
             if (isset($race['RaceInfo']) && is_array($race['RaceInfo']) && isset($race['RaceInfo']['Environment'])) {
                 $env = $race['RaceInfo']['Environment'];
             }
+
             $rank = isset($race['Rank']) ? (string)$race['Rank'] : '';
+
             $time = '';
             if (isset($race['Score']) && is_array($race['Score'])) {
                 if (isset($race['Score']['Time']) && $race['Score']['Time'] !== '') {
@@ -397,16 +440,20 @@ class UmPanelRenderer
                     $time = $race['Score']['RaceTime'];
                 }
             }
+
             $pts = isset($race['AwardedPoints']) ? (string)$race['AwardedPoints'] : '';
+
             $enviFont = '$390$o';
             $otherFont = ((int)$rank > 3) ? '$fff$o' : '$fc0$o';
             $bg = (($i % 2) === 0) ? '0003' : '0000';
-            $xml .= "<quad posn='{$tableX} {$rowY} 0.10' sizen='{$tableW} {$rowH}' halign='left' valign='top' bgcolor='{$bg}'/>";
-            $xml .= "<label posn='{$xIdxLeft} " . ($rowY - 0.6) . " 0.2' sizen='" . ($idxW - $idxPadL) . " {$rowH}' halign='left' valign='top' textsize='1' text='{$otherFont}" . self::safeString($raceIdx) . "'/>";
-            $xml .= "<label posn='{$xEnv} " . ($rowY - 0.6) . " 0.2' sizen='{$colW} {$rowH}' halign='left'  valign='top' textsize='1' text='{$enviFont}" . self::safeString($env) . "'/>";
-            $xml .= "<label posn='{$xRank} " . ($rowY - 0.6) . " 0.2' sizen='{$colW} {$rowH}' halign='right' valign='top' textsize='1' text='{$otherFont}" . self::safeString($rank) . "'/>";
-            $xml .= "<label posn='{$xPts} " . ($rowY - 0.6) . " 0.2' sizen='{$colW} {$rowH}'  halign='right' valign='top' textsize='1' text='{$otherFont}" . self::safeString($pts) . "'/>";
-            $xml .= "<label posn='{$xTimeRight} " . ($rowY - 0.6) . " 0.2' sizen='" . ($colW - $timePadR) . " {$rowH}' halign='right' valign='top' textsize='1' text='{$otherFont}" . self::safeString($time) . "'/>";
+
+            $xml .= XmlTag::quad($tableX, $rowY, $tableW, $rowH, $bg);
+            $xml .= XmlTag::label($xIdxLeft, $rowY - 0.6, $idxW - $idxPadL, $rowH, $otherFont . $raceIdx);
+            $xml .= XmlTag::label($xEnv, $rowY - 0.6, $colW, $rowH, $enviFont . $env);
+            $xml .= XmlTag::labelRight($xRank, $rowY - 0.6, $colW, $rowH, $otherFont . $rank);
+            $xml .= XmlTag::labelRight($xPts, $rowY - 0.6, $colW, $rowH, $otherFont . $pts);
+            $xml .= XmlTag::labelRight($xTimeRight, $rowY - 0.6, $colW - $timePadR, $rowH, $otherFont . $time);
+
             $i++;
         }
 
@@ -416,34 +463,30 @@ class UmPanelRenderer
 
             $canPrev = ($page > 0);
             $canNext = ($page < $pageCount - 1);
+
             $pagerY = $headerY - (($i + 1) * $rowH) - 1.2;
+
             $labelW = 2.0;
             $gap = 0.25;
+
             $nextX = $tableW - 1.6;
             $prevX = $nextX - 1.6 - $gap - $labelW - $gap - 1.6;
+
             $prevCenterX = $prevX + (1.6 / 2.0);
             $nextCenterX = $nextX + (1.6 / 2.0);
             $midX = ($prevCenterX + $nextCenterX) / 2.0;
             $midY = -0.8;
-            $xml .= "<frame posn='{$tableX} {$pagerY} 0.2' halign='left' valign='top'>"
-                . "<quad sizen='1.6 1.6' posn='{$prevX} 0 0' style='Icons64x64_1' substyle='ArrowPrev'"
-                . ($canPrev ? " action='{$_ml_act['races.prev']}'" : "")
-                . "/>"
-                . "<label sizen='{$labelW} 1.6' posn='{$midX} {$midY} 0' textsize='1' valign='center' halign='center'"
-                . " text='\$aaa" . ($page + 1) . "/" . $pageCount . "'/>"
-                . "<quad sizen='1.6 1.6' posn='{$nextX} 0 0' style='Icons64x64_1' substyle='ArrowNext'"
-                . ($canNext ? " action='{$_ml_act['races.next']}'" : "")
-                . "/>"
-                . "</frame>";
+
+            $prevAct = ($canPrev && isset($_ml_act['races.prev'])) ? (int)$_ml_act['races.prev'] : null;
+            $nextAct = ($canNext && isset($_ml_act['races.next'])) ? (int)$_ml_act['races.next'] : null;
+
+            $pagerInner = XmlTag::quadIcon64($prevX, 0, 1.6, 'ArrowPrev', $prevAct);
+            $pagerInner .= XmlTag::labelCenterCenter($midX, $midY, $labelW, 1.6, "\$aaa" . ($page + 1) . "/" . $pageCount);
+            $pagerInner .= XmlTag::quadIcon64($nextX, 0, 1.6, 'ArrowNext', $nextAct);
+
+            $xml .= XmlTag::frame($tableX, $pagerY, 0.2, $pagerInner);
         }
 
         return $xml;
-    }
-
-    private static function safeString($str)
-    {
-        $str = (string)$str;
-        $str = str_replace(array("\r", "\n", "\t"), ' ', $str);
-        return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
     }
 }
