@@ -12,14 +12,6 @@ class UmPanelKeys {
     // State key prefix for subtabs (value stored under "um.subtab.<tabKey>")
     const ML_SUBTAB_PREFIX = 'um.subtab.';
 
-    // ---------------- Tab keys (UI state values) ----------------
-    const TAB_PLAYERS = 'players';
-    const TAB_STINTS = 'stints';
-    const TAB_PRIZE = 'prize';
-    const TAB_SCHEDULE = 'schedule';
-    const TAB_RULES = 'rules';
-    const TAB_INFORMATION = 'information';
-
     // Actions (static)
     const ACT_PANEL_CLOSE = 'um.panel.close';
     const ACT_PANEL_OPEN = 'um.panel.open';
@@ -29,7 +21,7 @@ class UmPanelKeys {
     // Action prefixes (dynamic groups)
     const ACT_SCOREBOARD_ROW_PREFIX = 'umScoreBoardPlayerActions.';
     const ACT_TAB_PREFIX = 'um.tab.';
-    const ACT_SUBTAB_PREFIX = 'um.subtab.';
+    const ACT_SUBTAB_IDENTIFIER = '.subtab';
 
     // Known tab actions used in init (and by UmPanelTabs)
     const ACT_TAB_PLAYERS = 'um.tab.players';
@@ -40,10 +32,10 @@ class UmPanelKeys {
     const ACT_TAB_INFORMATION = 'um.tab.information';
 
     // Subtabs (rules)
-    const ACT_SUBTAB_RULES_QUALIFICATION = 'um.subtab.rules.qualification';
-    const ACT_SUBTAB_RULES_QUALIFICATION_POINTS = 'um.subtab.rules.qualification-points';
-    const ACT_SUBTAB_RULES_SEMI_FINAL = 'um.subtab.rules.semi-final';
-    const ACT_SUBTAB_RULES_MISC = 'um.subtab.rules.misc';
+    const ACT_SUBTAB_RULES_QUALIFICATION = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.qualification';
+    const ACT_SUBTAB_RULES_QUALIFICATION_POINTS = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.qualification-points';
+    const ACT_SUBTAB_RULES_SEMI_FINAL = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.semi-final';
+    const ACT_SUBTAB_RULES_MISC = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.misc';
 
     /**
      * Build scoreboard row action name.

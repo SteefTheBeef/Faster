@@ -9,34 +9,46 @@ class RulesPanelBuilder {
         global $_players;
 
         $submenuItems = array(
-            array('key' => 'qualification', 'title' => 'Qualification', 'action' => 'um.subtab.rules.qualification'),
-            array('key' => 'qualification-points', 'title' => 'Qualification Points', 'action' => 'um.subtab.rules.qualification-points'),
-            array('key' => 'semi-final', 'title' => 'Semi-Final', 'action' => 'um.subtab.rules.semi-final'),
-            array('key' => 'misc', 'title' => 'Grand-Final', 'action' => 'um.subtab.rules.misc'),
+            array('title' => 'Qualification',         'action' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION),
+            array('title' => 'Qualification Points',  'action' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION_POINTS),
+            array('title' => 'Semi-Final',            'action' => UmPanelKeys::ACT_SUBTAB_RULES_SEMI_FINAL),
+            array('title' => 'Grand-Final',           'action' => UmPanelKeys::ACT_SUBTAB_RULES_MISC),
         );
 
-        $subBuild = SubMenuBuilder::build($login, $layout, 'rules', $submenuItems, array(
-            'submenuR' => 0.0,
-            'submenuW' => 17.0,   // tweak to taste
-            'gap' => 0.0,
-        ));
+        $sub = SubMenuBuilder::build(
+            $login,
+            $layout,
+            UmPanelKeys::ACT_TAB_RULES,
+            $submenuItems,
+            array(
+                'submenuR' => 0.0,
+                'submenuW' => 17.0,
+                'gap'      => 0.0,
 
-        $subKey = isset($_players[$login]['ML']['um.subtab.rules']) ? (string)$_players[$login]['ML']['um.subtab.rules'] : 'qualification';
+                // NEW: let the builder validate+default
+                'defaultAction' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION,
+            )
+        );
 
-        // You can later swap these for richer panels per section.
-        // For now: reuse your existing rules panel for "Qualification", and show placeholders for others.
+        switch ($sub['activeAction']) {
+            case UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION:
+                $contentXml = self::qualification($layout, $umConfig);
+                break;
 
-        if ($subKey === 'qualification') {
-            $contentXml = self::qualification($layout, $umConfig);
-        } elseif ($subKey === 'qualification-points') {
-            $contentXml = self::qualificationPoints($layout, $umConfig);
-        } elseif ($subKey === 'semi-final') {
-            $contentXml = self::semiFinalPoints($layout, $umConfig);
-        } else {
-            $contentXml = UMPanel::textLabel($layout, "Misc rules...\n(Replace this with your real content)");
+            case UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION_POINTS:
+                $contentXml = self::qualificationPoints($layout, $umConfig);
+                break;
+
+            case UmPanelKeys::ACT_SUBTAB_RULES_SEMI_FINAL:
+                $contentXml = self::semiFinalPoints($layout, $umConfig);
+                break;
+
+            default:
+                $contentXml = UMPanel::textLabel($layout, "Misc rules...\n(Replace this with your real content)");
+                break;
         }
 
-        return $contentXml . $subBuild['xml'];
+        return $contentXml . $sub['xml'];
     }
 
     static function qualification(Layout $layout, $umConfig) {

@@ -1,8 +1,12 @@
 <?php
 require_once 'layout/Layout.php';
 require_once __DIR__ . '/../utils/StringUtils.php';
+require_once __DIR__ . '/UmPanelKeys.php';
 
 class SubMenuBuilder {
+
+
+
     /**
      * Build a generic "sub menu on the right" INSIDE the panel body.
      * Returns array('xml' => ..., 'contentW' => float, 'submenuW' => float)
@@ -36,33 +40,66 @@ class SubMenuBuilder {
         $contentW = $submenuX - $gap - $contentL;
         if ($contentW < 0) $contentW = 0;
 
-        $stateKey = 'um.subtab.' . $menuKey;
-        $activeSub = isset($_players[$login]['ML'][$stateKey]) ? (string)$_players[$login]['ML'][$stateKey] : '';
+        // --- Active selection (robust default + validation) ---
+        $stateKey = (string)$menuKey . UmPanelKeys::ACT_SUBTAB_IDENTIFIER;
 
-        if ($activeSub === '' && isset($items[0]['key'])) {
-            $activeSub = (string)$items[0]['key'];
-            $_players[$login]['ML'][$stateKey] = $activeSub;
+        $defaultAction = '';
+        if (isset($opts['defaultAction'])) {
+            $defaultAction = (string)$opts['defaultAction'];
+        } elseif (is_array($items) && isset($items[0]) && isset($items[0]['action'])) {
+            $defaultAction = (string)$items[0]['action'];
         }
+
+        $activeAction = isset($_players[$login]['ML'][$stateKey]) ? (string)$_players[$login]['ML'][$stateKey] : '';
+        if ($activeAction === '') {
+            $activeAction = $defaultAction;
+        }
+
+        // Validate stored value: only allow actions present in $items
+        $known = false;
+        $count = is_array($items) ? count($items) : 0;
+        for ($i = 0; $i < $count; $i++) {
+            if (isset($items[$i]['action']) && (string)$items[$i]['action'] === $activeAction) {
+                $known = true;
+                break;
+            }
+        }
+        if (!$known) {
+            $activeAction = $defaultAction;
+        }
+
+        // Persist resolved value (so highlight is stable and state is self-healing)
+        $_players[$login]['ML'][$stateKey] = $activeAction;
 
         $xml = '';
 
         // Items
         $y = $topY - 3.2;
-        for ($i = 0; $i < count($items); $i++) {
-            $itKey = isset($items[$i]['key']) ? (string)$items[$i]['key'] : ('item' . $i);
-            $itTitle = isset($items[$i]['title']) ? (string)$items[$i]['title'] : $itKey;
-            $itActionName = isset($items[$i]['action']) ? (string)$items[$i]['action'] : '';
-            $itActionId = ($itActionName !== '' && isset($_ml_act[$itActionName])) ? (int)$_ml_act[$itActionName] : 0;
+        for ($i = 0; $i < $count; $i++) {
+            if (!isset($items[$i]['action'])) {
+                continue;
+            }
 
-            $isActive = ($itKey === $activeSub);
+            $itActionName = (string)$items[$i]['action'];
+            $isActive = ($activeAction === $itActionName);
+
+            $itActionId = isset($_ml_act[$itActionName]) ? (int)$_ml_act[$itActionName] : 0;
+
             $bg = $isActive ? '060D' : '010D';
-
-            $xml .= "<quad posn='{$submenuX} {$y} 0.14' sizen='{$submenuW} {$rowH}' halign='left' valign='top' bgcolor='{$bg}' action='{$itActionId}'/>";
+            $xml .= XmlTag::quad($submenuX, $y, $submenuW, $rowH, $bg, $itActionId, array('z' => 0.14));
 
             // Center text vertically in the row
             $textY = $y - ($rowH / 2.0);
-
-            $xml .= "<label posn='" . ($submenuX + $padX) . " {$textY} 0.20' sizen='" . ($submenuW - 2 * $padX) . " {$rowH}' halign='left' valign='center' textsize='1' text='\$fff\$o" . StringUtils::safeString($itTitle) . "'/>";
+            $title = isset($items[$i]['title']) ? $items[$i]['title'] : '';
+            $xml .= XmlTag::labelCenterLeft(
+                $submenuX + $padX,
+                $textY,
+                $submenuW - 2 * $padX,
+                $rowH,
+                "\$fff\$o" . StringUtils::safeString($title),
+                null,
+                array('z' => 0.2)
+            );
 
             $y -= ($rowH);
         }
@@ -71,6 +108,8 @@ class SubMenuBuilder {
             'xml' => $xml,
             'contentW' => $contentW,
             'submenuW' => $submenuW,
+            'stateKey' => $stateKey,
+            'activeAction' => $activeAction,
         );
     }
 }

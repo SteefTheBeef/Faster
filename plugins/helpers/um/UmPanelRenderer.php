@@ -80,7 +80,7 @@ class UmPanelRenderer {
 
     public static function handleAction($login, $action, $answer, array &$selectedRowByLogin, array &$selectedPlayer = null) {
         global $_players, $umScoreBoardPlayers;
-
+        console($action);
         // Panel close/open
         if ($action === UmPanelKeys::ACT_PANEL_CLOSE) {
             self::mlSet($login, UmPanelKeys::ML_PANEL_CLOSED, 1);
@@ -92,39 +92,31 @@ class UmPanelRenderer {
             return true;
         }
 
-        // Tabs: store the tab *action* as state (single identifier)
-        if (strpos($action, UmPanelKeys::ACT_TAB_PREFIX) === 0) {
-            $tabs = UmPanelTabs::getTabs();
+        console($action);
+        // Subtabs: store the *full action* under "um.subtab.<tabKey>"
+        // Example stored value: 'um.subtab.rules.qualification'
 
-            $known = false;
-            $count = count($tabs);
-            for ($i = 0; $i < $count; $i++) {
-                if (isset($tabs[$i]['action']) && (string)$tabs[$i]['action'] === (string)$action) {
-                    $known = true;
-                    break;
-                }
-            }
+        // Subtabs: store the *full action* under "<tabAction>.subtab"
+        // Example stored value: 'um.tab.rules.subtab.qualification'
+        if (strpos($action, UmPanelKeys::ACT_TAB_PREFIX) === 0 && strpos($action, UmPanelKeys::ACT_SUBTAB_IDENTIFIER . '.') !== false) {
 
-            if ($known) {
-                self::mlSet($login, UmPanelKeys::ML_TAB, (string)$action);
+            $parts = explode(UmPanelKeys::ACT_SUBTAB_IDENTIFIER, $action, 2);
+            $tabAction = isset($parts[0]) ? (string)$parts[0] : '';
+            $subRest = isset($parts[1]) ? (string)$parts[1] : '';
+
+            // $subRest should begin with ".something"
+            if ($tabAction !== '' && $subRest !== '' && $subRest[0] === '.') {
+                self::mlSet($login, $tabAction . UmPanelKeys::ACT_SUBTAB_IDENTIFIER, (string)$action);
                 return true;
             }
 
-            // Unknown um.tab.* action => don't write invalid state
-            $defaultAction = isset($tabs[0]) ? (string)$tabs[0]['action'] : UmPanelKeys::ACT_TAB_PLAYERS;
-            self::mlSet($login, UmPanelKeys::ML_TAB, $defaultAction);
             return false;
         }
 
-        // Subtabs: "um.subtab.<tabKey>.<subKey>"
-        if (strpos($action, UmPanelKeys::ACT_SUBTAB_PREFIX) === 0) {
-            $rest = substr($action, strlen(UmPanelKeys::ACT_SUBTAB_PREFIX));
-            $parts = explode('.', (string)$rest, 2);
-            $tabKey = isset($parts[0]) ? $parts[0] : '';
-            $subKey = isset($parts[1]) ? $parts[1] : '';
-            if ($tabKey !== '' && $subKey !== '') {
-                self::mlSet($login, UmPanelKeys::mlSubtabKey($tabKey), $subKey);
-            }
+        // Tabs: store the tab *action* as state (single identifier)
+        // Tabs needs to come after subtabs.
+        if (strpos($action, UmPanelKeys::ACT_TAB_PREFIX) === 0) {
+            self::mlSet($login, UmPanelKeys::ML_TAB, (string)$action);
             return true;
         }
 
