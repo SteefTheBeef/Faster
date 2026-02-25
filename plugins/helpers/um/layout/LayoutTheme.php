@@ -13,6 +13,7 @@ class LayoutTheme
     public $tabActiveBackgroundColor;
 
     public $headerFontStyle;
+    public $panelTitleFontStyle;
     public $accentTextColor;
 
     public static function buildDefault()
@@ -29,6 +30,7 @@ class LayoutTheme
         $t->tabBackgroundColor = '010D';
         $t->tabActiveBackgroundColor = '060D';
 
+        $t->panelTitleFontStyle = '$fff$o';
         $t->headerFontStyle = '$cf0$o';
         $t->accentTextColor = '$390';
 
