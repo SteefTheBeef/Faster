@@ -1,6 +1,7 @@
 <?php
 
-require_once('UMConfigEntry.php');
+require_once 'UMConfigEntry.php';
+require_once 'UmMap.php';
 
 class UMConfig {
 
@@ -12,20 +13,6 @@ class UMConfig {
 
 
     public function __construct() {
-        $this->um4GF = new UMConfigEntry(
-            array(0 => 150,
-                1 => 116,
-                2 => 98,
-                3 => 83,
-                4 => 71,
-                5 => 60,
-                6 => 49,
-                7 => 39,
-                8 => 30,
-                9 => 21,
-                10 => 13,
-                11 => 5
-            ));
         $this->um3Semi = new UMConfigEntry(
             array(0 => 1200,
                 1 => 1050,
@@ -53,6 +40,21 @@ class UMConfig {
                 23 => 270,
             ));
 
+        $this->um4GF = new UMConfigEntry(
+            array(0 => 150,
+                1 => 116,
+                2 => 98,
+                3 => 83,
+                4 => 71,
+                5 => 60,
+                6 => 49,
+                7 => 39,
+                8 => 30,
+                9 => 21,
+                10 => 13,
+                11 => 5
+            ));
+
         $this->um4QualiBestRace = new UMConfigEntry(array(
             0 => 200,
             1 => 150,
@@ -78,6 +80,9 @@ class UMConfig {
             21 => 6,
             22 => 4,
             23 => 2,
+        ), array(
+            new UmMap("7yMu9T9aAjvWxsE5Kd8CEGJ2Ja1"),
+            new UmMap("JMD02KeNXc6qccMNsNtolktLL88"),
         ));
 
         $this->um4QualiBestLap = new UMConfigEntry(array(
