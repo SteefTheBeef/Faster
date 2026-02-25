@@ -110,7 +110,7 @@ class UMConfig {
             21 => 3,
             22 => 2,
             23 => 1,
-        ));
+        ), $this->um4QualiBestRace->maps);
 
         $this->um4Semi = new UMConfigEntry(array(
             0 => 200,

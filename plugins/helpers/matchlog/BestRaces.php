@@ -412,6 +412,15 @@ class BestRaces {
     }
 
     /**
+     * New: rankings for best laps (same aggregation logic, different source files).
+     */
+    public static function buildQualificationRankingsAllMapsBestLaps($qualiBestLapsConfig, $nickMap) {
+        $byEnvLogin = self::buildQualificationScoresAllMapsBestLaps($qualiBestLapsConfig, $nickMap);
+        return self::normalizeEnvLoginMapToRankedLists($byEnvLogin);
+    }
+
+
+    /**
      * Converts env => (login => row) into env => numeric ranked list.
      * Sort: Score DESC, MapsPlayed DESC, Login ASC.
      */
@@ -460,47 +469,56 @@ class BestRaces {
     }
 
     /**
-     * Build aggregated qualification scores across ALL configured maps.
-     *
-     * Notes:
-     * - Tries to locate bestRaces files by UID using glob(): fastlog/um/bestRaces.*.<uid>.txt
-     * - If a file contains multiple MapId sections, you can optionally specify $m->mapId (or $m->MapId) in config.
+     * Build aggregated qualification scores across ALL configured maps, from bestRaces files.
      */
     public static function buildQualificationScoresAllMaps(UMConfigEntry $qualiBestRacesConfig, $nickMap) {
-        $maps = $qualiBestRacesConfig->maps;
-        $pointsDistribution = $qualiBestRacesConfig->pointsDistribution;
+        return self::buildQualificationScoresAllMapsForKind(self::FILE_PREFIX_BEST_RACES, $qualiBestRacesConfig, $nickMap);
+    }
+
+    /**
+     * New: same as buildQualificationScoresAllMaps(), but reads from bestLaps files.
+     */
+    public static function buildQualificationScoresAllMapsBestLaps(UMConfigEntry $qualiBestLapsConfig, $nickMap) {
+        return self::buildQualificationScoresAllMapsForKind(self::FILE_PREFIX_BEST_LAPS, $qualiBestLapsConfig, $nickMap);
+    }
+    /**
+     * Shared implementation for qualification aggregation.
+     *
+     * $kindPrefix: one of FILE_PREFIX_BEST_RACES / FILE_PREFIX_BEST_LAPS
+     */
+    private static function buildQualificationScoresAllMapsForKind($kindPrefix, UMConfigEntry $config, $nickMap) {
+        $maps = $config->maps;
+        $pointsDistribution = $config->pointsDistribution;
 
         $out = array(); // env => login => row
 
         foreach ($maps as $m) {
-            $uid = $m->id;
-            $uidSafe = preg_replace('/[^A-Za-z0-9_-]/', '', $uid);
+            $uidSafe = self::safeUidFromMapConfig($m);
             if ($uidSafe === '') continue;
 
-            $wantedMapId = '';
-            if (isset($m->mapId)) $wantedMapId = (string)$m->mapId;
-            elseif (isset($m->MapId)) $wantedMapId = (string)$m->MapId;
+            $wantedMapId = self::wantedMapIdFromMapConfig($m);
 
-            $pattern = self::DIR_UM . '/' . self::FILE_PREFIX_BEST_RACES . '.*.' . $uidSafe . '.txt';
-            $files = glob($pattern);
-            if ($files === false || !is_array($files) || count($files) < 1) continue;
+            $files = self::listBestFilesForUid($kindPrefix, $uidSafe);
+            if (!is_array($files) || count($files) < 1) continue;
 
             foreach ($files as $filePath) {
                 if (!is_string($filePath) || $filePath === '') continue;
                 if (!file_exists($filePath)) continue;
 
-                $envSafe = self::extractEnvFromBestRacesFilename($filePath);
+                $envSafe = self::extractEnvFromBestFilename($kindPrefix, $filePath);
                 if ($envSafe === '') $envSafe = self::ENV_UNKNOWN;
 
-                $all = self::parseBestRacesFile($filePath);
+                console("kindPrefix: " . print_r($kindPrefix, true));
+                $all = self::parseBestFileForKind($kindPrefix, $filePath);
                 if (!is_array($all) || count($all) < 1) continue;
 
-                $mapIdToUse = self::pickMapIdFromParsedBestRaces($all, $wantedMapId);
+                $mapIdToUse = self::pickMapIdFromParsedBestFile($all, $wantedMapId);
                 if ($mapIdToUse === '') continue;
 
-                if (!isset($all[$mapIdToUse]['players']) || !is_array($all[$mapIdToUse]['players'])) continue;
+                $ranking = self::extractRankingFromParsedBestFile($all, $mapIdToUse);
+                if (!is_array($ranking) || count($ranking) < 1) continue;
 
-                $ranking = array_values($all[$mapIdToUse]['players']);
+
 
                 $count = count($ranking);
                 for ($i = 0; $i < $count; $i++) {
@@ -512,33 +530,8 @@ class BestRaces {
                     $rank = $i + 1;
                     $points = self::pointsForRank($pointsDistribution, $i, $rank);
 
-                    if (!isset($out[$envSafe])) $out[$envSafe] = array();
-                    if (!isset($out[$envSafe][$login]) || !is_array($out[$envSafe][$login])) {
-                        $out[$envSafe][$login] = array(
-                            'Login' => $login,
-                            'Score' => 0,
-                            'MapsPlayed' => 0,
-                            'PerMap' => array(), // uidSafe => points
-                        );
-                    }
-
-                    $out[$envSafe][$login]['Score'] += $points;
-                    $out[$envSafe][$login]['MapsPlayed'] += 1;
-                    $out[$envSafe][$login]['PerMap'][$uidSafe] = $points;
-
-                    if (is_array($nickMap) && isset($nickMap[$login]) && is_array($nickMap[$login])) {
-                        $row = $nickMap[$login];
-
-                        if ((!isset($out[$envSafe][$login]['NickName']) || (string)$out[$envSafe][$login]['NickName'] === '')
-                            && isset($row['NickName']) && (string)$row['NickName'] !== '') {
-                            $out[$envSafe][$login]['NickName'] = (string)$row['NickName'];
-                        }
-
-                        if ((!isset($out[$envSafe][$login]['NickNameWithColor']) || (string)$out[$envSafe][$login]['NickNameWithColor'] === '')
-                            && isset($row['NickNameWithColor']) && (string)$row['NickNameWithColor'] !== '') {
-                            $out[$envSafe][$login]['NickNameWithColor'] = (string)$row['NickNameWithColor'];
-                        }
-                    }
+                    self::applyQualificationPoints($out, $envSafe, $login, $uidSafe, $points);
+                    self::mergeNicknamesIfMissing($out, $envSafe, $login, $nickMap);
                 }
             }
         }
@@ -546,24 +539,81 @@ class BestRaces {
         return $out;
     }
 
-    private static function pointsForRank($pointsDistribution, $index0, $rank1) {
-        $points = 0;
-        // supports 0-based distribution (0=>rank1) and also 1-based if ever used
-        if (isset($pointsDistribution[$index0])) {
-            $points = (int)$pointsDistribution[$index0];
-        } elseif (isset($pointsDistribution[$rank1])) {
-            $points = (int)$pointsDistribution[$rank1];
-        }
-        return $points;
+    private static function safeUidFromMapConfig($m) {
+        $uid = isset($m->id) ? (string)$m->id : '';
+        $uidSafe = preg_replace('/[^A-Za-z0-9_-]/', '', $uid);
+        return (string)$uidSafe;
     }
 
-    private static function extractEnvFromBestRacesFilename($filePath) {
-        // expected: fastlog/um/bestRaces.<Env>.<Uid>.txt
+    private static function wantedMapIdFromMapConfig($m) {
+        if (isset($m->mapId)) return (string)$m->mapId;
+        if (isset($m->MapId)) return (string)$m->MapId;
+        return '';
+    }
+
+    private static function listBestFilesForUid($kindPrefix, $uidSafe) {
+        $pattern = self::DIR_UM . '/' . $kindPrefix . '.*.' . $uidSafe . '.txt';
+        $files = glob($pattern);
+        if ($files === false || !is_array($files)) return array();
+        return $files;
+    }
+
+    private static function parseBestFileForKind($kindPrefix, $filePath) {
+        if ($kindPrefix === self::FILE_PREFIX_BEST_LAPS) {
+            return self::parseBestLapsFile($filePath);
+        }
+        return self::parseBestRacesFile($filePath);
+    }
+
+    private static function extractRankingFromParsedBestFile($all, $mapIdToUse) {
+        if (!isset($all[$mapIdToUse]['players']) || !is_array($all[$mapIdToUse]['players'])) return array();
+        return array_values($all[$mapIdToUse]['players']);
+    }
+
+    private static function applyQualificationPoints(&$out, $envSafe, $login, $uidSafe, $points) {
+        if (!isset($out[$envSafe])) $out[$envSafe] = array();
+
+        if (!isset($out[$envSafe][$login]) || !is_array($out[$envSafe][$login])) {
+            $out[$envSafe][$login] = array(
+                'Login' => $login,
+                'Score' => 0,
+                'MapsPlayed' => 0,
+                'PerMap' => array(), // uidSafe => points
+            );
+        }
+
+        $out[$envSafe][$login]['Score'] += (int)$points;
+        $out[$envSafe][$login]['MapsPlayed'] += 1;
+        $out[$envSafe][$login]['PerMap'][$uidSafe] = (int)$points;
+    }
+
+    private static function mergeNicknamesIfMissing(&$out, $envSafe, $login, $nickMap) {
+        if (!is_array($nickMap) || !isset($nickMap[$login]) || !is_array($nickMap[$login])) {
+            return;
+        }
+
+        $row = $nickMap[$login];
+
+        if ((!isset($out[$envSafe][$login]['NickName']) || (string)$out[$envSafe][$login]['NickName'] === '')
+            && isset($row['NickName']) && (string)$row['NickName'] !== '') {
+            $out[$envSafe][$login]['NickName'] = (string)$row['NickName'];
+        }
+
+        if ((!isset($out[$envSafe][$login]['NickNameWithColor']) || (string)$out[$envSafe][$login]['NickNameWithColor'] === '')
+            && isset($row['NickNameWithColor']) && (string)$row['NickNameWithColor'] !== '') {
+            $out[$envSafe][$login]['NickNameWithColor'] = (string)$row['NickNameWithColor'];
+        }
+    }
+
+    /**
+     * New generic env extractor:
+     * expected: fastlog/um/<kind>.<Env>.<Uid>.txt
+     */
+    private static function extractEnvFromBestFilename($kindPrefix, $filePath) {
         $base = basename($filePath);
         $parts = explode('.', $base);
-        // [0]=bestRaces, [1]=Env, [2]=Uid, [3]=txt
-        if (count($parts) >= 4 && $parts[0] === self::FILE_PREFIX_BEST_RACES) {
-            return $parts[1];
+        if (count($parts) >= 4 && $parts[0] === $kindPrefix) {
+            return (string)$parts[1];
         }
         return '';
     }
@@ -582,6 +632,27 @@ class BestRaces {
 
         return isset($keys[0]) ? (string)$keys[0] : '';
     }
+
+    /**
+     * New generic picker (works for bestRaces + bestLaps since both are mapId => section arrays).
+     */
+    private static function pickMapIdFromParsedBestFile($all, $wantedMapId) {
+        return self::pickMapIdFromParsedBestRaces($all, $wantedMapId);
+    }
+
+
+    private static function pointsForRank($pointsDistribution, $index0, $rank1) {
+        $points = 0;
+        // supports 0-based distribution (0=>rank1) and also 1-based if ever used
+        if (isset($pointsDistribution[$index0])) {
+            $points = (int)$pointsDistribution[$index0];
+        } elseif (isset($pointsDistribution[$rank1])) {
+            $points = (int)$pointsDistribution[$rank1];
+        }
+        return $points;
+    }
+
+
 }
 
 /**

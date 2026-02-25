@@ -25,15 +25,22 @@ class CsvFile
         $currentMapId = '';
 
         foreach ($lines as $line) {
+
             $line = trim((string)$line);
             if ($line === '') continue;
-            if ($line[0] === '#') continue;
+
+            // NOTE: map marker starts with '#', so don't skip it as a comment.
+            // Skip comment lines, but keep "### MAP,..." rows.
+            if ($line[0] === '#' && strpos($line, BestRaces::MAP_MARKER) !== 0) continue;
 
             $cols = str_getcsv($line);
             if (!is_array($cols) || count($cols) < 1) continue;
 
             // Map marker row: ### MAP,<env>,<mapId>,<mapName>,<author>
+            //console("cols[0]: " . print_r($cols[0], true)); // prints 'cols[0]: Login' or 'cols[0]: blackcat111'
+            //console("BestRaces::MAP_MARKER: " . BestRaces::MAP_MARKER); // prints 'BestRaces::MAP_MARKER: ### MAP'
             if ((string)$cols[0] === BestRaces::MAP_MARKER) {
+                //console("BestRaces::MAP_MARKER found");
                 $env = isset($cols[1]) ? (string)$cols[1] : '';
                 $mapId = isset($cols[2]) ? (string)$cols[2] : '';
                 $mapName = isset($cols[3]) ? (string)$cols[3] : '';
