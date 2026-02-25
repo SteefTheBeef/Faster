@@ -1,298 +1,416 @@
 <?php
+
+require_once 'utils/FastFile.php';
+require_once 'utils/CsvFile.php';
+
 class BestRaces {
+    const DIR_UM = 'fastlog/um';
+
+    const FILE_PREFIX_BEST_RACES = 'bestRaces';
+    const FILE_PREFIX_BEST_LAPS = 'bestLaps';
+
+    // Stored as first CSV column in map meta row.
+    // Full row format: ### MAP,<Environment>,<MapId>,<MapName>,<Author>
+    const MAP_MARKER = '### MAP';
+
+    const ENV_UNKNOWN = 'Unknown';
+
     /**
-     * If current challenge UID is configured for "quali best race",
-     * load best scores file and build a scoreboard-like players array for THIS map.
+     * Update UM best race progress file (per environment), only if improved:
+     * - Check DESC (more checkpoints is better)
+     * - TimeMs ASC for equal Check (lower is better)
      *
-     * Returns array of players (numerically indexed), or empty array on any failure.
+     * File: fastlog/um/bestRaces.<env>.<uid>.txt
      */
-    static function umPanelBuildPlayersFromBestScoresForCurrentMap($challengeInfo, $qualiBestRacesConfig) {
-        if (!is_array($challengeInfo) || !is_object($qualiBestRacesConfig)) return array();
-        if (!isset($challengeInfo['UId'])) return array();
-
-        $uid = (string)$challengeInfo['UId'];
-        if ($uid === '') return array();
-
-        // 1) check if current UID is in config maps
-        $isConfigured = false;
-        if (isset($qualiBestRacesConfig->maps) && is_array($qualiBestRacesConfig->maps)) {
-            foreach ($qualiBestRacesConfig->maps as $m) {
-                if (is_object($m) && isset($m->id) && (string)$m->id === $uid) {
-                    $isConfigured = true;
-                    break;
-                }
-            }
-        }
-        if (!$isConfigured) return array();
-
-
-        // 2) open the correct bestScores file for this environment + uid
-        $env = isset($challengeInfo['Environnement']) ? (string)$challengeInfo['Environnement'] : 'Unknown';
-        $envSafe = preg_replace('/[^a-zA-Z0-9_-]+/', '', $env);
-        if ($envSafe === '') $envSafe = 'Unknown';
-
-        $uidSafe = preg_replace('/[^A-Za-z0-9_-]/', '', $uid);
-        if ($uidSafe === '') return array();
-
-        $filePath = 'fastlog/um/bestRaces.' . $envSafe . '.' . $uidSafe . '.txt';
-        console($filePath);
-
-        // 3) parse and extract players for the current MapId section
-        $mapId = (string)getChallengeID($challengeInfo);
-        if ($mapId === '') return array();
-
-        $all = self::parseBestRacesFile($filePath);
-        if (!isset($all[$mapId]) || !isset($all[$mapId]['players']) || !is_array($all[$mapId]['players'])) {
-            return array();
-        }
-
-        // parseBestRacesFile returns players keyed by login; panel expects numeric array
-        return array_values($all[$mapId]['players']);
+    public static function updateBestRacesFile($finishedPlayers, $challengeInfo) {
+        self::updateBestFile(self::FILE_PREFIX_BEST_RACES, $finishedPlayers, $challengeInfo);
     }
-    static function updateBestRacesFile($finishedPlayers, $challengeInfo) {
-        if (!is_array($finishedPlayers) || count($finishedPlayers) < 1) return;
 
-        $env = isset($challengeInfo['Environnement']) ? (string)$challengeInfo['Environnement'] : 'Unknown';
-        $envSafe = preg_replace('/[^a-zA-Z0-9_-]+/', '', $env);
-        if ($envSafe === '') $envSafe = 'Unknown';
+    /**
+     * Update UM best laps file (per environment), only if improved:
+     * - BestLapMs ASC (lower is better)
+     *
+     * File: fastlog/um/bestLaps.<env>.<uid>.txt
+     */
+    public static function updateBestLapsFile($finishedPlayers, $challengeInfo) {
+        self::updateBestFile(self::FILE_PREFIX_BEST_LAPS, $finishedPlayers, $challengeInfo);
+    }
 
-        $dir = 'fastlog/um';
-
-        $uid = preg_replace('/[^A-Za-z0-9_-]/', '', (string)$challengeInfo['UId']);
-        $filePath = $dir . '/bestScores.' . $envSafe . '.' . $uid . '.txt';
-
-        // Use shared file helper for mkdir/touch logic.
-        if (class_exists('FastFile')) {
-            FastFile::ensureFile($filePath);
-        } else {
-            if (!is_dir($dir)) {
-                @mkdir($dir, 0777, true);
-            }
-            if (!file_exists($filePath)) {
-                $h = @fopen($filePath, 'a');
-                if ($h) fclose($h);
-            }
+    /**
+     * Shared update pipeline for "best races" and "best laps".
+     */
+    private static function updateBestFile($kindPrefix, $finishedPlayers, $challengeInfo) {
+        if (!is_array($finishedPlayers) || count($finishedPlayers) < 1) {
+            return;
         }
 
+        $env = isset($challengeInfo['Environnement']) ? (string)$challengeInfo['Environnement'] : self::ENV_UNKNOWN;
+        $envSafe = self::sanitizeToken($env, self::ENV_UNKNOWN);
+
+        $uidSafe = self::sanitizeToken(isset($challengeInfo['UId']) ? $challengeInfo['UId'] : '', '');
+        if ($uidSafe === '') {
+            return;
+        }
+
+        $filePath = self::DIR_UM . '/' . $kindPrefix . '.' . $envSafe . '.' . $uidSafe . '.txt';
+        FastFile::ensureFile($filePath);
+
         $mapId = (string)getChallengeID($challengeInfo);
+        if ($mapId === '') {
+            return;
+        }
+
         $mapName = isset($challengeInfo['Name']) ? stripColors($challengeInfo['Name']) : '';
         $mapAuthor = isset($challengeInfo['Author']) ? stripColors($challengeInfo['Author']) : '';
 
-        $data = self::parseBestRacesFile($filePath);
+        $meta = array(
+            'Environment' => $env,
+            'MapId' => $mapId,
+            'MapName' => $mapName,
+            'Author' => $mapAuthor,
+        );
 
-        if (!isset($data[$mapId])) {
-            $data[$mapId] = array(
-                'meta' => array(
-                    'Environment' => $env,
-                    'MapId' => $mapId,
-                    'MapName' => $mapName,
-                    'Author' => $mapAuthor,
-                ),
-                'players' => array(), // login => row
-            );
-        } else {
-            if (!isset($data[$mapId]['meta'])) $data[$mapId]['meta'] = array();
-            $data[$mapId]['meta']['Environment'] = $env;
-            $data[$mapId]['meta']['MapId'] = $mapId;
-            $data[$mapId]['meta']['MapName'] = $mapName;
-            $data[$mapId]['meta']['Author'] = $mapAuthor;
-        }
+        $spec = self::specForKind($kindPrefix);
+        $data = CsvFile::parse($filePath, $spec);
 
+        $data = self::ensureMapSection($data, $mapId, $meta);
+
+        $now = self::now();
         foreach ($finishedPlayers as $p) {
-            if (!is_array($p)) continue;
-
-            $login = isset($p['Login']) ? stripColors($p['Login']) : '';
-            if ($login === '') continue;
-
-            $lap = isset($p['Lap']) ? (int)$p['Lap'] : 0;
-            $check = isset($p['Check']) ? (int)$p['Check'] : 0;
-            $timeMs = isset($p['Time']) ? (int)$p['Time'] : 0;
-            $bestLapMs = isset($p['BestLap']) ? (int)$p['BestLap'] : 0;
-
-            if ($timeMs <= 0) continue;
-
-            $newRow = array(
-                'Login' => $login,
-                'Lap' => $lap,
-                'Check' => $check,
-                'TimeMs' => $timeMs,
-                'BestLapMs' => $bestLapMs,
-                'UpdatedAt' => date('Y-m-d H:i:s'),
-            );
-
-            $oldRow = isset($data[$mapId]['players'][$login]) ? $data[$mapId]['players'][$login] : null;
-            if ($oldRow === null) {
-                $data[$mapId]['players'][$login] = $newRow;
+            if (!is_array($p)) {
                 continue;
             }
 
-            $oldCheck = isset($oldRow['Check']) ? (int)$oldRow['Check'] : 0;
-            $oldTimeMs = isset($oldRow['TimeMs']) ? (int)$oldRow['TimeMs'] : 0;
-
-            $isImproved = false;
-            if ($check > $oldCheck) {
-                $isImproved = true;
-            } elseif ($check === $oldCheck && ($oldTimeMs <= 0 || $timeMs < $oldTimeMs)) {
-                $isImproved = true;
+            $row = call_user_func($spec['buildRowFromFinishedPlayer'], $p, $now);
+            if ($row === null) {
+                continue;
             }
 
-            if ($isImproved) {
-                $data[$mapId]['players'][$login] = $newRow;
+            $login = isset($row['Login']) ? (string)$row['Login'] : '';
+            if ($login === '') {
+                continue;
+            }
+
+            $old = isset($data[$mapId]['players'][$login]) ? $data[$mapId]['players'][$login] : null;
+            if ($old === null || call_user_func($spec['isImproved'], $row, $old)) {
+                $data[$mapId]['players'][$login] = $row;
             }
         }
 
         foreach ($data as $mId => $section) {
-            if (!isset($data[$mId]['players']) || !is_array($data[$mId]['players'])) continue;
-
-            $rows = array_values($data[$mId]['players']);
-            usort($rows, 'bestScoresCompare');
-            $rekey = array();
-            foreach ($rows as $r) {
-                $rekey[$r['Login']] = $r;
+            if (!isset($section['players']) || !is_array($section['players'])) {
+                continue;
             }
-            $data[$mId]['players'] = $rekey;
+            $data[$mId]['players'] = self::sortAndRekeyByLogin($section['players'], $spec['compareRows']);
         }
 
-        self::writeBestRacesFile($filePath, $data);
+        CsvFile::writeAtomic($filePath, $data, $spec);
     }
 
     /**
-     * File format (multi-map, easy to parse):
-     * ### MAP,<Environment>,<MapId>,<MapName>,<Author>
-     * Login,Check,Lap,TimeMs,Time,BestLapMs,BestLap,UpdatedAt
+     * Per-kind behavior spec (keeps update pipeline generic).
      */
-    private static function parseBestRacesFile($filePath) {
-        $data = array();
-
-        $lines = array();
-        if (class_exists('FastFile')) {
-            $lines = FastFile::readLines($filePath);
-        } else {
-            if (!file_exists($filePath)) return $data;
-            $lines = @file($filePath, FILE_IGNORE_NEW_LINES);
-            if ($lines === false || !is_array($lines)) return $data;
+    private static function specForKind($kindPrefix) {
+        if ($kindPrefix === self::FILE_PREFIX_BEST_RACES) {
+            return array(
+                'title' => 'UM Best Scores',
+                'sortComment' => 'Sort: Check DESC, then Time ASC',
+                'header' => array('Login', 'Check', 'Lap', 'TimeMs', 'Time', 'BestLapMs', 'BestLap', 'UpdatedAt'),
+                'compareRows' => array('BestRaces', 'compareBestRacesRows'),
+                'buildRowFromFinishedPlayer' => array('BestRaces', 'buildBestRaceRow'),
+                'isImproved' => array('BestRaces', 'isBestRaceImproved'),
+                'serializePlayerRow' => array('BestRaces', 'serializeBestRaceRow'),
+                'parsePlayerRow' => array('BestRaces', 'parseBestRaceRow'),
+            );
         }
 
-        if (!is_array($lines) || count($lines) < 1) return $data;
+        return array(
+            'title' => 'UM Best Laps',
+            'sortComment' => 'Sort: BestLapMs ASC',
+            'header' => array('Login', 'BestLapMs', 'BestLap', 'UpdatedAt'),
+            'compareRows' => array('BestRaces', 'compareBestLapsRows'),
+            'buildRowFromFinishedPlayer' => array('BestRaces', 'buildBestLapRow'),
+            'isImproved' => array('BestRaces', 'isBestLapImproved'),
+            'serializePlayerRow' => array('BestRaces', 'serializeBestLapRow'),
+            'parsePlayerRow' => array('BestRaces', 'parseBestLapRow'),
+        );
+    }
 
-        $currentMapId = null;
+    private static function sanitizeToken($s, $default) {
+        $s = preg_replace('/[^A-Za-z0-9_-]+/', '', (string)$s);
+        return ($s !== '') ? $s : $default;
+    }
 
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if ($line === '') continue;
+    private static function now() {
+        return date('Y-m-d H:i:s');
+    }
 
-            if (strpos($line, '### MAP,') === 0) {
-                $parts = explode(',', $line, 5);
-                $env = isset($parts[1]) ? (string)$parts[1] : '';
-                $mapId = isset($parts[2]) ? (string)$parts[2] : '';
-                $mapName = isset($parts[3]) ? (string)$parts[3] : '';
-                $author = isset($parts[4]) ? (string)$parts[4] : '';
-
-                $currentMapId = $mapId;
-                if ($currentMapId !== '') {
-                    $data[$currentMapId] = array(
-                        'meta' => array(
-                            'Environment' => $env,
-                            'MapId' => $mapId,
-                            'MapName' => $mapName,
-                            'Author' => $author,
-                        ),
-                        'players' => array(),
-                    );
-                }
-                continue;
-            }
-
-            if (strpos($line, 'Login,Check,') === 0) {
-                continue;
-            }
-
-            if ($currentMapId === null || $currentMapId === '') continue;
-
-            $cols = explode(',', $line);
-            if (count($cols) < 4) continue;
-
-            $login = isset($cols[0]) ? (string)$cols[0] : '';
-            if ($login === '') continue;
-
-            $check = isset($cols[1]) ? (int)$cols[1] : 0;
-            $lap = isset($cols[2]) ? (int)$cols[2] : 0;
-            $timeMs = isset($cols[3]) ? (int)$cols[3] : 0;
-
-            $bestLapMs = isset($cols[5]) ? (int)$cols[5] : 0;
-            $updatedAt = isset($cols[7]) ? (string)$cols[7] : '';
-
-            $data[$currentMapId]['players'][$login] = array(
-                'Login' => $login,
-                'Check' => $check,
-                'Lap' => $lap,
-                'TimeMs' => $timeMs,
-                'BestLapMs' => $bestLapMs,
-                'UpdatedAt' => $updatedAt,
+    private static function ensureMapSection($data, $mapId, $meta) {
+        if (!isset($data[$mapId]) || !is_array($data[$mapId])) {
+            $data[$mapId] = array(
+                'meta' => array(),
+                'players' => array(),
             );
+        }
+
+        if (!isset($data[$mapId]['meta']) || !is_array($data[$mapId]['meta'])) {
+            $data[$mapId]['meta'] = array();
+        }
+
+        foreach ($meta as $k => $v) {
+            $data[$mapId]['meta'][$k] = $v;
+        }
+
+        if (!isset($data[$mapId]['players']) || !is_array($data[$mapId]['players'])) {
+            $data[$mapId]['players'] = array();
         }
 
         return $data;
     }
 
-    private static function writeBestRacesFile($filePath, $data) {
-        $out = '';
-        $out .= "# UM Best Scores\n";
-        $out .= "# UpdatedAt=" . date('Y-m-d H:i:s') . "\n";
-        $out .= "# Sort: Check DESC, then Time ASC\n\n";
+    private static function sortAndRekeyByLogin($players, $compareCallable) {
+        $rows = array_values($players);
+        usort($rows, $compareCallable);
 
-        foreach ($data as $mapId => $section) {
-            $meta = isset($section['meta']) ? $section['meta'] : array();
-            $env = isset($meta['Environment']) ? (string)$meta['Environment'] : '';
-            $mapName = isset($meta['MapName']) ? (string)$meta['MapName'] : '';
-            $author = isset($meta['Author']) ? (string)$meta['Author'] : '';
-
-            $out .= "### MAP," . $env . "," . $mapId . "," . $mapName . "," . $author . "\n";
-            $out .= "Login,Check,Lap,TimeMs,Time,BestLapMs,BestLap,UpdatedAt\n";
-
-            $players = isset($section['players']) ? $section['players'] : array();
-            foreach ($players as $row) {
-                $login = isset($row['Login']) ? (string)$row['Login'] : '';
-                $check = isset($row['Check']) ? (int)$row['Check'] : 0;
-                $lap = isset($row['Lap']) ? (int)$row['Lap'] : 0;
-                $timeMs = isset($row['TimeMs']) ? (int)$row['TimeMs'] : 0;
-                $bestLapMs = isset($row['BestLapMs']) ? (int)$row['BestLapMs'] : 0;
-                $updatedAt = isset($row['UpdatedAt']) ? (string)$row['UpdatedAt'] : '';
-
-                $timeStr = $timeMs > 0 ? MwTimeToString($timeMs) : '';
-                $bestLapStr = $bestLapMs > 0 ? MwTimeToString($bestLapMs) : '';
-
-                $out .= $login . "," . $check . "," . $lap . "," . $timeMs . "," . $timeStr . "," . $bestLapMs . "," . $bestLapStr . "," . $updatedAt . "\n";
+        $out = array();
+        foreach ($rows as $r) {
+            if (!is_array($r)) {
+                continue;
             }
-            $out .= "\n";
+            $login = isset($r['Login']) ? (string)$r['Login'] : '';
+            if ($login === '') {
+                continue;
+            }
+            $out[$login] = $r;
         }
 
-        if (class_exists('FastFile')) {
-            FastFile::atomicWrite($filePath, $out, true);
-            return;
-        }
-
-        // atomic-ish write with lock (legacy fallback)
-        $tmp = $filePath . '.tmp';
-        $h = @fopen($tmp, 'wb');
-        if (!$h) return;
-
-        if (@flock($h, LOCK_EX)) {
-            fwrite($h, $out);
-            fflush($h);
-            flock($h, LOCK_UN);
-        } else {
-            fwrite($h, $out);
-        }
-        fclose($h);
-
-        @rename($tmp, $filePath);
+        return $out;
     }
 
-    static function buildQualificationRankingsAllMaps($qualiBestRacesConfig, $nickMap) {
+    // ---------------------------------------------------------------------
+    // Best races: build / compare / improve / (de)serialize
+    // ---------------------------------------------------------------------
+
+    public static function buildBestRaceRow($p, $now) {
+        $login = isset($p['Login']) ? stripColors($p['Login']) : '';
+        if ($login === '') {
+            return null;
+        }
+
+        $lap = isset($p['Lap']) ? (int)$p['Lap'] : 0;
+        $check = isset($p['Check']) ? (int)$p['Check'] : 0;
+        $timeMs = isset($p['Time']) ? (int)$p['Time'] : 0;
+        $bestLapMs = isset($p['BestLap']) ? (int)$p['BestLap'] : 0;
+
+        if ($timeMs <= 0) {
+            return null;
+        }
+
+        return array(
+            'Login' => $login,
+            'Lap' => $lap,
+            'Check' => $check,
+            'TimeMs' => $timeMs,
+            'BestLapMs' => $bestLapMs,
+            'UpdatedAt' => (string)$now,
+        );
+    }
+
+    public static function isBestRaceImproved($newRow, $oldRow) {
+        $check = isset($newRow['Check']) ? (int)$newRow['Check'] : 0;
+        $timeMs = isset($newRow['TimeMs']) ? (int)$newRow['TimeMs'] : 0;
+
+        $oldCheck = isset($oldRow['Check']) ? (int)$oldRow['Check'] : 0;
+        $oldTimeMs = isset($oldRow['TimeMs']) ? (int)$oldRow['TimeMs'] : 0;
+
+        if ($check > $oldCheck) {
+            return true;
+        }
+        if ($check < $oldCheck) {
+            return false;
+        }
+
+        // Same check: lower time wins; missing/invalid old time => accept new.
+        if ($oldTimeMs <= 0) {
+            return true;
+        }
+
+        return ($timeMs > 0 && $timeMs < $oldTimeMs);
+    }
+
+    public static function compareBestRacesRows($a, $b) {
+        $aCheck = isset($a['Check']) ? (int)$a['Check'] : 0;
+        $bCheck = isset($b['Check']) ? (int)$b['Check'] : 0;
+
+        if ($aCheck > $bCheck) return -1;
+        if ($aCheck < $bCheck) return 1;
+
+        $aTime = isset($a['TimeMs']) ? (int)$a['TimeMs'] : 0;
+        $bTime = isset($b['TimeMs']) ? (int)$b['TimeMs'] : 0;
+
+        if ($aTime < $bTime) return -1;
+        if ($aTime > $bTime) return 1;
+
+        $aLogin = isset($a['Login']) ? (string)$a['Login'] : '';
+        $bLogin = isset($b['Login']) ? (string)$b['Login'] : '';
+        return strcmp($aLogin, $bLogin);
+    }
+
+    public static function serializeBestRaceRow($row) {
+        $login = isset($row['Login']) ? (string)$row['Login'] : '';
+        $check = isset($row['Check']) ? (int)$row['Check'] : 0;
+        $lap = isset($row['Lap']) ? (int)$row['Lap'] : 0;
+        $timeMs = isset($row['TimeMs']) ? (int)$row['TimeMs'] : 0;
+        $bestLapMs = isset($row['BestLapMs']) ? (int)$row['BestLapMs'] : 0;
+        $updatedAt = isset($row['UpdatedAt']) ? (string)$row['UpdatedAt'] : '';
+
+        $timeStr = $timeMs > 0 ? MwTimeToString($timeMs) : '';
+        $bestLapStr = $bestLapMs > 0 ? MwTimeToString($bestLapMs) : '';
+
+        return array($login, $check, $lap, $timeMs, $timeStr, $bestLapMs, $bestLapStr, $updatedAt);
+    }
+
+    public static function parseBestRaceRow($cols) {
+        if (!is_array($cols) || count($cols) < 4) {
+            return null;
+        }
+
+        $login = isset($cols[0]) ? (string)$cols[0] : '';
+        if ($login === '') {
+            return null;
+        }
+
+        return array(
+            'Login' => $login,
+            'Check' => isset($cols[1]) ? (int)$cols[1] : 0,
+            'Lap' => isset($cols[2]) ? (int)$cols[2] : 0,
+            'TimeMs' => isset($cols[3]) ? (int)$cols[3] : 0,
+            'BestLapMs' => isset($cols[5]) ? (int)$cols[5] : 0,
+            'UpdatedAt' => isset($cols[7]) ? (string)$cols[7] : '',
+        );
+    }
+
+    // ---------------------------------------------------------------------
+    // Best laps: build / compare / improve / (de)serialize
+    // ---------------------------------------------------------------------
+
+    public static function buildBestLapRow($p, $now) {
+        $login = isset($p['Login']) ? stripColors($p['Login']) : '';
+        if ($login === '') {
+            return null;
+        }
+
+        $bestLapMs = isset($p['BestLap']) ? (int)$p['BestLap'] : 0;
+        if ($bestLapMs <= 0) {
+            return null;
+        }
+
+        return array(
+            'Login' => $login,
+            'BestLapMs' => $bestLapMs,
+            'UpdatedAt' => (string)$now,
+        );
+    }
+
+    public static function isBestLapImproved($newRow, $oldRow) {
+        $bestLapMs = isset($newRow['BestLapMs']) ? (int)$newRow['BestLapMs'] : 0;
+        $oldBestLapMs = isset($oldRow['BestLapMs']) ? (int)$oldRow['BestLapMs'] : 0;
+
+        if ($bestLapMs <= 0) return false;
+        if ($oldBestLapMs <= 0) return true;
+
+        return ($bestLapMs < $oldBestLapMs);
+    }
+
+    public static function compareBestLapsRows($a, $b) {
+        $aMs = isset($a['BestLapMs']) ? (int)$a['BestLapMs'] : 0;
+        $bMs = isset($b['BestLapMs']) ? (int)$b['BestLapMs'] : 0;
+
+        // Treat <=0 as "worst" so valid laps come first.
+        $aBad = ($aMs <= 0);
+        $bBad = ($bMs <= 0);
+        if ($aBad && !$bBad) return 1;
+        if (!$aBad && $bBad) return -1;
+
+        if ($aMs < $bMs) return -1;
+        if ($aMs > $bMs) return 1;
+
+        $aLogin = isset($a['Login']) ? (string)$a['Login'] : '';
+        $bLogin = isset($b['Login']) ? (string)$b['Login'] : '';
+        return strcmp($aLogin, $bLogin);
+    }
+
+    public static function serializeBestLapRow($row) {
+        $login = isset($row['Login']) ? (string)$row['Login'] : '';
+        $bestLapMs = isset($row['BestLapMs']) ? (int)$row['BestLapMs'] : 0;
+        $updatedAt = isset($row['UpdatedAt']) ? (string)$row['UpdatedAt'] : '';
+
+        $bestLapStr = $bestLapMs > 0 ? MwTimeToString($bestLapMs) : '';
+        return array($login, $bestLapMs, $bestLapStr, $updatedAt);
+    }
+
+    public static function parseBestLapRow($cols) {
+        if (!is_array($cols) || count($cols) < 2) {
+            return null;
+        }
+
+        $login = isset($cols[0]) ? (string)$cols[0] : '';
+        if ($login === '') {
+            return null;
+        }
+
+        return array(
+            'Login' => $login,
+            'BestLapMs' => isset($cols[1]) ? (int)$cols[1] : 0,
+            'UpdatedAt' => isset($cols[3]) ? (string)$cols[3] : '',
+        );
+    }
+
+    // ---------------------------------------------------------------------
+    // Compatibility wrappers: keep old private parse/write names used elsewhere
+    // ---------------------------------------------------------------------
+
+    /**
+     * Legacy wrapper (used by qualification aggregation).
+     */
+    private static function parseBestRacesFile($filePath) {
+        $spec = self::specForKind(self::FILE_PREFIX_BEST_RACES);
+        return CsvFile::parse($filePath, $spec);
+    }
+
+    /**
+     * Legacy wrapper.
+     */
+    private static function writeBestRacesFile($filePath, $data) {
+        $spec = self::specForKind(self::FILE_PREFIX_BEST_RACES);
+        CsvFile::writeAtomic($filePath, $data, $spec);
+    }
+
+    /**
+     * Legacy wrapper.
+     */
+    private static function parseBestLapsFile($filePath) {
+        $spec = self::specForKind(self::FILE_PREFIX_BEST_LAPS);
+        return CsvFile::parse($filePath, $spec);
+    }
+
+    /**
+     * Legacy wrapper.
+     */
+    private static function writeBestLapsFile($filePath, $data) {
+        $spec = self::specForKind(self::FILE_PREFIX_BEST_LAPS);
+        CsvFile::writeAtomic($filePath, $data, $spec);
+    }
+
+    // ---------------------------------------------------------------------
+    // Qualification aggregation (kept from your original implementation)
+    // ---------------------------------------------------------------------
+
+    public static function buildQualificationRankingsAllMaps($qualiBestRacesConfig, $nickMap) {
         $byEnvLogin = self::buildQualificationScoresAllMaps($qualiBestRacesConfig, $nickMap);
         return self::normalizeEnvLoginMapToRankedLists($byEnvLogin);
     }
+
     /**
      * Converts env => (login => row) into env => numeric ranked list.
      * Sort: Score DESC, MapsPlayed DESC, Login ASC.
@@ -308,7 +426,6 @@ class BestRaces {
             }
 
             $list = array_values($loginMap);
-
             usort($list, array('BestRaces', 'compareQualificationRows'));
 
             $rank = 1;
@@ -331,7 +448,7 @@ class BestRaces {
         if ($aScore > $bScore) return -1;
         if ($aScore < $bScore) return 1;
 
-        // Tie-breaker: more maps played first (optional but usually nice)
+        // Tie-breaker: more maps played first
         $aMp = isset($a['MapsPlayed']) ? (int)$a['MapsPlayed'] : 0;
         $bMp = isset($b['MapsPlayed']) ? (int)$b['MapsPlayed'] : 0;
         if ($aMp > $bMp) return -1;
@@ -341,24 +458,15 @@ class BestRaces {
         $bLogin = isset($b['Login']) ? (string)$b['Login'] : '';
         return strcmp($aLogin, $bLogin);
     }
+
     /**
      * Build aggregated qualification scores across ALL configured maps.
      *
-     * Output structure:
-     *   array(
-     *     'Rally' => array(
-     *        'login1' => array('Login'=>'login1','Score'=>123,'MapsPlayed'=>2,'NickName'=>...),
-     *        ...
-     *     ),
-     *     'Bay' => array( ... ),
-     *   )
-     *
      * Notes:
-     * - Uses $qualiBestRacesConfig->pointsDistribution for each map ranking.
-     * - Tries to locate bestScores files by UID using glob(): fastlog/um/bestScores.*.<uid>.txt
+     * - Tries to locate bestRaces files by UID using glob(): fastlog/um/bestRaces.*.<uid>.txt
      * - If a file contains multiple MapId sections, you can optionally specify $m->mapId (or $m->MapId) in config.
      */
-    static function buildQualificationScoresAllMaps(UMConfigEntry $qualiBestRacesConfig, $nickMap) {
+    public static function buildQualificationScoresAllMaps(UMConfigEntry $qualiBestRacesConfig, $nickMap) {
         $maps = $qualiBestRacesConfig->maps;
         $pointsDistribution = $qualiBestRacesConfig->pointsDistribution;
 
@@ -369,13 +477,11 @@ class BestRaces {
             $uidSafe = preg_replace('/[^A-Za-z0-9_-]/', '', $uid);
             if ($uidSafe === '') continue;
 
-            // Optional: if config provides a specific MapId section to use.
             $wantedMapId = '';
             if (isset($m->mapId)) $wantedMapId = (string)$m->mapId;
             elseif (isset($m->MapId)) $wantedMapId = (string)$m->MapId;
 
-            // Find all matching env files for this UID (usually 1, but robust).
-            $pattern = 'fastlog/um/bestRaces.*.' . $uidSafe . '.txt';
+            $pattern = self::DIR_UM . '/' . self::FILE_PREFIX_BEST_RACES . '.*.' . $uidSafe . '.txt';
             $files = glob($pattern);
             if ($files === false || !is_array($files) || count($files) < 1) continue;
 
@@ -384,7 +490,7 @@ class BestRaces {
                 if (!file_exists($filePath)) continue;
 
                 $envSafe = self::extractEnvFromBestRacesFilename($filePath);
-                if ($envSafe === '') $envSafe = 'Unknown';
+                if ($envSafe === '') $envSafe = self::ENV_UNKNOWN;
 
                 $all = self::parseBestRacesFile($filePath);
                 if (!is_array($all) || count($all) < 1) continue;
@@ -394,10 +500,8 @@ class BestRaces {
 
                 if (!isset($all[$mapIdToUse]['players']) || !is_array($all[$mapIdToUse]['players'])) continue;
 
-                // Ensure numeric ranking list.
                 $ranking = array_values($all[$mapIdToUse]['players']);
 
-                // Apply rank->points and aggregate per player login.
                 $count = count($ranking);
                 for ($i = 0; $i < $count; $i++) {
                     if (!isset($ranking[$i]) || !is_array($ranking[$i])) continue;
@@ -414,8 +518,7 @@ class BestRaces {
                             'Login' => $login,
                             'Score' => 0,
                             'MapsPlayed' => 0,
-                            // Optional debug / introspection fields:
-                            'PerMap' => array(), // uidSafe => points (or mapId => points)
+                            'PerMap' => array(), // uidSafe => points
                         );
                     }
 
@@ -423,7 +526,6 @@ class BestRaces {
                     $out[$envSafe][$login]['MapsPlayed'] += 1;
                     $out[$envSafe][$login]['PerMap'][$uidSafe] = $points;
 
-                    // Merge nickname once here (no need to run UmPlayers::mergeNicknamesIntoPlayersList on numeric arrays).
                     if (is_array($nickMap) && isset($nickMap[$login]) && is_array($nickMap[$login])) {
                         $row = $nickMap[$login];
 
@@ -431,6 +533,7 @@ class BestRaces {
                             && isset($row['NickName']) && (string)$row['NickName'] !== '') {
                             $out[$envSafe][$login]['NickName'] = (string)$row['NickName'];
                         }
+
                         if ((!isset($out[$envSafe][$login]['NickNameWithColor']) || (string)$out[$envSafe][$login]['NickNameWithColor'] === '')
                             && isset($row['NickNameWithColor']) && (string)$row['NickNameWithColor'] !== '') {
                             $out[$envSafe][$login]['NickNameWithColor'] = (string)$row['NickNameWithColor'];
@@ -451,16 +554,15 @@ class BestRaces {
         } elseif (isset($pointsDistribution[$rank1])) {
             $points = (int)$pointsDistribution[$rank1];
         }
-
         return $points;
     }
 
     private static function extractEnvFromBestRacesFilename($filePath) {
-        // expected: fastlog/um/bestScores.<Env>.<Uid>.txt
+        // expected: fastlog/um/bestRaces.<Env>.<Uid>.txt
         $base = basename($filePath);
         $parts = explode('.', $base);
-        // [0]=bestScores, [1]=Env, [2]=Uid, [3]=txt
-        if (count($parts) >= 4 && $parts[0] === 'bestScores') {
+        // [0]=bestRaces, [1]=Env, [2]=Uid, [3]=txt
+        if (count($parts) >= 4 && $parts[0] === self::FILE_PREFIX_BEST_RACES) {
             return $parts[1];
         }
         return '';
@@ -473,30 +575,18 @@ class BestRaces {
             return (string)$wantedMapId;
         }
 
-        // If only one section exists, use it.
         $keys = array_keys($all);
         if (count($keys) === 1) {
             return (string)$keys[0];
         }
 
-        // Fallback: take the first section (deterministic-ish if file order is stable).
         return isset($keys[0]) ? (string)$keys[0] : '';
     }
-
 }
 
-function bestScoresCompare($a, $b) {
-    $aCheck = isset($a['Check']) ? (int)$a['Check'] : 0;
-    $bCheck = isset($b['Check']) ? (int)$b['Check'] : 0;
-    if ($aCheck > $bCheck) return -1;
-    if ($aCheck < $bCheck) return 1;
-
-    $aTime = isset($a['TimeMs']) ? (int)$a['TimeMs'] : 0;
-    $bTime = isset($b['TimeMs']) ? (int)$b['TimeMs'] : 0;
-    if ($aTime < $bTime) return -1;
-    if ($aTime > $bTime) return 1;
-
-    $aLogin = isset($a['Login']) ? (string)$a['Login'] : '';
-    $bLogin = isset($b['Login']) ? (string)$b['Login'] : '';
-    return strcmp($aLogin, $bLogin);
-}
+/**
+ * Backward-compatible global comparators.
+ * Keep these if any legacy code calls usort($rows, 'bestRacesCompare') / 'bestLapsCompare'.
+ */
+function bestRacesCompare($a, $b) { return BestRaces::compareBestRacesRows($a, $b); }
+function bestLapsCompare($a, $b)  { return BestRaces::compareBestLapsRows($a, $b); }

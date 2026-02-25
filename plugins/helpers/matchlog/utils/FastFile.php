@@ -1,13 +1,12 @@
 <?php
+require_once 'CsvFile.php';
 
 /**
  * Small file/dir helper for FAST plugins (PHP 5.6).
  * Centralizes mkdir/touch/read/write/atomic write.
  */
-class FastFile
-{
-    public static function ensureDir($dir)
-    {
+class FastFile {
+    public static function ensureDir($dir) {
         if (!is_string($dir) || $dir === '') return false;
         if (is_dir($dir)) return true;
 
@@ -17,8 +16,7 @@ class FastFile
         return is_dir($dir);
     }
 
-    public static function ensureFile($filePath)
-    {
+    public static function ensureFile($filePath) {
         if (!is_string($filePath) || $filePath === '') return false;
 
         $dir = dirname($filePath);
@@ -33,8 +31,7 @@ class FastFile
         return file_exists($filePath);
     }
 
-    public static function readLines($filePath)
-    {
+    public static function readLines($filePath) {
         if (!is_string($filePath) || $filePath === '') return array();
         if (!file_exists($filePath)) return array();
 
@@ -50,8 +47,7 @@ class FastFile
      * - optional flock during write
      * - rename temp to final
      */
-    public static function atomicWrite($filePath, $content, $useLock)
-    {
+    public static function atomicWrite($filePath, $content, $useLock) {
         if (!is_string($filePath) || $filePath === '') return false;
 
         $dir = dirname($filePath);

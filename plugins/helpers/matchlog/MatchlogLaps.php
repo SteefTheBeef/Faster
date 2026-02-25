@@ -115,6 +115,10 @@ class MatchlogLaps {
         // Check DESC (higher is better), then Time ASC (lower is better).
         BestRaces::updateBestRacesFile($finishedPlayers, $challengeInfo);
 
+        // Update UM best laps file (per environment), only if improved:
+        // BestLapMs ASC (lower is better).
+        BestRaces::updateBestLapsFile($finishedPlayers, $challengeInfo);
+
         // Update UM players file (per environment), keyed by Login, sorted by Login.
         UmPlayers::updatePlayersFile($playerList);
     }
