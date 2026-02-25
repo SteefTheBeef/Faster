@@ -9,7 +9,8 @@ class UmPanelTabs {
      */
     public static function getTabs() {
         return array(
-            array('title' => 'Players', 'action' => UmPanelKeys::ACT_TAB_PLAYERS),
+            array('title' => 'Qualification', 'action' => UmPanelKeys::ACT_TAB_QUALIFICATION),
+            array('title' => 'Semi-Final', 'action' => UmPanelKeys::ACT_TAB_SEMI_FINAL),
             array('title' => 'Stints', 'action' => UmPanelKeys::ACT_TAB_STINTS),
             array('title' => 'Prize Pool', 'action' => UmPanelKeys::ACT_TAB_PRIZE),
             array('title' => 'Schedule', 'action' => UmPanelKeys::ACT_TAB_SCHEDULE),
@@ -24,7 +25,7 @@ class UmPanelTabs {
      * @return string valid action name (fallbacks to first tab)
      */
     public static function getActiveTabAction($activeFromState, array $tabs) {
-        $defaultAction = isset($tabs[0]) ? (string)$tabs[0]['action'] : UmPanelKeys::ACT_TAB_PLAYERS;
+        $defaultAction = isset($tabs[0]) ? (string)$tabs[0]['action'] : UmPanelKeys::ACT_TAB_QUALIFICATION;
 
         $active = (string)$activeFromState;
         if ($active === '') $active = $defaultAction;

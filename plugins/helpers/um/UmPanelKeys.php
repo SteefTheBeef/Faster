@@ -24,7 +24,8 @@ class UmPanelKeys {
     const ACT_SUBTAB_IDENTIFIER = '.subtab';
 
     // Known tab actions used in init (and by UmPanelTabs)
-    const ACT_TAB_PLAYERS = 'um.tab.players';
+    const ACT_TAB_QUALIFICATION = 'um.tab.qualification';
+    const ACT_TAB_SEMI_FINAL = 'um.tab.semi-final';
     const ACT_TAB_STINTS = 'um.tab.stints';
     const ACT_TAB_PRIZE = 'um.tab.prize';
     const ACT_TAB_SCHEDULE = 'um.tab.schedule';
@@ -37,6 +38,15 @@ class UmPanelKeys {
     const ACT_SUBTAB_RULES_SEMI_FINAL = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.semi-final';
     const ACT_SUBTAB_RULES_MISC = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.misc';
 
+    // Subtabs (qualification)
+    const ACT_SUBTAB_QUALIFICATION_LEADERBOARD = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.leaderboard';
+    const ACT_SUBTAB_QUALIFICATION_RALLY = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.rally';
+    const ACT_SUBTAB_QUALIFICATION_SPEED = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.speed';
+    const ACT_SUBTAB_QUALIFICATION_ALPINE = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.alpine';
+    const ACT_SUBTAB_QUALIFICATION_COAST = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.coast';
+    const ACT_SUBTAB_QUALIFICATION_ISLAND = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.island';
+    const ACT_SUBTAB_QUALIFICATION_BAY = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.bay';
+    const ACT_SUBTAB_QUALIFICATION_STADIUM = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.stadium';
     /**
      * Build scoreboard row action name.
      *
@@ -67,7 +77,8 @@ class UmPanelKeys {
             self::ACT_RACES_PREV,
             self::ACT_RACES_NEXT,
 
-            self::ACT_TAB_PLAYERS,
+            self::ACT_TAB_QUALIFICATION,
+            self::ACT_TAB_SEMI_FINAL,
             self::ACT_TAB_STINTS,
             self::ACT_TAB_PRIZE,
             self::ACT_TAB_SCHEDULE,
@@ -78,6 +89,15 @@ class UmPanelKeys {
             self::ACT_SUBTAB_RULES_QUALIFICATION_POINTS,
             self::ACT_SUBTAB_RULES_SEMI_FINAL,
             self::ACT_SUBTAB_RULES_MISC,
+
+            self::ACT_SUBTAB_QUALIFICATION_LEADERBOARD,
+            self::ACT_SUBTAB_QUALIFICATION_RALLY,
+            self::ACT_SUBTAB_QUALIFICATION_SPEED,
+            self::ACT_SUBTAB_QUALIFICATION_ALPINE,
+            self::ACT_SUBTAB_QUALIFICATION_COAST,
+            self::ACT_SUBTAB_QUALIFICATION_ISLAND,
+            self::ACT_SUBTAB_QUALIFICATION_BAY,
+            self::ACT_SUBTAB_QUALIFICATION_STADIUM
         );
     }
 }

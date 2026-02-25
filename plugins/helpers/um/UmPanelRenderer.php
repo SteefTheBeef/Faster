@@ -4,6 +4,7 @@ require_once __DIR__ . '/layout/Layout.php';
 require_once __DIR__ . '/../utils/XmlTag.php';
 require_once __DIR__ . '/UmPanelTabs.php';
 require_once __DIR__ . '/UmPanelKeys.php';
+require_once __DIR__ . '/panels/QualificationPanelBuilder.php';
 
 class UmPanelRenderer {
     /**
@@ -48,11 +49,14 @@ class UmPanelRenderer {
         $_players[$login]['ML'][$key] = $value;
     }
 
-    public static function buildPanelXml($login, Layout $layout, array $players, $selectedRow, $selectedPlayerForLogin, array $actionIds, array $mlAct, $umConfig) {
+    public static function buildPanelXml($login, Layout $layout, array $players, $selectedRow, $selectedPlayerForLogin, array $actionIds, array $mlAct, UMConfig $umConfig) {
         $isClosed = ((int)self::mlGet($login, UmPanelKeys::ML_PANEL_CLOSED, 0) === 1);
         if ($isClosed) {
             return self::buildClosedToggleXml($layout, $mlAct);
         }
+
+        $panelHeaderTitle = 'UNITED MASTERS 4';
+        $panelHeaderXml = self::buildPanelHeaderTitleXml($layout, $panelHeaderTitle);
 
         $bordersXml = self::buildPanelBordersXml($layout);
 
@@ -70,17 +74,42 @@ class UmPanelRenderer {
             . $rightBuild['panelFrameEnd'];
 
         return XmlTag::frame(0, 0, 5,
-            $bordersXml
+            $panelHeaderXml
+            . $bordersXml
             . $layout->markup->playerFrameStart
             . $xmlPlayers
             . $layout->markup->playerFrameEnd
             . $rightPanelXml
         );
     }
+    private static function buildPanelHeaderTitleXml(Layout $layout, $text) {
+        $leftX = $layout->geometry->borderLeftX;
+        $outerW = $layout->geometry->borderOuterWidth;
+        $topY = $layout->geometry->borderTopY;
 
+        $titleH = 3.0;
+        $titleW = $outerW;
+        $centerX = $leftX + ($outerW / 2.0);
+
+        // Move this up/down to match your red line precisely:
+        $y = $topY + 6.6;
+
+        // If your layout theme has a font style you like, you can use it here.
+        $font = $layout->theme->panelTitleFontStyle;
+
+        return XmlTag::labelCenterCenter(
+            $centerX,
+            $y,
+            $titleW,
+            $titleH,
+            $font . $text,
+            null,
+            array('textsize' => 3.2, 'z' => 0.8)
+        );
+    }
     public static function handleAction($login, $action, $answer, array &$selectedRowByLogin, array &$selectedPlayer = null) {
         global $_players, $umScoreBoardPlayers;
-        console($action);
+
         // Panel close/open
         if ($action === UmPanelKeys::ACT_PANEL_CLOSE) {
             self::mlSet($login, UmPanelKeys::ML_PANEL_CLOSED, 1);
@@ -92,20 +121,21 @@ class UmPanelRenderer {
             return true;
         }
 
-        console($action);
+
         // Subtabs: store the *full action* under "um.subtab.<tabKey>"
         // Example stored value: 'um.subtab.rules.qualification'
 
         // Subtabs: store the *full action* under "<tabAction>.subtab"
         // Example stored value: 'um.tab.rules.subtab.qualification'
         if (strpos($action, UmPanelKeys::ACT_TAB_PREFIX) === 0 && strpos($action, UmPanelKeys::ACT_SUBTAB_IDENTIFIER . '.') !== false) {
-
             $parts = explode(UmPanelKeys::ACT_SUBTAB_IDENTIFIER, $action, 2);
             $tabAction = isset($parts[0]) ? (string)$parts[0] : '';
             $subRest = isset($parts[1]) ? (string)$parts[1] : '';
 
             // $subRest should begin with ".something"
             if ($tabAction !== '' && $subRest !== '' && $subRest[0] === '.') {
+                //console($action);
+                //console($tabAction);
                 self::mlSet($login, $tabAction . UmPanelKeys::ACT_SUBTAB_IDENTIFIER, (string)$action);
                 return true;
             }
@@ -262,11 +292,11 @@ class UmPanelRenderer {
         $panelBgQuad = XmlTag::quad(0, 0, $panelW, $panelH, $layout->theme->panelBackgroundColor);
 
         $selectedPlayerName = (is_array($selectedPlayerForLogin) && isset($selectedPlayerForLogin['NickNameWithColor'])) ? $selectedPlayerForLogin['NickNameWithColor'] : '';
-        $titleText = ($activeTabAction === UmPanelKeys::ACT_TAB_PLAYERS)
+        $titleText = ($activeTabAction === UmPanelKeys::ACT_TAB_SEMI_FINAL)
             ? $selectedPlayerName
             : UmPanelTabs::getTitleByAction($activeTabAction, $tabs);
 
-        $font = ($activeTabAction === UmPanelKeys::ACT_TAB_PLAYERS) ? '' : $layout->theme->headerFontStyle;
+        $font = ($activeTabAction === UmPanelKeys::ACT_TAB_SEMI_FINAL) ? '' : $layout->theme->headerFontStyle;
 
         $panelTitle = XmlTag::label(1, -1, $panelW - 2, 3, $font . $titleText, null, array('textsize' => 2));
 
@@ -291,11 +321,11 @@ class UmPanelRenderer {
                 return RulesPanelBuilder::build($login, $layout, $umConfig);
             case UmPanelKeys::ACT_TAB_INFORMATION:
                 return InformationPanelBuilder::getInformationPanel($layout);
-            case UmPanelKeys::ACT_TAB_STINTS:
-                return '';
+            case UmPanelKeys::ACT_TAB_QUALIFICATION:
+                return QualificationPanelBuilder::build($login, $layout, $umConfig);
             case UmPanelKeys::ACT_TAB_PRIZE:
                 return '';
-            case UmPanelKeys::ACT_TAB_PLAYERS:
+            case UmPanelKeys::ACT_TAB_SEMI_FINAL:
             default:
                 return self::buildPlayerRacesPanelXml($login, $selectedPlayer, $layout, $mlAct);
         }

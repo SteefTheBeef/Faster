@@ -1,0 +1,123 @@
+<?php
+require_once __DIR__ . '/../../utils/StringUtils.php';
+require_once __DIR__ . '/../UMPanel.php';
+require_once __DIR__ . '/../layout/Layout.php';
+require_once 'TableBuilder.php';
+
+class QualificationPanelBuilder {
+    static function build($login, Layout $layout, $umConfig) {
+        global $_players;
+
+        $items = array(
+            array('title' => 'Leaderboard', 'action' => UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD),
+            array('title' => 'Rally', 'action' => UmPanelKeys::ACT_SUBTAB_QUALIFICATION_RALLY),
+            array('title' => 'Speed', 'action' => UmPanelKeys::ACT_SUBTAB_QUALIFICATION_SPEED),
+            array('title' => 'Alpine', 'action' => UmPanelKeys::ACT_SUBTAB_QUALIFICATION_ALPINE),
+            array('title' => 'Coast', 'action' => UmPanelKeys::ACT_SUBTAB_QUALIFICATION_COAST),
+            array('title' => 'Island', 'action' => UmPanelKeys::ACT_SUBTAB_QUALIFICATION_ISLAND),
+            array('title' => 'Bay', 'action' => UmPanelKeys::ACT_SUBTAB_QUALIFICATION_BAY),
+            array('title' => 'Stadium', 'action' => UmPanelKeys::ACT_SUBTAB_QUALIFICATION_STADIUM),
+        );
+
+        $sub = SubMenuBuilder::build($login, $layout,  UmPanelKeys::ACT_TAB_QUALIFICATION, $items, array(
+            'placement'  => 'bottom',
+            'submenuR'   => 0.0,
+            'rowH'       => 2.8,
+            'bottomY'    => -53.6,
+
+            'autoWidth'  => true,
+            'fill'       => true,   // use the unused space
+            'tabLift'    => 0.5,    // adjust 0.3..0.8 if needed
+
+            'itemGap'    => 0.0,
+            'textsize'   => 1.10,
+            'tabPadLR'   => 0.7,
+            'tabMinW'    => 3.4,
+            'tabMaxW'    => 40.0,
+        ));
+
+        console(print_r($sub['activeAction'], true));
+
+        switch ($sub['activeAction']) {
+            case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD:
+                $contentXml = self::leaderboard($layout, $umConfig);
+                break;
+
+            case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_RALLY:
+                $contentXml = self::envi($layout, $umConfig);
+                break;
+
+            default:
+                $contentXml = UMPanel::textLabel($layout, "Misc rules...\n(Replace this with your real content)");
+                break;
+        }
+
+        return $contentXml . $sub['xml'];
+    }
+
+    static function leaderboard(Layout $layout, $umConfig) {
+        $xml = UMPanel::textLabel($layout, '$fffQualification', 0, true);
+        $accentColor = $layout->theme->accentTextColor;
+
+        $p1 = "This server will run seven carefully selected qualification maps in a continuous loop, "
+            . "one after the other, for the whole duration of the qualification. "
+            . "As this is a TMUF cup, one map for each of the seven environments has been picked."
+            . "While the qualification is running you are free to drive as much as you want, no restrictions.";
+        $xml .= UMPanel::textLabel($layout, $p1, 3.5);
+
+        $p2 = "Each qualification race consists of one warmup lap and {$accentColor}four\$fff regular laps. "
+            . "\$fffWhen a race is completed, the new times are recorded and added to our database. "
+            . "If you happen improve your time for that specific map, "
+            . "you will in most cases climb higher on the leaderboard.";
+        $xml .= UMPanel::textLabel($layout, $p2, 14.5);
+
+        $p3 = "The {$accentColor}top 24 players advances \$ffffrom the qualifications to the semi-final. "
+            . "Points accumulated in the qualification will {$accentColor}carry-over to the semi-final.";
+        $xml .= UMPanel::textLabel($layout, $p3, 24);
+
+        $p4 = "\$oImportant: \$oOnly races driven on {$accentColor}this server "
+            . "\$fffwill count towards your cumulative qualification results. "
+            . "Records achieved on other servers are not valid.";
+        $xml .= UMPanel::textLabel($layout, $p4, 31);
+        return $xml;
+    }
+
+    static function envi(Layout $layout, UMConfig $umConfig) {
+        $raceDist = is_array($umConfig->um4QualiBestRace->pointsDistribution)
+            ? $umConfig->um4QualiBestRace->pointsDistribution
+            : array();
+
+        $lapDist = is_array($umConfig->um4QualiBestLap->pointsDistribution)
+            ? $umConfig->um4QualiBestLap->pointsDistribution
+            : array();
+
+        // Keep table out of the submenu area.
+        $reservedForSubmenu = 17.0 + 0.8; // submenuW + breathing gap
+
+        // Add a subheader like in the Qualification panel
+        $subHeaderYOffset = 0.0;
+        $tableTopGap = 3.2; // how far below the subheader the table starts (tweak to taste)
+
+        $xml = UMPanel::textLabel($layout, '$fffPoints Per Map in Qualification', $subHeaderYOffset, true);
+
+        $columns = array(
+            array('header' => 'Rank', 'rank' => true, 'halign' => 'left'),
+            array('header' => 'Points Fastest Race', 'data' => $raceDist, 'halign' => 'right'),
+        );
+
+        // Optional 3rd column: only add it if you actually provide data
+        if (is_array($lapDist) && count($lapDist) > 0) {
+            $columns[] = array('header' => 'Points Fastest Lap', 'data' => $lapDist, 'halign' => 'right');
+        }
+
+        $xml .= TableBuilder::build(
+            $layout,
+            24,
+            $reservedForSubmenu,
+            $tableTopGap,
+            $columns
+        );
+
+        return $xml;
+    }
+}

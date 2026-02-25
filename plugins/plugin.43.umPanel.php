@@ -18,6 +18,7 @@
 require_once "helpers/matchlog/MatchlogFileParser.php";
 require_once "helpers/um/UMState.php";
 require_once "helpers/um/UMConfig.php";
+require_once "helpers/um/UMConfigEntry.php";
 require_once "helpers/um/UMPanel.php";
 require_once "helpers/um/panels/InformationPanelBuilder.php";
 require_once "helpers/um/panels/RulesPanelBuilder.php";
@@ -64,9 +65,11 @@ function generatePointsArray() {
 // Init : (plugin init)
 //--------------------------------------------------------------
 function umPanelInit($event) {
-    global $_ml_act, $umScoreBoardPlayerActions, $umScoreBoardSelectedPlayerRow, $umConfig, $umState, $umScoreBoardPlayers, $selectedPlayer;
+    global $_ml_act, $umScoreBoardPlayerActions, $umScoreBoardSelectedPlayerRow, $umConfig, $qualiBestRacesConfig, $umState, $umScoreBoardPlayers, $selectedPlayer;
     $umState = new UMState();
     $umConfig = new UMConfig();
+    $qualiBestRacesConfig = $umConfig->um4QualiBestRace;
+
     $umScoreBoardSelectedPlayerRow = array();
     // here we store the player's race results'
     $selectedPlayer = array();
@@ -83,7 +86,7 @@ function umPanelInit($event) {
     }
 
     $umScoreBoardPlayers = MatchlogFileParser::getScoreboardPlayersFromMatchlog('fastlog/um3_semi.txt', $umConfig->um3Semi->pointsDistribution);
-    // generatePointsArray();
+
 
     $actions = UmPanelKeys::actionsToRegister();
     $count = count($actions);
@@ -96,12 +99,19 @@ function umPanelInit($event) {
 // PlayerConnect : (event from server callback)
 //--------------------------------------------------------------
 function umPanelPlayerConnect($event, $login) {
-    global $_players, $umState, $umScoreBoardPlayers, $umScoreBoardSelectedPlayerRow, $selectedPlayer;
+    global $_players, $umState, $umScoreBoardPlayers, $umScoreBoardSelectedPlayerRow, $selectedPlayer, $qualiBestRacesConfig, $_ChallengeInfo;
 
     if ($umState->shouldUpdateXml) {
         umPanelUpdateXml($login, 'show');
         $umState->shouldUpdateXml = false;
     }
+
+    $nickMap = UmPlayers::loadPlayersNicknamesMap();
+    $qualificationRankings = BestRaces::buildQualificationRankingsAllMaps($qualiBestRacesConfig, $nickMap);
+
+    // Example:
+    $rallyList = isset($qualificationRankings['Rally']) ? $qualificationRankings['Rally'] : array();
+    console("RALLY " . print_r($rallyList, true));
 
     // select player in the scoreboard.
     // TODO: if player is not in board, select first player.
@@ -124,7 +134,7 @@ function umPanelPlayerConnect($event, $login) {
 
     // Default tab (store action name)
     if (!isset($_players[$login]['ML'][UmPanelKeys::ML_TAB]) || $_players[$login]['ML'][UmPanelKeys::ML_TAB] === '') {
-        $_players[$login]['ML'][UmPanelKeys::ML_TAB] = UmPanelKeys::ACT_TAB_PLAYERS;
+        $_players[$login]['ML'][UmPanelKeys::ML_TAB] = UmPanelKeys::ACT_TAB_SEMI_FINAL;
     }
 
     umPanelUpdateXml($login, 'show');
