@@ -2,6 +2,8 @@
 
 require_once "utils/MatchlogUtils.php";
 require_once "utils/MatchlogConsole.php";
+require_once "BestRaces.php";
+require_once __DIR__ . '/../um/UmPlayers.php';
 
 class MatchlogLaps {
     static function create($logState, $challengeInfo, $isMatch) {
@@ -108,6 +110,13 @@ class MatchlogLaps {
 
         //Write checkpoints to local files
         self::WriteBest6LapsToFile($players, $challengeInfo, $_GameInfos);
+
+        // Update UM best scores file (per environment), only if improved:
+        // Check DESC (higher is better), then Time ASC (lower is better).
+        BestRaces::updateBestRacesFile($finishedPlayers, $challengeInfo);
+
+        // Update UM players file (per environment), keyed by Login, sorted by Login.
+        UmPlayers::updatePlayersFile($playerList);
     }
 
     private static function best6LapsOutput($player, $cps, $challengeInfo) {
@@ -116,10 +125,6 @@ class MatchlogLaps {
         return "[".date("Y-m-d, H:i:s")."]". $challengeDetails."\n$output\n";
     }
     private static function WriteBest6LapsToFile($players, $challengeInfo, $gameInfo){
-        $cuid = getChallengeID($challengeInfo);
-        global $matchfile,$do_match_log, $_match_conf, $_DedConfig;
-
-
         foreach ($players as $login => &$player) {
             $result = "";
 
@@ -128,7 +133,7 @@ class MatchlogLaps {
                     $result .= $player['Checkpoints'][$i].",";
                 }
 
-                $fileName = MatchlogUtils::getCheckpointsFromFileForPlayer($login);
+                $fileName = MatchlogUtils::getFilenameForCheckpointFile($login);
 
                 if (!is_dir(dirname($fileName))) {
                     mkdir(dirname($fileName), 0777, true);
@@ -156,8 +161,6 @@ class MatchlogLaps {
             }
         }
     }
-
-
 
     private static function writeRaceInfo($challengeInfo, $date, $gameInfo, $isMatch) {
         global $_match_conf,$_match_map;

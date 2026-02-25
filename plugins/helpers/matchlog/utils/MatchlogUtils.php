@@ -1,22 +1,19 @@
 <?php
-require_once(dirname(__FILE__)."/../../challenge/challenge.php");
+require_once(dirname(__FILE__) . "/../../challenge/challenge.php");
 
 
-class MatchlogUtils
-{
+class MatchlogUtils {
     /**
      * @param $challengeInfo - The Challenge info
      * @param $prefix - TIMEATTACK, ROUNDS, LAPS, TEAMLAPS, STUNTS
      * @return string - The title
      */
-    static function getMatchlogTitle($challengeInfo, $prefix, $suffix = "")
-    {
+    static function getMatchlogTitle($challengeInfo, $prefix, $suffix = "") {
         $cuid = getChallengeID($challengeInfo);
         return $prefix . ' MATCH on [' . stripColors($challengeInfo['Name']) . '] (' . $challengeInfo['Environnement'] . ',' . $cuid . ',' . stripColors($challengeInfo['Author']) . ')' . $suffix;
     }
 
-    static function writeRaceInfo($challengeInfo, $date, $gameInfo, $gameMode)
-    {
+    static function writeRaceInfo($challengeInfo, $date, $gameInfo, $gameMode) {
         $result = "\n* Race info:";
         $result .= "\nDate, ChallengeName, ChallengeNameWithColor, ChallengeID, ChallengeAuthor, Environment, GameMode, NumberOfLaps";
         $result .= "\n" . $date . "," . stripColors($challengeInfo["Name"]) . "," .
@@ -26,8 +23,7 @@ class MatchlogUtils
         return $result . MatchlogUtils::writeSectionDelimiter();
     }
 
-    static function writePlayers($playersList)
-    {
+    static function writePlayers($playersList) {
         $result = "\n* Players:\n";
         $result .= "Login, NickName, NickNameWithColor";
         for ($i = 0; $i < sizeof($playersList); $i++) {
@@ -41,8 +37,7 @@ class MatchlogUtils
         return $result . self::writeSectionDelimiter();
     }
 
-    static function writeSpectators($playersList)
-    {
+    static function writeSpectators($playersList) {
         $text = "";
         $separator = "\n* Spectators: ";
         for ($i = 0; $i < sizeof($playersList); $i++) {
@@ -59,15 +54,18 @@ class MatchlogUtils
         return "";
     }
 
-    static function writeSectionDelimiter()
-    {
+    static function writeSectionDelimiter() {
         return "\n--------------------";
     }
 
-    static function getCheckpointsFromFileForPlayer($playerLogin)
-    {
+    static function getFilenameForCheckpointFile($login) {
         global $_GameInfos, $_ChallengeInfo;
-        $filename = "fastlog/" . $_GameInfos["LapsNbLaps"] . "laps/" . $_ChallengeInfo['UId'] . "_" . $playerLogin . ".txt";
+        $fileName = "fastlog/" . $_GameInfos["LapsNbLaps"] . "laps/" . $_ChallengeInfo['UId'] . "_" . $login . ".txt";
+        return $fileName;
+    }
+
+    static function getCheckpointsFromFileForPlayer($login) {
+        $filename = self::getFilenameForCheckpointFile($login);
 
         if (!file_exists($filename)) {
             return;
@@ -93,8 +91,7 @@ class MatchlogUtils
 
 // -----------------------------------
 // compare function for usort, return -1 if $a should be before $b
-    function matchlogRecCompare($a, $b)
-    {
+    function matchlogRecCompare($a, $b) {
         if ($a['FinalTime'] <= 0 && $b['FinalTime'] <= 0)
             return strcmp($a['NickName'], $b['NickName']);
         elseif ($b['FinalTime'] <= 0)
