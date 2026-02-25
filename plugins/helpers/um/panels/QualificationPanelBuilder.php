@@ -5,7 +5,7 @@ require_once __DIR__ . '/../layout/Layout.php';
 require_once 'TableBuilder.php';
 
 class QualificationPanelBuilder {
-    static function build($login, Layout $layout, $umConfig) {
+    static function build($login, Layout $layout, UMConfig $umConfig, UMState $umState) {
         global $_players;
 
         $items = array(
@@ -35,8 +35,6 @@ class QualificationPanelBuilder {
             'tabMinW'    => 3.4,
             'tabMaxW'    => 40.0,
         ));
-
-        console(print_r($sub['activeAction'], true));
 
         switch ($sub['activeAction']) {
             case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD:
