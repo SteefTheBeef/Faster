@@ -133,6 +133,72 @@ class XmlTag {
         return self::tag('frame', $attrs, $innerXml);
     }
 
+    /**
+     * Generic prev/next pager (Icons64x64_1 ArrowPrev/ArrowNext + "page/pageCount" label)
+     *
+     * Important: x positions are computed relative to $containerW (typically table width),
+     * so it keeps the "aligned to table width" behavior.
+     *
+     * @param float|int $frameX Frame origin X (where the pager frame is placed)
+     * @param float|int $frameY Frame origin Y (where the pager frame is placed)
+     * @param float|int $frameZ Frame origin Z
+     * @param float|int $containerW Width used for internal alignment (typically table width)
+     * @param int $page 0-based
+     * @param int $pageCount total pages (>= 1)
+     * @param int|null $prevAction Action id for prev (null/0 to disable)
+     * @param int|null $nextAction Action id for next (null/0 to disable)
+     * @param array $opts Optional overrides:
+     *  - iconSize (float) default 1.6
+     *  - labelW (float) default 2.0
+     *  - gap (float) default 0.25
+     *  - midY (float) default -0.8
+     *  - textPrefix (string) default '$aaa'
+     *  - prevSubstyle (string) default 'ArrowPrev'
+     *  - nextSubstyle (string) default 'ArrowNext'
+     * @return string
+     */
+    public static function pagerPrevNext64($frameX, $frameY, $frameZ, $containerW, $page, $pageCount, $prevAction, $nextAction, array $opts = array()) {
+        $iconSize = isset($opts['iconSize']) ? (float)$opts['iconSize'] : 1.6;
+        $labelW = isset($opts['labelW']) ? (float)$opts['labelW'] : 2.0;
+        $gap = isset($opts['gap']) ? (float)$opts['gap'] : 0.25;
+        $midY = isset($opts['midY']) ? (float)$opts['midY'] : -0.8;
+
+        $textPrefix = isset($opts['textPrefix']) ? (string)$opts['textPrefix'] : '$aaa';
+        $prevSubstyle = isset($opts['prevSubstyle']) ? (string)$opts['prevSubstyle'] : 'ArrowPrev';
+        $nextSubstyle = isset($opts['nextSubstyle']) ? (string)$opts['nextSubstyle'] : 'ArrowNext';
+
+        // NEW: horizontal alignment of the whole pager within containerW
+        $align = isset($opts['align']) ? strtolower((string)$opts['align']) : 'right'; // 'left'|'center'|'right'
+        $pagerW = (2.0 * $iconSize) + (2.0 * $gap) + $labelW;
+
+        $containerW = (float)$containerW;
+        if ($containerW < 0) $containerW = 0;
+
+        $startX = 0.0;
+        if ($align === 'left') {
+            $startX = 0.0;
+        } elseif ($align === 'center' || $align === 'middle') {
+            $startX = ($containerW - $pagerW) / 2.0;
+        } else { // default: right
+            $startX = $containerW - $pagerW;
+        }
+
+        // Optional safety: clamp so we don't go negative if container is narrower than pager
+        if ($startX < 0) $startX = 0.0;
+
+        // Place elements relative to startX
+        $prevX = $startX;
+        $midX  = $startX + $iconSize + $gap + ($labelW / 2.0);
+        $nextX = $startX + $iconSize + $gap + $labelW + $gap;
+
+        $inner = '';
+        $inner .= self::quadIcon64($prevX, 0, $iconSize, $prevSubstyle, $prevAction);
+        $inner .= self::labelCenterCenter($midX, $midY, $labelW, $iconSize, $textPrefix . (((int)$page) + 1) . "/" . (int)$pageCount);
+        $inner .= self::quadIcon64($nextX, 0, $iconSize, $nextSubstyle, $nextAction);
+
+        return self::frame($frameX, $frameY, $frameZ, $inner);
+    }
+
     private static function setCommonAttrs(array &$attrs, $x, $y, $action = null) {
         $zIndex = self::popAttr($attrs, 'z', 0);
         if ($action !== null) {

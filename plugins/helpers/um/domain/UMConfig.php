@@ -1,8 +1,4 @@
 <?php
-
-require_once 'UMConfigEntry.php';
-require_once 'UmMap.php';
-
 class UMConfig {
 
     public $um3Semi;
@@ -136,8 +132,41 @@ class UMConfig {
             20 => 8,
             21 => 6,
             22 => 4,
-            23  => 2,
+            23 => 2,
         ));
 
     }
+
+    function generatePointsArray() {
+        $first = 500;
+        $last = 10;
+        $spots = 24;
+
+        $targetSecondPct = 0.77;
+        $targetSecond = $first * $targetSecondPct;
+
+        // rank 2 => t = 1/($spots-1)
+        $t2 = 1 / ($spots - 1);
+
+        // Solve for $power:
+        // (targetSecond - first) / (last - first) = t2^power
+        $ratio = ($targetSecond - $first) / ($last - $first);
+        $power = log($ratio) / log($t2); // ~0.510...
+
+        $umConfig['um4_semi'] = array();
+        for ($rank = 1; $rank <= $spots; $rank++) {
+            $t = ($rank - 1) / ($spots - 1);
+            $umConfig['um4_semi'][$rank] = (int)round($first + ($last - $first) * pow($t, $power));
+            $umConfig['um4_semi'][$rank] = round($umConfig['um4_semi'][$rank] / 10) * 2;
+        }
+
+        console(print_r($umConfig['um4_semi'], true));
+
+        // quick sanity check
+        echo "power=" . $power . "\n";
+        echo "1st=" . $umConfig['um4_semi'][1] . "\n";
+        echo "2nd=" . $umConfig['um4_semi'][2] . " (" . round($umConfig['um4_semi'][2] / $umConfig['um4_semi'][1] * 100, 2) . "%)\n";
+        echo "24th=" . $umConfig['um4_semi'][24] . "\n";
+    }
+
 }

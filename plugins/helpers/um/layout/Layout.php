@@ -1,9 +1,5 @@
 <?php
 
-require_once __DIR__ . '/LayoutGeometry.php';
-require_once __DIR__ . '/LayoutTheme.php';
-require_once __DIR__ . '/LayoutMarkup.php';
-
 class Layout
 {
     /** @var LayoutGeometry */

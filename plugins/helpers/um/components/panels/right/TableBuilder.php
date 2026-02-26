@@ -1,7 +1,4 @@
 <?php
-require_once __DIR__ . '/../../utils/StringUtils.php';
-require_once __DIR__ . '/../UMPanel.php';
-require_once __DIR__ . '/../layout/Layout.php';
 
 class TableBuilder {
     static function build(Layout $layout, $rows, $reserveRightW, $topOffset, $columns, $preferredRowH = null) {

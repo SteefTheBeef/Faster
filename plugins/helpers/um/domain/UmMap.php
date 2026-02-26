@@ -1,4 +1,5 @@
 <?php
+
 class UmMap {
     public $name;
     public $nameWithColor;

@@ -1,36 +1,32 @@
 <?php
-require_once __DIR__ . '/../../utils/StringUtils.php';
-require_once __DIR__ . '/../UMPanel.php';
-require_once __DIR__ . '/../layout/Layout.php';
-require_once 'TableBuilder.php';
 
 class RulesPanelBuilder {
-    static function build($login, Layout $layout, $umConfig) {
-        global $_players;
-
+    static function build($login, Layout $layout, UMConfig $umConfig, UmState $umState) {
+        $selectedSubTab = $umState->getSelectedSubTab($login);
         $submenuItems = array(
-            array('title' => 'Qualification',         'action' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION),
-            array('title' => 'Qualification Points',  'action' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION_POINTS),
-            array('title' => 'Semi-Final',            'action' => UmPanelKeys::ACT_SUBTAB_RULES_SEMI_FINAL),
-            array('title' => 'Grand-Final',           'action' => UmPanelKeys::ACT_SUBTAB_RULES_MISC),
+            array('title' => 'Qualification', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION),
+            array('title' => 'Qualification Points', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION_POINTS),
+            array('title' => 'Semi-Final', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_SEMI_FINAL),
+            array('title' => 'Grand-Final', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_MISC),
         );
 
-        $sub = SubMenuBuilder::build(
+        $sub = SubTabs::right(
             $login,
             $layout,
             UmPanelKeys::ACT_TAB_RULES,
             $submenuItems,
+            $selectedSubTab,
             array(
                 'submenuR' => 0.0,
                 'submenuW' => 17.0,
-                'gap'      => 0.0,
+                'gap' => 0.0,
 
                 // NEW: let the builder validate+default
                 'defaultAction' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION,
             )
         );
 
-        switch ($sub['activeAction']) {
+        switch ($selectedSubTab) {
             case UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION:
                 $contentXml = self::qualification($layout, $umConfig);
                 break;
@@ -54,7 +50,7 @@ class RulesPanelBuilder {
     static function qualification(Layout $layout, $umConfig) {
         $xml = UMPanel::textLabel($layout, '$fffQualification', 0, true);
         $accentColor = $layout->theme->accentTextColor;
-
+        $panelTitle = RightPanel::buildTitle($layout, 'Rules: Qualification');
         $p1 = "This server will run seven carefully selected qualification maps in a continuous loop, "
             . "one after the other, for the whole duration of the qualification. "
             . "As this is a TMUF cup, one map for each of the seven environments has been picked."
@@ -75,7 +71,7 @@ class RulesPanelBuilder {
             . "\$fffwill count towards your cumulative qualification results. "
             . "Records achieved on other servers are not valid.";
         $xml .= UMPanel::textLabel($layout, $p4, 31);
-        return $xml;
+        return $panelTitle . $xml;
     }
 
     static function qualificationPoints(Layout $layout, UMConfig $umConfig) {
@@ -113,8 +109,8 @@ class RulesPanelBuilder {
             $tableTopGap,
             $columns
         );
-
-        return $xml;
+        $panelTitle = RightPanel::buildTitle($layout, 'Rules: Qualification Points');
+        return $panelTitle . $xml;
     }
 
     static function semiFinalPoints(Layout $layout, UMConfig $umConfig) {
@@ -149,7 +145,7 @@ class RulesPanelBuilder {
             $columns,
             1.4
         );
-
-        return $xml;
+        $panelTitle = RightPanel::buildTitle($layout, 'Rules: Semi-Final');
+        return $panelTitle . $xml;
     }
 }

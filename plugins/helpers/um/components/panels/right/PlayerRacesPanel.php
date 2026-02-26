@@ -1,8 +1,5 @@
 <?php
-require_once __DIR__ . '/../../utils/StringUtils.php';
-require_once __DIR__ . '/../UMPanel.php';
-require_once __DIR__ . '/../layout/Layout.php';
-require_once __DIR__ . '/../../utils/MLState.php';
+
 
 class PlayerRacesPanel {
     static function build($login, $selectedPlayer, Layout $layout, array $mlAct) {
@@ -39,7 +36,7 @@ class PlayerRacesPanel {
             $canNext = ($page < $pageCount - 1);
         }
 
-        return self::renderRacesTable($v, $rows, $page, $pageCount, $showPager, $mlAct, $canPrev, $canNext);
+        return RightPanel::buildTitle($layout, $selectedPlayer['NickNameWithColor']) . self::renderRacesTable($v, $rows, $page, $pageCount, $showPager, $mlAct, $canPrev, $canNext);
     }
 
     /**
@@ -205,28 +202,20 @@ class PlayerRacesPanel {
         if ($showPager) {
             $pagerY = $v['headerY'] - (($count + 1) * $v['rowH']) - 1.2;
 
-            $labelW = 2.0;
-            $gap = 0.25;
-
-            // NOTE: keep original behavior: pager is aligned relative to table width (not panel width).
-            $nextX = $v['tableW'] - 1.6;
-            $prevX = $nextX - 1.6 - $gap - $labelW - $gap - 1.6;
-
-            $prevCenterX = $prevX + (1.6 / 2.0);
-            $nextCenterX = $nextX + (1.6 / 2.0);
-            $midX = ($prevCenterX + $nextCenterX) / 2.0;
-            $midY = -0.8;
-
             $prevAct = ($canPrev && isset($mlAct[UmPanelKeys::ACT_RACES_PREV])) ? (int)$mlAct[UmPanelKeys::ACT_RACES_PREV] : null;
             $nextAct = ($canNext && isset($mlAct[UmPanelKeys::ACT_RACES_NEXT])) ? (int)$mlAct[UmPanelKeys::ACT_RACES_NEXT] : null;
 
-            $pagerInner = XmlTag::quadIcon64($prevX, 0, 1.6, 'ArrowPrev', $prevAct);
-            $pagerInner .= XmlTag::labelCenterCenter($midX, $midY, $labelW, 1.6, "\$aaa" . ((int)$page + 1) . "/" . (int)$pageCount);
-            $pagerInner .= XmlTag::quadIcon64($nextX, 0, 1.6, 'ArrowNext', $nextAct);
-
-            $xml .= XmlTag::frame($v['tableX'], $pagerY, 0.2, $pagerInner);
+            $xml .= XmlTag::pagerPrevNext64(
+                $v['tableX'],
+                $pagerY,
+                0.2,
+                $v['tableW'],
+                (int)$page,
+                (int)$pageCount,
+                $prevAct,
+                $nextAct
+            );
         }
-
         return $xml;
     }
 }

@@ -1,29 +1,11 @@
 <?php
-require_once 'layout/Layout.php';
-require_once __DIR__ . '/../utils/StringUtils.php';
-require_once __DIR__ . '/UmPanelKeys.php';
 
-class SubMenuBuilder {
-
-
-    /**
-     * Backward compatible entry point.
-     *
-     * opts:
-     *  - placement: 'right' (default) or 'bottom'
-     */
-    public static function build($login, Layout $layout, $menuKey, $items, $opts = array()) {
-        $placement = isset($opts['placement']) ? (string)$opts['placement'] : 'right';
-        if ($placement === 'bottom') {
-            return self::buildBottom($login, $layout, $menuKey, $items, $opts);
-        }
-        return self::buildRight($login, $layout, $menuKey, $items, $opts);
-    }
+class SubTabs {
 
     /**
      * Right-side vertical submenu (current behavior).
      */
-    public static function buildRight($login, Layout $layout, $menuKey, $items, $opts = array()) {
+    public static function right($login, Layout $layout, $menuKey, $items, $selectedSubTab, $opts = array()) {
         $p = self::prepare($login, $layout, $menuKey, $items, $opts);
 
         $xml = '';
@@ -32,7 +14,7 @@ class SubMenuBuilder {
             if (!isset($items[$i]['action'])) continue;
 
             $itActionName = (string)$items[$i]['action'];
-            $isActive = ($p['activeAction'] === $itActionName);
+            $isActive = ($selectedSubTab === $itActionName);
             $itActionId = isset($p['mlAct'][$itActionName]) ? (int)$p['mlAct'][$itActionName] : 0;
 
             $bg = $isActive ? '060D' : '010D';
@@ -70,7 +52,7 @@ class SubMenuBuilder {
      *  - bottomMargin (float): used only if bottomY not provided, relative to -panelH
      *  - itemGap (float)     : optional spacing between tabs
      */
-    public static function buildBottom($login, Layout $layout, $menuKey, $items, $opts = array()) {
+    public static function bottom($login, Layout $layout, $menuKey, $items, $selectedSubTab, $opts = array()) {
 
         $autoWidth = isset($opts['autoWidth']) ? (bool)$opts['autoWidth'] : true;
 
@@ -161,7 +143,7 @@ class SubMenuBuilder {
             $i = $visibleIdx[$k];
 
             $itActionName = (string)$items[$i]['action'];
-            $isActive = ($p['activeAction'] === $itActionName);
+            $isActive = ($selectedSubTab === $itActionName);
             $itActionId = isset($p['mlAct'][$itActionName]) ? (int)$p['mlAct'][$itActionName] : 0;
 
             $w = $tabWs[$k] * $scale;

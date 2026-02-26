@@ -1,7 +1,4 @@
 <?php
-require_once __DIR__ . '/../../utils/StringUtils.php';
-require_once __DIR__ . '/../UMPanel.php';
-require_once __DIR__ . '/../layout/Layout.php';
 
 class InformationPanelBuilder {
     static function getInformationPanel(Layout $layout) {
@@ -31,6 +28,6 @@ class InformationPanelBuilder {
         //$xml .= UMPanel::textLabel($layout, $discordLink, 17);
 
         //$xml .= "<label posn='1" . ($panelBodyTopY - 10) . " 0.2' sizen='" . ($panelW/1.5 - 2) . " {$panelBodyH}' halign='left' valign='top' textsize='1' autonewline='1' text='" . safeString($discordLink) . "'/>";
-        return $xml;
+        return RightPanel::buildTitle($layout, "Information") . $xml;
     }
 }

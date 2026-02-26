@@ -5,6 +5,7 @@ class LayoutTheme
     public $borderColor;
 
     public $panelBackgroundColor;
+    public $leftPanelBackgroundColor;
 
     public $cardBackgroundColor;
     public $cardSelectedBackgroundColor;
@@ -23,6 +24,7 @@ class LayoutTheme
         $t->borderColor = '010D';
 
         $t->panelBackgroundColor = '010D';
+        $t->leftPanelBackgroundColor = '020D';
 
         $t->cardBackgroundColor = '020D';
         $t->cardSelectedBackgroundColor = '010D';

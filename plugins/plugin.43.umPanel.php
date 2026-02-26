@@ -15,52 +15,64 @@
 // See dev documentation for more infos.
 //
 // Just uncomment the registerPlugin() function to make it active
-require_once "helpers/matchlog/MatchlogFileParser.php";
-require_once "helpers/um/UMState.php";
-require_once "helpers/um/UMConfig.php";
-require_once "helpers/um/UMConfigEntry.php";
-require_once "helpers/um/UMPanel.php";
-require_once "helpers/um/panels/InformationPanelBuilder.php";
-require_once "helpers/um/panels/RulesPanelBuilder.php";
-require_once "helpers/um/panels/SchedulePanelBuilder.php";
-require_once "helpers/um/SubMenuBuilder.php";
+
+// Layout
+require_once "helpers/um/layout/LayoutGeometry.php";
+require_once "helpers/um/layout/LayoutMarkup.php";
+require_once "helpers/um/layout/LayoutTheme.php";
 require_once "helpers/um/layout/Layout.php";
-require_once "helpers/um/UmPanelRenderer.php";
-require_once "helpers/um/UmPanelKeys.php";
-require_once "helpers/um/ScoresMerger.php";
+
+// Utils
+require_once "helpers/utils/XmlTag.php";
+require_once "helpers/utils/MLState.php";
+require_once "helpers/utils/StringUtils.php";
+require_once "helpers/um/UMPanel.php";
+
+// Services
+require_once "helpers/um/services/QualificationRankingService.php";
+
+// Storage
+require_once "helpers/um/storage/MatchlogFileParser.php";
+require_once "helpers/um/storage/UmPlayers.php";
+require_once "helpers/um/storage/BestRaces.php";
+require_once "helpers/um/storage/utils/FastFile.php";
+require_once "helpers/um/storage/utils/CsvFile.php";
+
+// Domain
+require_once "helpers/um/domain/UMConfigEntry.php";
+require_once "helpers/um/domain/UMConfig.php";
+require_once "helpers/um/domain/UmMap.php";
+require_once "helpers/um/domain/UmPanelKeys.php";
+require_once "helpers/um/domain/UmState.php";
+
+// General Components
+require_once "helpers/um/components/BoardTitle.php";
+require_once "helpers/um/components/BoardBorders.php";
+require_once "helpers/um/components/OpenCloseToggle.php";
+require_once "helpers/um/components/BackgroundPanel.php";
+require_once "helpers/um/components/Tabs.php";
+require_once "helpers/um/components/SubTabs.php";
+
+// Left panel components
+require_once "helpers/um/components/panels/left/PlayerListPlayoffsPanel.php";
+require_once "helpers/um/components/panels/left/QualiPlayerListPanelBuilder.php";
+require_once "helpers/um/components/panels/left/PlayerPagination.php";
+
+// Right panel components
+require_once "helpers/um/components/panels/right/TableBuilder.php";
+require_once "helpers/um/components/panels/right/RightPanel.php";
+require_once "helpers/um/components/panels/right/InformationPanelBuilder.php";
+require_once "helpers/um/components/panels/right/QualificationPanelBuilder.php";
+require_once "helpers/um/components/panels/right/PlayerRacesPanel.php";
+require_once "helpers/um/components/panels/right/RulesPanelBuilder.php";
+require_once "helpers/um/components/panels/right/SchedulePanelBuilder.php";
+
+// Main component
+require_once "helpers/um/components/UmBoard.php";
+require_once "helpers/um/components/UmPanelRenderContext.php";
+
 registerPlugin(UmPanelKeys::ML_ID_PANEL, 43, 1.0);
 
-function generatePointsArray() {
-    $first = 500;
-    $last = 10;
-    $spots = 24;
-
-    $targetSecondPct = 0.77;
-    $targetSecond = $first * $targetSecondPct;
-
-// rank 2 => t = 1/($spots-1)
-    $t2 = 1 / ($spots - 1);
-
-// Solve for $power:
-// (targetSecond - first) / (last - first) = t2^power
-    $ratio = ($targetSecond - $first) / ($last - $first);
-    $power = log($ratio) / log($t2); // ~0.510...
-
-    $umConfig['um4_semi'] = array();
-    for ($rank = 1; $rank <= $spots; $rank++) {
-        $t = ($rank - 1) / ($spots - 1);
-        $umConfig['um4_semi'][$rank] = (int)round($first + ($last - $first) * pow($t, $power));
-        $umConfig['um4_semi'][$rank] = round($umConfig['um4_semi'][$rank] / 10) * 2;
-    }
-
-    console(print_r($umConfig['um4_semi'], true));
-
-// quick sanity check
-    echo "power=" . $power . "\n";
-    echo "1st=" . $umConfig['um4_semi'][1] . "\n";
-    echo "2nd=" . $umConfig['um4_semi'][2] . " (" . round($umConfig['um4_semi'][2] / $umConfig['um4_semi'][1] * 100, 2) . "%)\n";
-    echo "24th=" . $umConfig['um4_semi'][24] . "\n";
-}
 
 //--------------------------------------------------------------
 // Init : (plugin init)
@@ -71,7 +83,7 @@ function umPanelInit($event) {
     $umConfig = new UMConfig();
     $qualiBestRacesConfig = $umConfig->um4QualiBestRace;
     $qualiBestLapsConfig = $umConfig->um4QualiBestLap;
-    $umState = new UMState($qualiBestRacesConfig, $qualiBestLapsConfig);
+    $umState = new UmState($qualiBestRacesConfig, $qualiBestLapsConfig);
 
     $umScoreBoardSelectedPlayerRow = array();
     // here we store the player's race results'
@@ -98,10 +110,11 @@ function umPanelInit($event) {
     }
 }
 
-function computeRankings() {
+function computeRankings($login) {
     global $umState;
     $umState = (object)$umState;
     $umState->computeRankings();
+    $umState->playerConnect($login);
 }
 
 //--------------------------------------------------------------
@@ -110,22 +123,7 @@ function computeRankings() {
 function umPanelPlayerConnect($event, $login) {
     global $_players, $umState, $umScoreBoardPlayers, $umScoreBoardSelectedPlayerRow, $selectedPlayer, $qualiBestRacesConfig, $qualiBestLapsConfig;
 
-    if ($umState->shouldUpdateXml) {
-        umPanelUpdateXml($login, 'show');
-        $umState->shouldUpdateXml = false;
-    }
-
-    computeRankings();
-
-    // select player in the scoreboard.
-    // TODO: if player is not in board, select first player.
-    for ($i = 0; $i < count($umScoreBoardPlayers); $i++) {
-
-        if ($umScoreBoardPlayers[$i]['Login'] == $login) {
-            $umScoreBoardSelectedPlayerRow[$login] = $i;
-            $selectedPlayer[$login] = $umScoreBoardPlayers[$i];
-        }
-    }
+    computeRankings($login);
 
     // Default: panel open
     if (!isset($_players[$login]['ML'][UmPanelKeys::ML_PANEL_CLOSED])) {
@@ -161,8 +159,7 @@ function umPanelPlayerShowML($event, $login, $ShowML) {
 // PlayerManialinkPageAnswer : (event from server callback)
 //--------------------------------------------------------------
 function umPanelPlayerManialinkPageAnswer($event, $login, $answer, $action) {
-    global $umScoreBoardSelectedPlayerRow, $selectedPlayer;
-    UmPanelRenderer::handleAction($login, $action, $answer, $umScoreBoardSelectedPlayerRow, $selectedPlayer);
+    UmBoard::handleAction($login, $action);
     umPanelUpdateXml($login, 'show');
 }
 
@@ -186,14 +183,12 @@ function getUMPanelXml($login) {
     global $_ml_act, $umConfig, $umState;
 
     $umState = (object)$umState;
-    //console('$umScoreBoardPlayers ' . print_r($umScoreBoardPlayers, true));
-    //console('$umState->playerRankings ' . print_r($umState->qualificationRankings, true));
     $layout = Layout::build();
 
     $players = $umScoreBoardPlayers;
     $selectedRow = isset($umScoreBoardSelectedPlayerRow[$login]) ? (int)$umScoreBoardSelectedPlayerRow[$login] : -1;
 
-    return UmPanelRenderer::buildPanelXml(
+    $ctx = new UmPanelRenderContext(
         $login,
         $layout,
         $players,
@@ -204,6 +199,8 @@ function getUMPanelXml($login) {
         $umConfig,
         $umState
     );
+
+    return UmBoard::buildPanelXml($ctx);
 }
 
 function umPanelPlayerMenuBuild($event, $login) {

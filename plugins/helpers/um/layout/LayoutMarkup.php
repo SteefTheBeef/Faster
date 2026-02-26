@@ -2,11 +2,11 @@
 
 class LayoutMarkup
 {
-    public $panelFrameStart;
-    public $panelFrameEnd;
+    public $rightFrameStart;
+    public $rightFrameEnd;
 
-    public $playerFrameStart;
-    public $playerFrameEnd;
+    public $leftFrameStart;
+    public $leftFrameEnd;
 
     public $frameEnd;
 
@@ -20,11 +20,11 @@ class LayoutMarkup
         $m = new self();
 
         // Keep string format consistent with the previous output.
-        $m->panelFrameStart = "<frame posn='" . ($g->backgroundTopLeftX + $g->panelOffsetX) . " {$g->listFrameY} 0.1'>";
-        $m->panelFrameEnd   = "</frame>";
+        $m->rightFrameStart = "<frame posn='" . ($g->backgroundTopLeftX + $g->panelOffsetX) . " {$g->listFrameY} 0.1'>";
+        $m->rightFrameEnd   = "</frame>";
 
-        $m->playerFrameStart = "<frame posn='{$g->backgroundTopLeftX} {$g->listFrameY} 0.1'>";
-        $m->playerFrameEnd   = "</frame>";
+        $m->leftFrameStart = "<frame posn='{$g->backgroundTopLeftX} {$g->listFrameY} 0.1'>";
+        $m->leftFrameEnd   = "</frame>";
 
         $m->frameEnd = "</frame>";
 

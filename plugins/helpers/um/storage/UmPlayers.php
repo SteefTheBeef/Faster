@@ -82,36 +82,6 @@ class UmPlayers {
     }
 
     /**
-     * Merge nicknames from players.txt into a numeric players list (like bestScores output).
-     * Populates NickName and NickNameWithColor if missing/empty.
-     */
-    static function mergeNicknamesIntoPlayersList(&$playersList, $nickMap) {
-        if (!is_array($playersList) || count($playersList) < 1) return;
-        if (!is_array($nickMap) || count($nickMap) < 1) return;
-
-        $count = count($playersList);
-        for ($i = 0; $i < $count; $i++) {
-            if (!isset($playersList[$i]) || !is_array($playersList[$i])) continue;
-
-            $login = isset($playersList[$i]['Login']) ? stripColors($playersList[$i]['Login']) : '';
-            if ($login === '') continue;
-
-            if (!isset($nickMap[$login]) || !is_array($nickMap[$login])) continue;
-            $row = $nickMap[$login];
-
-            $hasNick = isset($playersList[$i]['NickName']) && (string)$playersList[$i]['NickName'] !== '';
-            $hasNickColor = isset($playersList[$i]['NickNameWithColor']) && (string)$playersList[$i]['NickNameWithColor'] !== '';
-
-            if (!$hasNick && isset($row['NickName']) && (string)$row['NickName'] !== '') {
-                $playersList[$i]['NickName'] = (string)$row['NickName'];
-            }
-            if (!$hasNickColor && isset($row['NickNameWithColor']) && (string)$row['NickNameWithColor'] !== '') {
-                $playersList[$i]['NickNameWithColor'] = (string)$row['NickNameWithColor'];
-            }
-        }
-    }
-
-    /**
      * File format:
      * # UM Players
      * # UpdatedAt=YYYY-mm-dd HH:ii:ss

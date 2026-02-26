@@ -1,13 +1,11 @@
 <?php
-require_once __DIR__ . '/../../utils/StringUtils.php';
-require_once __DIR__ . '/../UMPanel.php';
-require_once __DIR__ . '/../layout/Layout.php';
-require_once 'TableBuilder.php';
+
 
 class QualificationPanelBuilder {
-    static function build($login, Layout $layout, UMConfig $umConfig, UMState $umState) {
+    static function build($login, Layout $layout, UMConfig $umConfig, UmState $umState) {
         global $_players;
 
+        $selectedSubTab = $umState->getSelectedSubTab($login);
         $items = array(
             array('title' => 'Leaderboard', 'action' => UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD),
             array('title' => 'Rally', 'action' => UmPanelKeys::ACT_SUBTAB_QUALIFICATION_RALLY),
@@ -19,21 +17,21 @@ class QualificationPanelBuilder {
             array('title' => 'Stadium', 'action' => UmPanelKeys::ACT_SUBTAB_QUALIFICATION_STADIUM),
         );
 
-        $sub = SubMenuBuilder::build($login, $layout,  UmPanelKeys::ACT_TAB_QUALIFICATION, $items, array(
-            'placement'  => 'bottom',
-            'submenuR'   => 0.0,
-            'rowH'       => 2.8,
-            'bottomY'    => -53.6,
+        $sub = SubTabs::bottom($login, $layout, UmPanelKeys::ACT_TAB_QUALIFICATION, $items, $selectedSubTab, array(
+            'placement' => 'bottom',
+            'submenuR' => 0.0,
+            'rowH' => 2.8,
+            'bottomY' => -53.6,
 
-            'autoWidth'  => true,
-            'fill'       => true,   // use the unused space
-            'tabLift'    => 0.5,    // adjust 0.3..0.8 if needed
+            'autoWidth' => true,
+            'fill' => true,   // use the unused space
+            'tabLift' => 0.5,    // adjust 0.3..0.8 if needed
 
-            'itemGap'    => 0.0,
-            'textsize'   => 1.10,
-            'tabPadLR'   => 0.7,
-            'tabMinW'    => 3.4,
-            'tabMaxW'    => 40.0,
+            'itemGap' => 0.0,
+            'textsize' => 1.10,
+            'tabPadLR' => 0.7,
+            'tabMinW' => 3.4,
+            'tabMaxW' => 40.0,
         ));
 
         switch ($sub['activeAction']) {
@@ -81,41 +79,6 @@ class QualificationPanelBuilder {
     }
 
     static function envi(Layout $layout, UMConfig $umConfig) {
-        $raceDist = is_array($umConfig->um4QualiBestRace->pointsDistribution)
-            ? $umConfig->um4QualiBestRace->pointsDistribution
-            : array();
-
-        $lapDist = is_array($umConfig->um4QualiBestLap->pointsDistribution)
-            ? $umConfig->um4QualiBestLap->pointsDistribution
-            : array();
-
-        // Keep table out of the submenu area.
-        $reservedForSubmenu = 17.0 + 0.8; // submenuW + breathing gap
-
-        // Add a subheader like in the Qualification panel
-        $subHeaderYOffset = 0.0;
-        $tableTopGap = 3.2; // how far below the subheader the table starts (tweak to taste)
-
-        $xml = UMPanel::textLabel($layout, '$fffPoints Per Map in Qualification', $subHeaderYOffset, true);
-
-        $columns = array(
-            array('header' => 'Rank', 'rank' => true, 'halign' => 'left'),
-            array('header' => 'Points Fastest Race', 'data' => $raceDist, 'halign' => 'right'),
-        );
-
-        // Optional 3rd column: only add it if you actually provide data
-        if (is_array($lapDist) && count($lapDist) > 0) {
-            $columns[] = array('header' => 'Points Fastest Lap', 'data' => $lapDist, 'halign' => 'right');
-        }
-
-        $xml .= TableBuilder::build(
-            $layout,
-            24,
-            $reservedForSubmenu,
-            $tableTopGap,
-            $columns
-        );
-
-        return $xml;
+        return RightPanel::buildTitle($layout, 'Qualification: Rally');
     }
 }

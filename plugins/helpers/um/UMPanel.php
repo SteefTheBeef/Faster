@@ -1,10 +1,15 @@
 <?php
-require_once __DIR__ . '/../utils/StringUtils.php';
-require_once __DIR__ . '/layout/Layout.php';
 
 define('RACES_PER_PAGE', 7);
+define('PLAYERS_PER_PAGE', 16);
+
 
 class UMPanel {
+    static function playersPageCount(array $players) {
+        $total = count($players);
+        if ($total <= 0) return 1;
+        return (int)ceil($total / PLAYERS_PER_PAGE);
+    }
     static function racesPageCount(array $races) {
         $total = count($races);
         if ($total <= 0) return 1;
@@ -21,6 +26,11 @@ class UMPanel {
     static function racesSliceForPage(array $races, $page /* 0-based */) {
         $offset = ((int)$page) * RACES_PER_PAGE;
         return array_slice($races, $offset, RACES_PER_PAGE);
+    }
+
+    static function playersSliceForPage(array $players, $page /* 0-based */) {
+        $offset = ((int)$page) * PLAYERS_PER_PAGE;
+        return array_slice($players, $offset, PLAYERS_PER_PAGE);
     }
 
     static function mlStripCodes($s) {

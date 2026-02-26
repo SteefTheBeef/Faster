@@ -18,6 +18,10 @@ class UmPanelKeys {
     const ACT_RACES_PREV = 'races.prev';
     const ACT_RACES_NEXT = 'races.next';
 
+    const ACT_PLAYERS_PREV = 'players.prev';
+    const ACT_PLAYERS_NEXT = 'players.next';
+    const ML_PLAYER_PAGE = 'players.page';
+
     // Action prefixes (dynamic groups)
     const ACT_SCOREBOARD_ROW_PREFIX = 'umScoreBoardPlayerActions.';
     const ACT_TAB_PREFIX = 'um.tab.';
@@ -76,6 +80,9 @@ class UmPanelKeys {
             self::ACT_PANEL_OPEN,
             self::ACT_RACES_PREV,
             self::ACT_RACES_NEXT,
+
+            self::ACT_PLAYERS_PREV,
+            self::ACT_PLAYERS_NEXT,
 
             self::ACT_TAB_QUALIFICATION,
             self::ACT_TAB_SEMI_FINAL,

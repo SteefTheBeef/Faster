@@ -1,8 +1,5 @@
 <?php
 
-require_once 'utils/FastFile.php';
-require_once 'utils/CsvFile.php';
-
 class BestRaces {
     const DIR_UM = 'fastlog/um';
 
@@ -518,8 +515,6 @@ class BestRaces {
                 $ranking = self::extractRankingFromParsedBestFile($all, $mapIdToUse);
                 if (!is_array($ranking) || count($ranking) < 1) continue;
 
-
-
                 $count = count($ranking);
                 for ($i = 0; $i < $count; $i++) {
                     if (!isset($ranking[$i]) || !is_array($ranking[$i])) continue;
@@ -532,11 +527,50 @@ class BestRaces {
 
                     self::applyQualificationPoints($out, $envSafe, $login, $uidSafe, $points);
                     self::mergeNicknamesIfMissing($out, $envSafe, $login, $nickMap);
+
+                    // NEW: capture best time fields into the aggregated row
+                    self::mergeBestTimesIntoQualificationRow($out[$envSafe][$login], $kindPrefix, $ranking[$i]);
                 }
             }
         }
 
         return $out;
+    }
+
+    /**
+     * Enriches a qualification aggregate row with best race / lap times.
+     *
+     * - bestRaces rows use TimeMs
+     * - bestLaps  rows use BestLapMs
+     *
+     * Keeps the minimum positive ms encountered.
+     */
+    private static function mergeBestTimesIntoQualificationRow(&$outRow, $kindPrefix, $sourceRow) {
+        if (!is_array($outRow) || !is_array($sourceRow)) return;
+
+        if ($kindPrefix === self::FILE_PREFIX_BEST_RACES) {
+            $ms = isset($sourceRow['TimeMs']) ? (int)$sourceRow['TimeMs'] : 0;
+            if ($ms > 0) {
+                $cur = isset($outRow['BestRaceTimeMs']) ? (int)$outRow['BestRaceTimeMs'] : 0;
+                if ($cur <= 0 || $ms < $cur) {
+                    $outRow['BestRaceTimeMs'] = $ms;
+                    $outRow['BestRaceTime'] = MwTimeToString($ms);
+                }
+            }
+            return;
+        }
+
+        if ($kindPrefix === self::FILE_PREFIX_BEST_LAPS) {
+            $ms = isset($sourceRow['BestLapMs']) ? (int)$sourceRow['BestLapMs'] : 0;
+            if ($ms > 0) {
+                $cur = isset($outRow['BestLapTimeMs']) ? (int)$outRow['BestLapTimeMs'] : 0;
+                if ($cur <= 0 || $ms < $cur) {
+                    $outRow['BestLapTimeMs'] = $ms;
+                    $outRow['BestLapTime'] = MwTimeToString($ms);
+                }
+            }
+            return;
+        }
     }
 
     private static function safeUidFromMapConfig($m) {

@@ -1,5 +1,4 @@
 <?php
-require_once 'CsvFile.php';
 
 /**
  * Small file/dir helper for FAST plugins (PHP 5.6).

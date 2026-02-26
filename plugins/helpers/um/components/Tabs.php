@@ -1,8 +1,6 @@
 <?php
-require_once __DIR__ . '/UMPanel.php';
-require_once __DIR__ . '/../utils/XmlTag.php';
 
-class UmPanelTabs {
+class Tabs {
 
     /**
      * @return array<int, array{key:string,title:string,action:string}>
@@ -60,7 +58,7 @@ class UmPanelTabs {
         return '';
     }
 
-    public static function buildTabsXml(Layout $layout, $activeTabAction, array $mlAct) {
+    public static function render(Layout $layout, $activeTabAction, array $mlAct) {
         $tabH = 3;
         $tabGap = 0.0;
         $tabRightMargin = 1.2;

@@ -2,8 +2,6 @@
 
 require_once "utils/MatchlogUtils.php";
 require_once "utils/MatchlogConsole.php";
-require_once "BestRaces.php";
-require_once __DIR__ . '/../um/UmPlayers.php';
 
 class MatchlogLaps {
     static function create($logState, $challengeInfo, $isMatch) {
