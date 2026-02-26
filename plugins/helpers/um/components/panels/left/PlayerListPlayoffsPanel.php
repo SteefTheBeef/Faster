@@ -5,15 +5,6 @@ class PlayerListPlayoffsPanel {
     const DISPLAY_POINTS = 'points';
     const DISPLAY_TIME = 'time';
 
-    /**
-     * @param string $login
-     * @param Layout $layout
-     * @param array<int, array<string,mixed>> $players
-     * @param int $selectedRow
-     * @param array<int,int> $actionIds
-     * @param string $display One of self::DISPLAY_POINTS|self::DISPLAY_TIME
-     * @return array{xmlPlayers:string, selectedPlayerIndex:int|null}
-     */
     static function build($ctx, $display = self::DISPLAY_POINTS) {
         $layout = $ctx->layout;
         $umState = $ctx->umState;
@@ -25,6 +16,9 @@ class PlayerListPlayoffsPanel {
         $pointsW = 6.0;
         $pointsRightX = $playerW - $padX;
         $rowSpacing = 0.0;
+
+        $actionIds = $ctx->mlAct;
+        // console("ACTIONS: " . print_r($ctx->selectPlayerActionIds, true));
 
         $xmlPlayers = '';
         $selectedPlayerIndex = null;
@@ -42,12 +36,14 @@ class PlayerListPlayoffsPanel {
             $name = $np['NickNameWithColor'];
             $pointsOrTime = $np['PointsOrTime'];
 
-            $bg = ''; //($i === (int)$selectedRow) ? $layout->theme->cardSelectedBackgroundColor : '';
-            $actionId = isset($actionIds[$i]) ? (int)$actionIds[$i] : 0;
+            $bg = ($i === (int)$umState->selectedPlayerIndex[$ctx->login]) ? $layout->theme->cardSelectedBackgroundColor : '';
+            $actionId = isset($ctx->selectPlayerActionIds[$i]) ? (int)$ctx->selectPlayerActionIds[$i] : 0;
 
             //if ($i === (int)$selectedRow && $player !== null) {
             //    $selectedPlayerIndex = $i;
             //}
+
+            //console("ACTION:" . $actionId);
 
             $xmlPlayers .= XmlTag::quad(0, $rowY, $playerW, $playerH, $bg, $actionId);
             $xmlPlayers .= XmlTag::labelCenterLeft($padX, $rowY - $padY, $playerW - 1.2, $playerH, "\$fc0" . ($i + 1));

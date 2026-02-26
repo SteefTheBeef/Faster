@@ -78,30 +78,28 @@ registerPlugin(UmPanelKeys::ML_ID_PANEL, 43, 1.0);
 // Init : (plugin init)
 //--------------------------------------------------------------
 function umPanelInit($event) {
-    global $_ml_act, $umScoreBoardPlayerActions, $umScoreBoardSelectedPlayerRow, $umConfig, $qualiBestRacesConfig, $qualiBestLapsConfig, $umState, $umScoreBoardPlayers, $selectedPlayer;
+    global $_ml_act, $umConfig, $qualiBestRacesConfig, $qualiBestLapsConfig, $umState, $selectPlayerActionIds, $layout;
 
+    $layout = Layout::build();
     $umConfig = new UMConfig();
     $qualiBestRacesConfig = $umConfig->um4QualiBestRace;
     $qualiBestLapsConfig = $umConfig->um4QualiBestLap;
     $umState = new UmState($qualiBestRacesConfig, $qualiBestLapsConfig);
 
-    $umScoreBoardSelectedPlayerRow = array();
-    // here we store the player's race results'
-    $selectedPlayer = array();
-
     // get a unique manialink id. Use the same name as for
     // manialinksAddManialink(). It will add its value automatically in <manialink id='xx'>
     manialinksAddId(UmPanelKeys::ML_ID_PANEL);
 
-    $umScoreBoardPlayerActions = array();
+    $selectPlayerActionIds = array();
     for ($i = 0; $i < 16; $i++) {
-        $actionName = UmPanelKeys::scoreboardRowAction($i);
+        $actionName = UmPanelKeys::createPlayerSelectActionString($i);
         manialinksAddAction($actionName);                 // creates a unique action id
-        $umScoreBoardPlayerActions[$i] = $_ml_act[$actionName]; // numeric action id stored by manialinks plugin
+        $selectPlayerActionIds[$i] = $_ml_act[$actionName]; // numeric action id stored by manialinks plugin
     }
 
-    $umScoreBoardPlayers = MatchlogFileParser::getScoreboardPlayersFromMatchlog('fastlog/um3_semi.txt', $umConfig->um3Semi->pointsDistribution);
+   // $umScoreBoardPlayers = MatchlogFileParser::getScoreboardPlayersFromMatchlog('fastlog/um3_semi.txt', $umConfig->um3Semi->pointsDistribution);
 
+    //console(print_r($selectPlayersActionIds, true));
 
     $actions = UmPanelKeys::actionsToRegister();
     $count = count($actions);
@@ -121,24 +119,7 @@ function computeRankings($login) {
 // PlayerConnect : (event from server callback)
 //--------------------------------------------------------------
 function umPanelPlayerConnect($event, $login) {
-    global $_players, $umState, $umScoreBoardPlayers, $umScoreBoardSelectedPlayerRow, $selectedPlayer, $qualiBestRacesConfig, $qualiBestLapsConfig;
-
     computeRankings($login);
-
-    // Default: panel open
-    if (!isset($_players[$login]['ML'][UmPanelKeys::ML_PANEL_CLOSED])) {
-        $_players[$login]['ML'][UmPanelKeys::ML_PANEL_CLOSED] = 0; // 0=open, 1=closed
-    }
-
-    if (!isset($_players[$login]['ML'][UmPanelKeys::ML_RACES_PAGE])) {
-        $_players[$login]['ML'][UmPanelKeys::ML_RACES_PAGE] = 0; // 0-based page index
-    }
-
-    // Default tab (store action name)
-    if (!isset($_players[$login]['ML'][UmPanelKeys::ML_TAB]) || $_players[$login]['ML'][UmPanelKeys::ML_TAB] === '') {
-        $_players[$login]['ML'][UmPanelKeys::ML_TAB] = UmPanelKeys::ACT_TAB_SEMI_FINAL;
-    }
-
     umPanelUpdateXml($login, 'show');
 }
 
@@ -168,8 +149,7 @@ function umPanelPlayerManialinkPageAnswer($event, $login, $answer, $action) {
 // action can be 'show', 'refresh', 'hide', 'remove'
 //--------------------------------------------------------------
 function umPanelUpdateXml($login, $action = 'show') {
-
-    global $_mldebug, $_ml_act, $_players, $_ml_howto_force;
+    global $_players;
     // if the players disabled manialinks then do nothing
     if (!isset($_players[$login]['ML']['ShowML']) || $_players[$login]['ML']['ShowML'] <= 0)
         return;
@@ -179,27 +159,8 @@ function umPanelUpdateXml($login, $action = 'show') {
 }
 
 function getUMPanelXml($login) {
-    global $umScoreBoardPlayerActions, $umScoreBoardSelectedPlayerRow, $umScoreBoardPlayers, $selectedPlayer;
-    global $_ml_act, $umConfig, $umState;
-
-    $umState = (object)$umState;
-    $layout = Layout::build();
-
-    $players = $umScoreBoardPlayers;
-    $selectedRow = isset($umScoreBoardSelectedPlayerRow[$login]) ? (int)$umScoreBoardSelectedPlayerRow[$login] : -1;
-
-    $ctx = new UmPanelRenderContext(
-        $login,
-        $layout,
-        $players,
-        $selectedRow,
-        isset($selectedPlayer[$login]) ? $selectedPlayer[$login] : null,
-        $umScoreBoardPlayerActions,
-        $_ml_act,
-        $umConfig,
-        $umState
-    );
-
+    global $selectPlayerActionIds, $_ml_act, $umConfig, $umState, $layout;
+    $ctx = new UmPanelRenderContext($login, $layout, $selectPlayerActionIds, $_ml_act, $umConfig, $umState);
     return UmBoard::buildPanelXml($ctx);
 }
 

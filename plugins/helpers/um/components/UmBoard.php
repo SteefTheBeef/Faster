@@ -83,10 +83,13 @@ class UmBoard {
         }        // Paging races for a player
 
         // Select player
-        $rowPrefix = UmPanelKeys::ACT_SCOREBOARD_ROW_PREFIX;
+
+        $rowPrefix = UmPanelKeys::ACT_PLAYERS_SELECT;
         if (strpos($action, $rowPrefix) === 0) {
+            console('Selected player row index: ' . $action);
             $rowIndex = (int)substr($action, strlen($rowPrefix));
-            $umState->selectedPlayerRowIndex[$login] = $rowIndex;
+            console('index: ' . $rowIndex);
+            $umState->selectedPlayerIndex[$login] = $rowIndex;
             return true;
         }
 

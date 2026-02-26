@@ -20,10 +20,10 @@ class UmPanelKeys {
 
     const ACT_PLAYERS_PREV = 'players.prev';
     const ACT_PLAYERS_NEXT = 'players.next';
+    const ACT_PLAYERS_SELECT = 'players.select';
     const ML_PLAYER_PAGE = 'players.page';
 
     // Action prefixes (dynamic groups)
-    const ACT_SCOREBOARD_ROW_PREFIX = 'umScoreBoardPlayerActions.';
     const ACT_TAB_PREFIX = 'um.tab.';
     const ACT_SUBTAB_IDENTIFIER = '.subtab';
 
@@ -58,8 +58,8 @@ class UmPanelKeys {
      * @param int $rowIndex
      * @return string
      */
-    public static function scoreboardRowAction($rowIndex) {
-        return self::ACT_SCOREBOARD_ROW_PREFIX . (int)$rowIndex;
+    public static function createPlayerSelectActionString($rowIndex) {
+        return self::ACT_PLAYERS_SELECT . (int)$rowIndex;
     }
 
     /**
