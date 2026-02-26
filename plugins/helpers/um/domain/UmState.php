@@ -22,6 +22,7 @@ class UmState {
 
     public $selectedPlayerPaginationIndex = array();
     public $selectedPlayerIndex = array();
+    public $selectedPlayer = array();
     public $boardIsOpen = array();
 
     public function __construct($qualiConfigBestRaces, $qualiConfigBestLaps) {
@@ -31,10 +32,6 @@ class UmState {
         $this->shouldComputeRankings = true;
         $this->qualiConfigBestRaces = $qualiConfigBestRaces;
         $this->qualiConfigBestLaps = $qualiConfigBestLaps;
-
-        //console("UM STATE CONSTRUCTOR". print_r($this, true));
-        console("qualiConfigBestRaces". print_r($qualiConfigBestRaces, true));
-        console("qualiConfigBestLaps". print_r($qualiConfigBestLaps, true));
     }
 
     public function computeRankings() {
@@ -58,11 +55,13 @@ class UmState {
 
     public function playerConnect($login) {
         $this->selectedPlayerCollection[$login] = $this->qualificationRankings;
-        $this->selectedPlayerIndex[$login] = 0;
+        $this->selectedPlayerIndex[$login] = null;
+        $this->selectedPlayer[$login] = isset($this->selectedPlayerCollection[$login][0]) ? $this->selectedPlayerCollection[$login][0] : null;
         $this->selectedTab[$login] = UmPanelKeys::ACT_TAB_QUALIFICATION;
         $this->selectedSubTab[$login] = UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD;
         $this->boardIsOpen[$login] = true;
         $this->selectedPlayerPaginationIndex[$login] = 0;
+
     }
 
     public function setSelectedTab($login, $action) {
@@ -83,7 +82,7 @@ class UmState {
         $this->selectedSubTab[$login] = $action;
         // reset players page if user change subtab
         $this->selectedPlayerPaginationIndex[$login] = 0;
-        $this->selectedPlayerIndex[$login] = 0;
+        $this->selectedPlayerIndex[$login] = null;
 
         // choose appropriate player collection based on subtab
         if ($action === UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD) {
@@ -112,10 +111,29 @@ class UmState {
 
         $newIndex = UMPanel::clampInt($currentIndex, 0, $pageCount - 1);
         $this->selectedPlayerPaginationIndex[$login] = $newIndex;
+
         return true;
     }
 
     public function getSelectedPlayerPaginationIndex($login) {
         return (int)$this->selectedPlayerPaginationIndex[$login];
+    }
+
+    public function setSelectedPlayerIndex($login, $action) {
+        $rowPrefix = UmPanelKeys::ACT_PLAYERS_SELECT;
+        $rowIndex = (int)substr($action, strlen($rowPrefix));
+        $this->selectedPlayerIndex[$login] = $rowIndex;
+
+        // set selected player for convenience
+        $currentIndex = $this->selectedPlayerPaginationIndex[$login];
+        $newSelectedPlayer = $this->selectedPlayerCollection[$login][$currentIndex * PLAYERS_PER_PAGE + $rowIndex];
+        if ($newSelectedPlayer === $this->selectedPlayer[$login]) {
+            $this->selectedPlayer[$login] = null;
+            $this->selectedPlayerIndex[$login] = null;
+        } else {
+            $this->selectedPlayer[$login] = $newSelectedPlayer;
+        }
+        //$this->selectedPlayer[$login] = $newSelectedPlayer;
+            //console("SELECTED PLAYER!!!!: " . print_r($this->selectedPlayer[$login], true));
     }
 }

@@ -52,6 +52,7 @@ require_once "helpers/um/components/OpenCloseToggle.php";
 require_once "helpers/um/components/BackgroundPanel.php";
 require_once "helpers/um/components/Tabs.php";
 require_once "helpers/um/components/SubTabs.php";
+require_once "helpers/um/components/Table.php";
 
 // Left panel components
 require_once "helpers/um/components/panels/left/PlayerListPlayoffsPanel.php";
@@ -66,6 +67,9 @@ require_once "helpers/um/components/panels/right/QualificationPanelBuilder.php";
 require_once "helpers/um/components/panels/right/PlayerRacesPanel.php";
 require_once "helpers/um/components/panels/right/RulesPanelBuilder.php";
 require_once "helpers/um/components/panels/right/SchedulePanelBuilder.php";
+require_once "helpers/um/components/panels/right/LeaderboardPanel.php";
+require_once "helpers/um/components/panels/right/LeaderboardPlayersTable.php";
+require_once "helpers/um/components/panels/right/PlayerDetailsTable.php";
 
 // Main component
 require_once "helpers/um/components/UmBoard.php";

@@ -28,6 +28,7 @@ class PlayerListPlayoffsPanel {
         $playersToShow = UMPanel::playersSliceForPage($players, $page);
 
         $i = 0;
+        console("INDEX: " . $umState->selectedPlayerIndex[$ctx->login]);
         foreach ($playersToShow as $player) {
             $rowY = -$i * ($playerH + $rowSpacing);
 
@@ -36,7 +37,7 @@ class PlayerListPlayoffsPanel {
             $name = $np['NickNameWithColor'];
             $pointsOrTime = $np['PointsOrTime'];
 
-            $bg = ($i === (int)$umState->selectedPlayerIndex[$ctx->login]) ? $layout->theme->cardSelectedBackgroundColor : '';
+            $bg = $i === $umState->selectedPlayerIndex[$ctx->login] ? $layout->theme->cardSelectedBackgroundColor : '';
             $actionId = isset($ctx->selectPlayerActionIds[$i]) ? (int)$ctx->selectPlayerActionIds[$i] : 0;
 
             //if ($i === (int)$selectedRow && $player !== null) {
@@ -46,7 +47,7 @@ class PlayerListPlayoffsPanel {
             //console("ACTION:" . $actionId);
 
             $xmlPlayers .= XmlTag::quad(0, $rowY, $playerW, $playerH, $bg, $actionId);
-            $xmlPlayers .= XmlTag::labelCenterLeft($padX, $rowY - $padY, $playerW - 1.2, $playerH, "\$fc0" . ($i + 1));
+            $xmlPlayers .= XmlTag::labelCenterLeft($padX, $rowY - $padY, $playerW - 1.2, $playerH, "\$fc0" . ($page * PLAYERS_PER_PAGE + $i + 1));
 
             $nameLeftX = $padX * 3.0;
             $nameW = ($pointsRightX - $pointsW) - $nameLeftX;

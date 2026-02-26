@@ -32,6 +32,51 @@ class UmBoard {
         );
     }
 
+    private static function buildLeftPanelXml(UmPanelRenderContext $ctx) {
+        switch ($ctx->activeTabAction) {
+            case UmPanelKeys::ACT_TAB_SEMI_FINAL:
+                $listBuild = PlayerListPlayoffsPanel::build(
+                    $ctx->login,
+                    $ctx->layout,
+                    $ctx->players,
+                    $ctx->selectedRow,
+                    $ctx->actionIds,
+                    $ctx->mlAct
+                );
+                return isset($listBuild['xmlPlayers']) ? $listBuild['xmlPlayers'] : '';
+            case UmPanelKeys::ACT_TAB_QUALIFICATION:
+                console("ACT_TAB_QUALIFICATION");
+                return QualiPlayerListPanelBuilder::build($ctx);
+            default:
+                return QualiPlayerListPanelBuilder::build($ctx);
+
+        }
+    }
+
+    private static function buildRightPanelBodyXml(UmPanelRenderContext $ctx) {
+        switch ((string)$ctx->activeTabAction) {
+            case UmPanelKeys::ACT_TAB_SCHEDULE:
+                return SchedulePanelBuilder::schedule($ctx->layout, $ctx->umConfig);
+
+            case UmPanelKeys::ACT_TAB_RULES:
+                return RulesPanelBuilder::build($ctx->login, $ctx->layout, $ctx->umConfig, $ctx->umState);
+
+            case UmPanelKeys::ACT_TAB_INFORMATION:
+                return InformationPanelBuilder::getInformationPanel($ctx->layout);
+
+            case UmPanelKeys::ACT_TAB_QUALIFICATION:
+                return QualificationPanelBuilder::build($ctx);
+
+            case UmPanelKeys::ACT_TAB_PRIZE:
+                return '';
+
+            case UmPanelKeys::ACT_TAB_SEMI_FINAL:
+            default:
+                //return 'PlayerRacesPanel::build($ctx->login, $ctx->selectedPlayerForLogin, $ctx->layout, $ctx->mlAct)';
+                return '';
+        }
+    }
+
     public static function handleAction($login, $action) {
         global $umState;
         $umState = (object)$umState;
@@ -86,90 +131,10 @@ class UmBoard {
 
         $rowPrefix = UmPanelKeys::ACT_PLAYERS_SELECT;
         if (strpos($action, $rowPrefix) === 0) {
-            console('Selected player row index: ' . $action);
-            $rowIndex = (int)substr($action, strlen($rowPrefix));
-            console('index: ' . $rowIndex);
-            $umState->selectedPlayerIndex[$login] = $rowIndex;
+            $umState->setSelectedPlayerIndex($login, $action);
             return true;
         }
 
         return false;
     }
-
-    private static function buildLeftPanelXml(UmPanelRenderContext $ctx) {
-        switch ($ctx->activeTabAction) {
-            case UmPanelKeys::ACT_TAB_SEMI_FINAL:
-                $listBuild = PlayerListPlayoffsPanel::build(
-                    $ctx->login,
-                    $ctx->layout,
-                    $ctx->players,
-                    $ctx->selectedRow,
-                    $ctx->actionIds,
-                    $ctx->mlAct
-                );
-                return isset($listBuild['xmlPlayers']) ? $listBuild['xmlPlayers'] : '';
-            case UmPanelKeys::ACT_TAB_QUALIFICATION:
-                console("ACT_TAB_QUALIFICATION");
-                return QualiPlayerListPanelBuilder::build($ctx);
-            default:
-                return '';
-
-        }
-    }
-
-    private static function buildLeftPanelBodyXml(UmPanelRenderContext $ctx) {
-        switch ((string)$ctx->activeSubtabAction) {
-            case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_RALLY:
-
-
-            case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_SPEED:
-
-            case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_ALPINE:
-            case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_COAST:
-            case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_ISLAND:
-            case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_BAY:
-            case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_STADIUM:
-                return UMPanel::textLabel($ctx->layout, 'Rules navigation goes here...');
-
-            case UmPanelKeys::ACT_TAB_QUALIFICATION:
-                return UMPanel::textLabel($ctx->layout, 'Qualification filters / groups go here...');
-
-            case UmPanelKeys::ACT_TAB_SCHEDULE:
-                return UMPanel::textLabel($ctx->layout, 'Schedule overview / round list goes here...');
-
-            case UmPanelKeys::ACT_TAB_INFORMATION:
-                return UMPanel::textLabel($ctx->layout, 'Info shortcuts / links go here...');
-
-            case UmPanelKeys::ACT_TAB_PRIZE:
-                return UMPanel::textLabel($ctx->layout, 'Prize categories go here...');
-
-            case UmPanelKeys::ACT_TAB_SEMI_FINAL:
-            default:
-                return UMPanel::textLabel($ctx->layout, 'Select a tab...');
-        }
-    }
-
-    private static function buildRightPanelBodyXml(UmPanelRenderContext $ctx) {
-        switch ((string)$ctx->activeTabAction) {
-            case UmPanelKeys::ACT_TAB_SCHEDULE:
-                return SchedulePanelBuilder::schedule($ctx->layout, $ctx->umConfig);
-
-            case UmPanelKeys::ACT_TAB_RULES:
-                return RulesPanelBuilder::build($ctx->login, $ctx->layout, $ctx->umConfig, $ctx->umState);
-
-            case UmPanelKeys::ACT_TAB_INFORMATION:
-                return InformationPanelBuilder::getInformationPanel($ctx->layout);
-
-            case UmPanelKeys::ACT_TAB_QUALIFICATION:
-                return QualificationPanelBuilder::build($ctx->login, $ctx->layout, $ctx->umConfig, $ctx->umState);
-
-            case UmPanelKeys::ACT_TAB_PRIZE:
-                return '';
-
-            case UmPanelKeys::ACT_TAB_SEMI_FINAL:
-            default:
-                return PlayerRacesPanel::build($ctx->login, $ctx->selectedPlayerForLogin, $ctx->layout, $ctx->mlAct);
-        }
-    }
-
 }
