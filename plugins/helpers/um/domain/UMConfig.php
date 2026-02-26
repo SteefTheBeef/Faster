@@ -160,7 +160,7 @@ class UMConfig {
             $umConfig['um4_semi'][$rank] = round($umConfig['um4_semi'][$rank] / 10) * 2;
         }
 
-        console(print_r($umConfig['um4_semi'], true));
+        //console(print_r($umConfig['um4_semi'], true));
 
         // quick sanity check
         echo "power=" . $power . "\n";

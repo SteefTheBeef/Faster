@@ -51,6 +51,7 @@ class UmPanelKeys {
     const ACT_SUBTAB_QUALIFICATION_ISLAND = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.island';
     const ACT_SUBTAB_QUALIFICATION_BAY = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.bay';
     const ACT_SUBTAB_QUALIFICATION_STADIUM = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.stadium';
+
     /**
      * Build scoreboard row action name.
      *
@@ -107,4 +108,19 @@ class UmPanelKeys {
             self::ACT_SUBTAB_QUALIFICATION_STADIUM
         );
     }
+
+    public static function getQualificationEnvironmentKeyBySubtabAction($action) {
+        $map = array(
+            self::ACT_SUBTAB_QUALIFICATION_RALLY   => 'Rally',
+            self::ACT_SUBTAB_QUALIFICATION_SPEED   => 'Speed',
+            self::ACT_SUBTAB_QUALIFICATION_ALPINE  => 'Alpine',
+            self::ACT_SUBTAB_QUALIFICATION_BAY     => 'Bay',
+            self::ACT_SUBTAB_QUALIFICATION_COAST   => 'Coast',
+            self::ACT_SUBTAB_QUALIFICATION_ISLAND  => 'Island',
+            self::ACT_SUBTAB_QUALIFICATION_STADIUM => 'Stadium',
+        );
+
+        return isset($map[$action]) ? $map[$action] : null;
+    }
+
 }

@@ -7,25 +7,29 @@ class QualiPlayerListPanelBuilder {
         $xml = PlayerListPlayoffsPanel::build($ctx, PlayerListPlayoffsPanel::DISPLAY_TIME);
         switch ($ctx->activeSubtabAction) {
             case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_RALLY:
-                $title = RightPanel::buildTitle2($ctx->layout, 'Rally');
+                $title = RightPanel::buildTitle2($ctx->layout, 'Qualification: Rally');
                 break;
             case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_SPEED:
-                $title = RightPanel::buildTitle2($ctx->layout, 'Speed');
+                $title = RightPanel::buildTitle2($ctx->layout, 'Qualification: Speed');
                 break;
             case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_ALPINE:
-                $title = RightPanel::buildTitle2($ctx->layout, 'Alpine');
+                $title = RightPanel::buildTitle2($ctx->layout, 'Qualification: Alpine');
                 break;
             case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_COAST:
-                $title = RightPanel::buildTitle2($ctx->layout, 'Coast');
+                $title = RightPanel::buildTitle2($ctx->layout, 'Qualification: Coast');
                 break;
             case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_ISLAND:
-                $title = RightPanel::buildTitle2($ctx->layout, 'Island');
+                $title = RightPanel::buildTitle2($ctx->layout, 'Qualification: Island');
                 break;
             case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_BAY:
-                $title = RightPanel::buildTitle2($ctx->layout, 'Bay');
+                $title = RightPanel::buildTitle2($ctx->layout, 'Qualification: Bay');
                 break;
             case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_STADIUM:
-                $title = RightPanel::buildTitle2($ctx->layout, 'Stadium');
+                $title = RightPanel::buildTitle2($ctx->layout, 'Qualification: Stadium');
+                break;
+            case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD:
+                $title = RightPanel::buildTitle2($ctx->layout, 'Qualification: Leaderboard');
+                $xml = PlayerListPlayoffsPanel::build($ctx);
                 break;
             default:
                 break;

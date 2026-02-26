@@ -93,7 +93,7 @@ class UmBoard {
         return false;
     }
 
-    private static function buildLeftPanelXml(UmPanelRenderContext &$ctx) {
+    private static function buildLeftPanelXml(UmPanelRenderContext $ctx) {
         switch ($ctx->activeTabAction) {
             case UmPanelKeys::ACT_TAB_SEMI_FINAL:
                 $listBuild = PlayerListPlayoffsPanel::build(

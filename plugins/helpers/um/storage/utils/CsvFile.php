@@ -37,7 +37,6 @@ class CsvFile
             if (!is_array($cols) || count($cols) < 1) continue;
 
             // Map marker row: ### MAP,<env>,<mapId>,<mapName>,<author>
-            //console("cols[0]: " . print_r($cols[0], true)); // prints 'cols[0]: Login' or 'cols[0]: blackcat111'
             //console("BestRaces::MAP_MARKER: " . BestRaces::MAP_MARKER); // prints 'BestRaces::MAP_MARKER: ### MAP'
             if ((string)$cols[0] === BestRaces::MAP_MARKER) {
                 //console("BestRaces::MAP_MARKER found");

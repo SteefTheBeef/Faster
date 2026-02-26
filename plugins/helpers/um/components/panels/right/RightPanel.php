@@ -12,7 +12,7 @@ class RightPanel {
         $font = "\$010\$o";
         $panelW = $layout->geometry->panelWidth;
 
-        return XmlTag::label(1, 3, $panelW - 2, 3, $font . $titleText, null, array('textsize' => 2));
+        return XmlTag::label(1, 3, $panelW - 2, 3, $font . $titleText, null, array('textsize' => 1.5));
     }
 
     private static function build(UmPanelRenderContext $ctx) {

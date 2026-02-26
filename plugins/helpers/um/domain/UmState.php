@@ -46,13 +46,13 @@ class UmState {
         //console("COMPUTED NEW RANKINGS");
         //console(print_r($this->qualificationBestRacesRanking, true));
         //console(print_r($this->qualificationRankingsPerEnv, true));
-        console("LEADERBOARD RANKINGS:");
-        console(print_r($this->qualificationRankings, true));
+        //console("LEADERBOARD RANKINGS:");
+        //console(print_r($this->qualificationRankings, true));
         $this->shouldComputeRankings = false;
     }
 
     public function playerConnect($login) {
-        $this->selectedPlayerCollection[$login] = &$this->qualificationRankings;
+        $this->selectedPlayerCollection[$login] = $this->qualificationRankings;
         $this->selectedPlayerRowIndex[$login] = 0;
         $this->selectedTab[$login] = UmPanelKeys::ACT_TAB_QUALIFICATION;
         $this->selectedSubTab[$login] = UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD;
@@ -82,27 +82,14 @@ class UmState {
         // choose appropriate player collection based on subtab
         if ($action === UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD) {
             $this->selectedPlayerCollection[$login] = $this->qualificationRankings;
+            console(print_r($this->selectedPlayerCollection[$login], true));
+            return;
         }
-        if ($action === UmPanelKeys::ACT_SUBTAB_QUALIFICATION_RALLY) {
-            $this->selectedPlayerCollection[$login] = $this->qualificationBestRacesRanking['Rally'];
-        }
-        if ($action === UmPanelKeys::ACT_SUBTAB_QUALIFICATION_SPEED) {
-            $this->selectedPlayerCollection[$login] = $this->qualificationBestRacesRanking['Speed'];
-        }
-        if ($action === UmPanelKeys::ACT_SUBTAB_QUALIFICATION_ALPINE) {
-            $this->selectedPlayerCollection[$login] = $this->qualificationBestRacesRanking['Alpine'];
-        }
-        if ($action === UmPanelKeys::ACT_SUBTAB_QUALIFICATION_BAY) {
-            $this->selectedPlayerCollection[$login] = $this->qualificationBestRacesRanking['Bay'];
-        }
-        if ($action === UmPanelKeys::ACT_SUBTAB_QUALIFICATION_COAST) {
-            $this->selectedPlayerCollection[$login] = $this->qualificationBestRacesRanking['Coast'];
-        }
-        if ($action === UmPanelKeys::ACT_SUBTAB_QUALIFICATION_ISLAND) {
-            $this->selectedPlayerCollection[$login] = $this->qualificationBestRacesRanking['Island'];
-        }
-        if ($action === UmPanelKeys::ACT_SUBTAB_QUALIFICATION_STADIUM) {
-            $this->selectedPlayerCollection[$login] = $this->qualificationBestRacesRanking['Stadium'];
+
+        $envKey = UmPanelKeys::getQualificationEnvironmentKeyBySubtabAction($action);
+        if ($envKey !== null) {
+            $this->selectedPlayerCollection[$login] = isset($this->qualificationRankingsPerEnv[$envKey])
+                ? $this->qualificationRankingsPerEnv[$envKey] : array();
         }
     }
 

@@ -25,7 +25,7 @@ class UmPanelRenderContext {
         array $actionIds,
         array $mlAct,
         UMConfig $umConfig,
-        UmState &$umState
+        UmState $umState
     ) {
         $this->login = $login;
         $this->layout = $layout;

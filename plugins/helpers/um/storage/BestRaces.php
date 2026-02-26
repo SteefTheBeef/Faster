@@ -505,7 +505,6 @@ class BestRaces {
                 $envSafe = self::extractEnvFromBestFilename($kindPrefix, $filePath);
                 if ($envSafe === '') $envSafe = self::ENV_UNKNOWN;
 
-                console("kindPrefix: " . print_r($kindPrefix, true));
                 $all = self::parseBestFileForKind($kindPrefix, $filePath);
                 if (!is_array($all) || count($all) < 1) continue;
 
