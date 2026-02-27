@@ -79,7 +79,7 @@ class PlayerEnviDetailsTable {
         $lapRows[$j]['rank'] = $selectedPlayer['rankBestLap'];
         $lapRows[$j]['time'] = $selectedPlayer['BestLapTime'];
         $lapRows[$j]['score'] = $selectedPlayer['BestLapScore'];
-        $lapRows[$j]['rankInt'] = $selectedPlayer['BestLapRank'];
+        $lapRows[$j]['rankInt'] = $selectedPlayer['rankBestLap'];
         $j = $j + 1;
 
 

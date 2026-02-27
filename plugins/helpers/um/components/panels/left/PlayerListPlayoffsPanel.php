@@ -28,7 +28,7 @@ class PlayerListPlayoffsPanel {
         $playersToShow = UMPanel::playersSliceForPage($players, $page);
 
         $i = 0;
-        console("INDEX: " . $umState->selectedPlayerIndex[$ctx->login]);
+
         foreach ($playersToShow as $player) {
             $rowY = -$i * ($playerH + $rowSpacing);
 
