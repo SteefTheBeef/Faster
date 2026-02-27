@@ -2,7 +2,7 @@
 
 class UmPanelKeys {
     // Manialink idname
-    const ML_ID_PANEL = 'umPanel';
+    const ML_ID_PANEL = 'umBoard';
 
     // Per-player ML state keys
     const ML_PANEL_CLOSED = 'um.panel.closed';

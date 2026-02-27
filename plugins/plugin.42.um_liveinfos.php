@@ -24,7 +24,6 @@ function um_liveinfosPlayerCheckpoint($event, $login) {
         if ($pl['Status'] == 1 && $pl['FinalTime'] <= 0 && ($pl['CurrentTargetId'] == $pid || $_players_playing == 1) &&
             $pl['ML']['ShowML'] && $pl['ML']['Show.live']) {
             if ($pl['ML']['Show.cpgaps'])
-                console("CP CHECK!!");
                 um_liveinfosUpdatePlayerCPGapsXml('' . $speclogin, 'show', $login);
         }
     }
