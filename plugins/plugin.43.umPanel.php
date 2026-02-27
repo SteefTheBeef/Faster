@@ -70,6 +70,8 @@ require_once "helpers/um/components/panels/right/SchedulePanelBuilder.php";
 require_once "helpers/um/components/panels/right/LeaderboardPanel.php";
 require_once "helpers/um/components/panels/right/LeaderboardPlayersTable.php";
 require_once "helpers/um/components/panels/right/PlayerDetailsTable.php";
+require_once "helpers/um/components/panels/right/EnviLeaderboardPlayerPanel.php";
+require_once "helpers/um/components/panels/right/PlayerEnviDetailsTable.php";
 
 // Main component
 require_once "helpers/um/components/UmBoard.php";

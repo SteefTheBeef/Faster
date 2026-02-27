@@ -55,7 +55,7 @@ class UmState {
 
     public function playerConnect($login) {
         $this->selectedPlayerCollection[$login] = $this->qualificationRankings;
-        $this->selectedPlayerIndex[$login] = null;
+        $this->selectedPlayerIndex[$login] = 0;
         $this->selectedPlayer[$login] = isset($this->selectedPlayerCollection[$login][0]) ? $this->selectedPlayerCollection[$login][0] : null;
         $this->selectedTab[$login] = UmPanelKeys::ACT_TAB_QUALIFICATION;
         $this->selectedSubTab[$login] = UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD;
@@ -82,11 +82,13 @@ class UmState {
         $this->selectedSubTab[$login] = $action;
         // reset players page if user change subtab
         $this->selectedPlayerPaginationIndex[$login] = 0;
-        $this->selectedPlayerIndex[$login] = null;
+        $this->selectedPlayerIndex[$login] = 0;
+        $this->selectedPlayer[$login] = null;
 
         // choose appropriate player collection based on subtab
         if ($action === UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD) {
             $this->selectedPlayerCollection[$login] = $this->qualificationRankings;
+            $this->selectedPlayer[$login] = $this->selectedPlayerCollection[$login][0];
             return;
         }
 
@@ -94,6 +96,9 @@ class UmState {
         if ($envKey !== null) {
             $this->selectedPlayerCollection[$login] = isset($this->qualificationRankingsPerEnv[$envKey])
                 ? $this->qualificationRankingsPerEnv[$envKey] : array();
+            if (isset($this->selectedPlayerCollection[$login]) && count($this->selectedPlayerCollection[$login]) > 0) {
+                $this->selectedPlayer[$login] = $this->selectedPlayerCollection[$login][0];
+            }
         }
     }
 
@@ -127,12 +132,13 @@ class UmState {
         // set selected player for convenience
         $currentIndex = $this->selectedPlayerPaginationIndex[$login];
         $newSelectedPlayer = $this->selectedPlayerCollection[$login][$currentIndex * PLAYERS_PER_PAGE + $rowIndex];
-        if ($newSelectedPlayer === $this->selectedPlayer[$login]) {
-            $this->selectedPlayer[$login] = null;
-            $this->selectedPlayerIndex[$login] = null;
-        } else {
-            $this->selectedPlayer[$login] = $newSelectedPlayer;
-        }
+        $this->selectedPlayer[$login] = $newSelectedPlayer;
+        //        if ($newSelectedPlayer === $this->selectedPlayer[$login]) {
+        //            $this->selectedPlayer[$login] = null;
+        //            $this->selectedPlayerIndex[$login] = null;
+        //        } else {
+        //            $this->selectedPlayer[$login] = $newSelectedPlayer;
+        //        }
         //$this->selectedPlayer[$login] = $newSelectedPlayer;
             //console("SELECTED PLAYER!!!!: " . print_r($this->selectedPlayer[$login], true));
     }

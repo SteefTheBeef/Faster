@@ -62,7 +62,7 @@ class Table {
             $row = $rows[$i];
             $rowY = $yTop - (($i + 1) * $rowH);
 
-            $bg = (($i % 2) === 0) ? $bgEven : $bgOdd;
+            $bg = (($i % 2) === 0) ? $bgOdd: $bgEven;
             $xml .= XmlTag::quad($x, $rowY, $w, $rowH, $bg);
 
             for ($c = 0; $c < $cCount; $c++) {

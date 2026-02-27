@@ -73,7 +73,7 @@ class LayoutGeometry
         $g->panelHeight = $g->backgroundHeight - $g->playerHeight;
         $g->panelOffsetX = $g->playerWidth + $g->gap;
 
-        $g->panelBodyTopY   = -5.0;
+        $g->panelBodyTopY   = -4.0;
         $g->panelBodyHeight = $g->panelHeight - 6.0;
 
         // closed toggle

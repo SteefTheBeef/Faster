@@ -37,12 +37,8 @@ class QualificationPanelBuilder {
                 $contentXml = LeaderboardPanel::render($ctx);
                 break;
 
-            case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_RALLY:
-                $contentXml = self::envi($ctx->layout, $ctx->umConfig);
-                break;
-
             default:
-                $contentXml = UMPanel::textLabel($ctx->layout, "Misc rules...\n(Replace this with your real content)");
+                $contentXml = EnviLeaderboardPlayerPanel::render($ctx);
                 break;
         }
 

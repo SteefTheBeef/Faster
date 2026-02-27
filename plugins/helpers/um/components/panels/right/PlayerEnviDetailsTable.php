@@ -1,7 +1,7 @@
 <?php
 
 
-class PlayerDetailsTable {
+class PlayerEnviDetailsTable {
     static function build(UmPanelRenderContext $ctx, $selectedPlayer) {
         $v = self::computeRacesTableLayout($ctx->layout);
         $layout = $ctx->layout;
@@ -21,19 +21,10 @@ class PlayerDetailsTable {
 
             'columns' => array(
                 array(
-                    'key' => 'envi',
-                    'title' => 'Environment',
-                    'width' => 16,
-                    'align' => 'left',
-                    'padL' => $v['idxPadL'],
-                    'gutterAfter' => $v['gutter'],
-                    'cellFont' => function($row) { return '$fff$o'; }, // or your rank-based logic in a closure
-                ),
-                array(
                     'key' => 'rank',
                     'title' => 'Rank',
-                    'width' => 12,
-                    'align' => 'right',
+                    'width' => 15,
+                    'align' => 'left',
                     'gutterAfter' => $v['gutter'],
                     'cellFont' => function($row) {
                         $rankInt = isset($row['rankInt']) ? (int)$row['rankInt'] : 0;
@@ -43,7 +34,7 @@ class PlayerDetailsTable {
                 array(
                     'key' => 'score',
                     'title' => 'Points',
-                    'width' => 12,
+                    'width' => 15,
                     'align' => 'right',
                     'padR' => $v['timePadR'],
                     'gutterAfter' => 0.0,
@@ -55,7 +46,7 @@ class PlayerDetailsTable {
                 array(
                     'key' => 'time',
                     'title' => 'Time',
-                    'width' => 12,
+                    'width' => 15,
                     'align' => 'right',
                     'gutterAfter' => $v['gutter'],
                     'cellFont' => function($row) {
@@ -68,30 +59,29 @@ class PlayerDetailsTable {
 
         $rows = array();
         $i = 0;
-        foreach($selectedPlayer['PerMap'] as $envi => $values) {
-            $rows[$i]['envi'] = $envi;
-            $rows[$i]['rank'] = $values['BestRaceRank'];
-            $rows[$i]['time'] = $values['BestRaceTime'];
-            $rows[$i]['score'] = $values['BestRaceScore'];
-            $rows[$i]['rankInt'] = $values['BestRaceRank'];
-            $i = $i + 1;
-        }
 
-        $xml = UMPanel::textLabel($ctx->layout, '$fffBest Races', 0, true);
+        // TODO: fix prop names
+        $rows[$i]['rank'] = $selectedPlayer['rankBestRace'];
+        $rows[$i]['time'] = $selectedPlayer['BestRaceTime'];
+        $rows[$i]['score'] = $selectedPlayer['BestRaceScore'];
+        $rows[$i]['rankInt'] = $selectedPlayer['rankBestRace'];
+        $i = $i + 1;
+
+        $xml = UMPanel::textLabel($ctx->layout, '$fffBest Race', 0, true);
         $xml .= Table::render($spec, $rows);
         $lapsTableTitleOffset = 7 +$i*2.4;
-        $xml .= UMPanel::textLabel($ctx->layout, '$fffBest Laps', $lapsTableTitleOffset, true);
+        $xml .= UMPanel::textLabel($ctx->layout, '$fffBest Lap', $lapsTableTitleOffset, true);
 
         $lapRows = array();
         $j = 0;
-        foreach($selectedPlayer['PerMap'] as $envi => $values) {
-            $lapRows[$j]['envi'] = $envi;
-            $lapRows[$j]['rank'] = $values['BestLapRank'];
-            $lapRows[$j]['time'] = $values['BestLapTime'];
-            $lapRows[$j]['score'] = $values['BestLapScore'];
-            $lapRows[$j]['rankInt'] = $values['BestLapRank'];
-            $j = $j + 1;
-        }
+
+        // TODO: fix prop names
+        $lapRows[$j]['rank'] = $selectedPlayer['rankBestLap'];
+        $lapRows[$j]['time'] = $selectedPlayer['BestLapTime'];
+        $lapRows[$j]['score'] = $selectedPlayer['BestLapScore'];
+        $lapRows[$j]['rankInt'] = $selectedPlayer['BestLapRank'];
+        $j = $j + 1;
+
 
         $spec['yTop'] = -($lapsTableTitleOffset) - 7;
         $xml .= Table::render($spec, $lapRows);

@@ -57,7 +57,7 @@ class PlayerListPlayoffsPanel {
             $i++;
         }
 
-        $xmlPlayers .= PlayerPagination::render($ctx, $players);
+        $xmlPlayers .= isset($players) && count($players) > 0 ? PlayerPagination::render($ctx, $players) : XmlTag::labelCenterLeft(1, -1, 30, 10, "No records yet...");
 
         return array(
             'xmlPlayers' => $xmlPlayers,

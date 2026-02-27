@@ -19,18 +19,18 @@ class LeaderboardPlayersTable {
 
             'columns' => array(
                 array(
-                    'key' => 'envi',
-                    'title' => 'Environment',
-                    'width' => 12,
+                    'key' => 'Rank',
+                    'title' => 'Rank',
+                    'width' => 6,
                     'align' => 'left',
                     'padL' => $v['idxPadL'],
                     'gutterAfter' => $v['gutter'],
                     'cellFont' => function($row) { return '$fff$o'; }, // or your rank-based logic in a closure
                 ),
                 array(
-                    'key' => 'type',
+                    'key' => 'NickNameWithColor',
                     'title' => 'Type',
-                    'width' => 10,
+                    'width' => 14,
                     'align' => 'left',
                     'gutterAfter' => $v['gutter'],
                     'cellFont' => function() { return '$390$o'; },
@@ -76,8 +76,12 @@ class LeaderboardPlayersTable {
         $i = 0;
         foreach($selectedPlayers as $key => $player) {
             console('player: ' . $key);
+            console(print_r($player, true));
             //console('player: ' . $key);
 
+            $rows[$i] = $player;
+            //$rows[$i]['Rank'] = $i + 1;
+            $i++;
         }
 
 
