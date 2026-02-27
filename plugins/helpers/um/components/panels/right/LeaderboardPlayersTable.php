@@ -75,15 +75,9 @@ class LeaderboardPlayersTable {
         $rows = array();
         $i = 0;
         foreach($selectedPlayers as $key => $player) {
-            console('player: ' . $key);
-            console(print_r($player, true));
-            //console('player: ' . $key);
-
             $rows[$i] = $player;
-            //$rows[$i]['Rank'] = $i + 1;
             $i++;
         }
-
 
         $xml = Table::render($spec, $rows);
         return $xml;
