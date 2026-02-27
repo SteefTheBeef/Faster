@@ -1,8 +1,6 @@
 <?php
 
 class UmState {
-    public $shouldUpdateXml = true;
-    public $shouldComputeRankings = true;
     public $qualificationBestRacesRanking = array();
     public $qualificationBestLapsRanking = array();
 
@@ -28,29 +26,20 @@ class UmState {
     public function __construct($qualiConfigBestRaces, $qualiConfigBestLaps) {
         $this->qualificationBestRacesRanking = array();
         $this->qualificationBestLapsRanking = array();
-        $this->shouldUpdateXml = true;
-        $this->shouldComputeRankings = true;
         $this->qualiConfigBestRaces = $qualiConfigBestRaces;
         $this->qualiConfigBestLaps = $qualiConfigBestLaps;
     }
 
     public function computeRankings() {
-        console("COMPUTING NEW RANKINGS!!!!");
-        console(print_r($this->qualiConfigBestRaces, true));
-        if (!$this->shouldComputeRankings) return;
-
         $this->players = UmPlayers::loadPlayersNicknamesMap();
-
         $this->qualificationBestRacesRanking = BestRaces::buildQualificationRankingsAllMaps($this->qualiConfigBestRaces, $this->players);
         $this->qualificationBestLapsRanking = BestRaces::buildQualificationRankingsAllMapsBestLaps($this->qualiConfigBestLaps, $this->players);
         $this->qualificationRankingsPerEnv = QualificationRankingService::mergeQualificationScoresByEnv($this->qualificationBestRacesRanking, $this->qualificationBestLapsRanking);
         $this->qualificationRankings = QualificationRankingService::buildQualificationLeaderboardAllEnvs($this->qualificationRankingsPerEnv);
-        console("COMPUTED NEW RANKINGS");
-        //console(print_r($this->qualificationBestRacesRanking, true));
-        //console(print_r($this->qualificationRankingsPerEnv, true));
-        //console("LEADERBOARD RANKINGS:");
-        //console(print_r($this->qualificationRankings, true));
-        $this->shouldComputeRankings = false;
+
+        foreach ($this->boardIsOpen as $login => $isOpen) {
+            $this->setSelectedTab($login, $this->getSelectedTab($login), $this->getSelectedSubTab($login));
+        }
     }
 
     public function playerConnect($login) {
@@ -64,12 +53,22 @@ class UmState {
 
     }
 
-    public function setSelectedTab($login, $action) {
+    public function playerDisconnect($login) {
+        unset($this->selectedPlayerCollection[$login]);
+        unset($this->selectedPlayerIndex[$login]);
+        unset($this->selectedPlayer[$login]);
+        unset($this->selectedTab[$login]);
+        unset($this->selectedSubTab[$login]);
+        unset($this->boardIsOpen[$login]);
+        unset($this->selectedPlayerPaginationIndex[$login]);
+    }
+
+    public function setSelectedTab($login, $action, $subTabAction = null) {
         if ($action === UmPanelKeys::ACT_TAB_RULES) {
-            $this->setSelectedSubTab($login, UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION);
+            $this->setSelectedSubTab($login, $subTabAction ?: UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION);
         }
         if ($action === UmPanelKeys::ACT_TAB_QUALIFICATION) {
-            $this->setSelectedSubTab($login, UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD);
+            $this->setSelectedSubTab($login, $subTabAction ?: UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD);
         }
         $this->selectedTab[$login] = $action;
     }
@@ -88,6 +87,7 @@ class UmState {
         // choose appropriate player collection based on subtab
         if ($action === UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD) {
             $this->selectedPlayerCollection[$login] = $this->qualificationRankings;
+            if (isset($this->selectedPlayerCollection[$login]) && count($this->selectedPlayerCollection[$login]) > 0)
             $this->selectedPlayer[$login] = $this->selectedPlayerCollection[$login][0];
             return;
         }
