@@ -45,7 +45,6 @@ class UmBoard {
                 );
                 return isset($listBuild['xmlPlayers']) ? $listBuild['xmlPlayers'] : '';
             case UmPanelKeys::ACT_TAB_QUALIFICATION:
-                console("ACT_TAB_QUALIFICATION");
                 return QualiPlayerListPanelBuilder::build($ctx);
             default:
                 return QualiPlayerListPanelBuilder::build($ctx);
