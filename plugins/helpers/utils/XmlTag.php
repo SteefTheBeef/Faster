@@ -222,9 +222,6 @@ class XmlTag {
     }
 
     private static function escapeAttr($value) {
-        if (is_array($value)) {
-            console(print_r($value, true));
-        }
         $value = (string)$value;
         $value = str_replace(array("\r", "\n", "\t"), ' ', $value);
         return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
