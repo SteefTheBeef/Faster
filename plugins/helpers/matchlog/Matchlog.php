@@ -1,10 +1,4 @@
 <?php
-require(dirname(__FILE__)."/../challenge/challenge.php");
-require_once "MatchlogTeams.php";
-require_once "MatchlogLaps.php";
-require_once "MatchlogRounds.php";
-require_once "MatchlogStunts.php";
-require_once "MatchlogTimeAttack.php";
 
 class Matchlog {
 

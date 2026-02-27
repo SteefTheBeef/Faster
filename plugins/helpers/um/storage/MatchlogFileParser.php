@@ -1,5 +1,5 @@
 <?php
-
+// Reading matchlog file for playoffs live events
 class MatchlogFileParser {
     static function getScoreboardPlayersFromMatchlog($filePath, $pointsScale) {
         $races = self::parseMatchlogFile($filePath);

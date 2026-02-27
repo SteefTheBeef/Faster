@@ -1,8 +1,16 @@
 <?php
-require_once(dirname(__FILE__) . "/../../challenge/challenge.php");
-
 
 class MatchlogUtils {
+
+    // TODO: use atomic write in the future
+    static function writeToFIle($text){
+        $fileName = "fastlog/um/matchlog.txt";
+
+        $myfile = fopen($fileName, "a");
+        fwrite($myfile,"###\n[".date("Y-m-d, H:i:s")."] $text\n");
+        fclose($myfile);
+    }
+
     /**
      * @param $challengeInfo - The Challenge info
      * @param $prefix - TIMEATTACK, ROUNDS, LAPS, TEAMLAPS, STUNTS
@@ -60,7 +68,7 @@ class MatchlogUtils {
 
     static function getFilenameForCheckpointFile($login) {
         global $_GameInfos, $_ChallengeInfo;
-        $fileName = "fastlog/" . $_GameInfos["LapsNbLaps"] . "laps/" . $_ChallengeInfo['UId'] . "_" . $login . ".txt";
+        $fileName = "fastlog/um/" . $_GameInfos["LapsNbLaps"] . "laps/" . $_ChallengeInfo['UId'] . "_" . $login . ".txt";
         return $fileName;
     }
 
