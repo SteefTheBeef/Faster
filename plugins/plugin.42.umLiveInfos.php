@@ -1,22 +1,27 @@
 <?php
+
+require_once "helpers/matchlog/utils/MatchlogUtils.php";
+
 ////////////////////////////////////////////////////////////////
-//¤
-// File:      FAST 3.2 (First Automatic Server for Trackmania)
-// Web:       
-// Date:      25.08.2011
+//
+// Date:      02.2026
 // Author:    [TnT]BlackCat
 // 
 ////////////////////////////////////////////////////////////////
-// needed plugins: manialinks,ml_menus
 //
 // plugin to show checkpoints times for a whole laps race
 
-require_once "helpers/matchlog/utils/MatchlogUtils.php";
-registerPlugin('um_liveinfos', 42, 1.0);
 
-function um_liveinfosPlayerCheckpoint($event, $login) {
-    global $_mldebug, $_players, $_players_playing;
-    um_liveinfosUpdatePlayerCPGapsXml($login, 'show');
+registerPlugin('umLiveInfos', 42, 1.0);
+function umLiveInfosInit($event) {
+    global $playersCheckpointsFromFile;
+
+    $playersCheckpointsFromFile = array();
+
+}
+function umLiveInfosPlayerCheckpoint($event, $login) {
+    global $_players, $_players_playing;
+    umLiveInfosUpdatePlayerCPGapsXml($login, 'show');
 
     // send check to targetted specs
     $pid = $_players[$login]['PlayerId'];
@@ -24,29 +29,40 @@ function um_liveinfosPlayerCheckpoint($event, $login) {
         if ($pl['Status'] == 1 && $pl['FinalTime'] <= 0 && ($pl['CurrentTargetId'] == $pid || $_players_playing == 1) &&
             $pl['ML']['ShowML'] && $pl['ML']['Show.live']) {
             if ($pl['ML']['Show.cpgaps'])
-                um_liveinfosUpdatePlayerCPGapsXml('' . $speclogin, 'show', $login);
+                umLiveInfosUpdatePlayerCPGapsXml('' . $speclogin, 'show', $login);
         }
     }
 }
 
-function um_liveinfosPlayerSpecChange($event) {
+function umLiveInfosPlayerSpecChange($event) {
     hideUI();
 }
 
-function um_liveinfosBeginRound($event) {
+function umLiveInfosBeginRound($event) {
     hideUI();
 }
 
-function um_liveinfosEndRace($event) {
-    hideUI();
+function umLiveInfosBeginRace($event,$GameInfos,$ChallengeInfo,$newcup,$warmup,$fwarmup){
+    global $_players, $playersCheckpointsFromFile;
+    foreach ($_players as $login => &$pl) {
+        $playersCheckpointsFromFile[$login] = MatchlogUtils::getCheckpointsFromFileForPlayer($login);
+    }
 }
-
+function umLiveInfosEndRace($event) {
+    hideUI();
+    resetPlayersCheckpoints();
+}
+function umLiveInfosPlayerConnect($event, $login) {
+    global $playersCheckpointsFromFile;
+    $playersCheckpointsFromFile[$login] = MatchlogUtils::getCheckpointsFromFileForPlayer($login);
+    console("umLiveInfosPlayerConnect:: " . print_r($playersCheckpointsFromFile, true));
+}
 //--------------------------------------------------------------
 // Function called to handle the manialink drawing
 // action can be 'show', 'hide', 'remove'
 //--------------------------------------------------------------
-function um_liveinfosUpdatePlayerCPGapsXml($login, $action = 'show', $speclogin = '') {
-    global $_players, $_GameInfos;
+function umLiveInfosUpdatePlayerCPGapsXml($login, $action = 'show', $speclogin = '') {
+    global $_players, $_GameInfos, $playersCheckpointsFromFile;
 
     if (!is_string($login))
         $login = '' . $login;
@@ -56,15 +72,15 @@ function um_liveinfosUpdatePlayerCPGapsXml($login, $action = 'show', $speclogin 
         return;
 
     if ($action == 'remove' || $action == 'hide') {
-        manialinksSet($login, 'um_liveinfos.cp', $action);
+        manialinksSet($login, 'umLiveInfos.cp', $action);
     }
 
     // show/refresh
     if (!$_players[$login]['ML']['Show.live'] || !$_players[$login]['ML']['Show.cpgaps'] ||
         ($_players[$login]['IsSpectator'] && $speclogin == '')) {
         // none to show and opened : hide it
-        if (manialinksIsOpened($login, 'um_liveinfos.cp'))
-            manialinksHide($login, 'um_liveinfos.cp');
+        if (manialinksIsOpened($login, 'umLiveInfos.cp'))
+            manialinksHide($login, 'umLiveInfos.cp');
         return;
     }
 
@@ -81,7 +97,11 @@ function um_liveinfosUpdatePlayerCPGapsXml($login, $action = 'show', $speclogin 
         return;
     }
 
-    $checkpointArray = MatchlogUtils::getCheckpointsFromFileForPlayer($login);
+    if (!isset($playersCheckpointsFromFile[$login]) || count($playersCheckpointsFromFile[$login]) < 2) {
+        return;
+    }
+
+    $checkpointArray = $playersCheckpointsFromFile[$login];
     $player = $_players[$login];
     $currentCpCount = count($player["Checkpoints"]);
     if ($currentCpCount < 2) {
@@ -112,7 +132,7 @@ function um_liveinfosUpdatePlayerCPGapsXml($login, $action = 'show', $speclogin 
 
     if ($msg != '') {
         $xml = '<label posn="0 33.7 -60" halign="center" textsize="3" text="' . $msg . '"/>';
-        manialinksShow($showlogin, 'um_liveinfos.cp', $xml);
+        manialinksShow($showlogin, 'umLiveInfos.cp', $xml);
     }
 }
 
@@ -120,6 +140,11 @@ function hideUI() {
     global $_players;
 
     foreach ($_players as $login => &$pl) {
-        um_liveinfosUpdatePlayerCPGapsXml($login, 'hide');
+        umLiveInfosUpdatePlayerCPGapsXml($login, 'hide');
     }
+}
+
+function resetPlayersCheckpoints() {
+    global $playersCheckpointsFromFile;
+    $playersCheckpointsFromFile = array();
 }
