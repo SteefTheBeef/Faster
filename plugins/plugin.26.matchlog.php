@@ -4,11 +4,11 @@
 // File:      FAST 3.2 (First Automatic Server for Trackmania)
 // Date:      12.04.2023
 // Author:    Gilles Masson
-//
+// 
 ////////////////////////////////////////////////////////////////
 //
 // FAST3.2 Matchlog plugin
-//
+// 
 //
 if(!$_is_relay) registerPlugin('matchlog',26,1.0);
 
@@ -34,7 +34,7 @@ function matchlogInit(){
 	$_lapspoints_points['fet2'] = array(15,12,11,10,9,8,7,6,6,5,5,4,4,3,3,3,2,2,2,2,1,1,0);
 	$_lapspoints_finishbonus['fet2'] = array(100=>5,80=>4,60=>3,40=>2,20=>1); // if >= index% of race, then add indicated bonus, must be in decreasing order !!
 
-	$_lapspoints_points['fet3'] = array(25,22,20,19,18,17,16,15,14,13,12,11,10,10,9,9,8,8,7,7,6,6,5,5,4,4,3,3,2,2,1); // FET6 style points
+  $_lapspoints_points['fet3'] = array(25,22,20,19,18,17,16,15,14,13,12,11,10,10,9,9,8,8,7,7,6,6,5,5,4,4,3,3,2,2,1); // FET6 style points
 	$_lapspoints_finishbonus['fet3'] = array(100=>0); // if >= index% of race, then add indicated bonus, must be in decreasing order !!
 	$_lapspoints_notfinishmultiplier['fet3'] = 0.5; // coef (round up) for players who did not finish
 
@@ -66,7 +66,7 @@ function matchlogBeginRace($event,$GameInfos){
 
 
 //------------------------------------------
-// BeginRound :
+// BeginRound : 
 //------------------------------------------
 function matchlogBeginRound(){
 	global $_debug,$_PlayerList,$_Ranking,$_matchlog_Ranking,$_GameInfos,$_Status,$_team_color,$_teamcolor,$do_match_log,$_WarmUp,$_FWarmUp;
@@ -92,12 +92,12 @@ function matchlogBeginRound(){
 		}
 		$_matchlog_Ranking = $_Ranking;
 	}
-
+	
 }
 
 
 //------------------------------------------
-// EndRound :
+// EndRound : 
 //------------------------------------------
 function matchlogEndRound($event,$Ranking,$ChallengeInfo,$GameInfos,$SpecialRestarting){
 	global $_debug,$_players,$_GameInfos,$_team_color,$do_match_log,$_players_round_current,$_Game,$_teams,$_WarmUp,$_FWarmUp,$_FGameModes,$_FGameMode;
@@ -105,7 +105,7 @@ function matchlogEndRound($event,$Ranking,$ChallengeInfo,$GameInfos,$SpecialRest
 		return;
 
 	if(isset($_FGameModes[$_FGameMode]['MatchLogEndRound']) && $_FGameModes[$_FGameMode]['MatchLogEndRound'] != '' &&
-		function_exists($_FGameModes[$_FGameMode]['MatchLogEndRound'])){
+		 function_exists($_FGameModes[$_FGameMode]['MatchLogEndRound'])){
 		// call FGameMode matchlog callback if exists
 		call_user_func($_FGameModes[$_FGameMode]['MatchLogEndRound'],$event,$Ranking,$ChallengeInfo,$GameInfos,$SpecialRestarting);
 
@@ -117,16 +117,16 @@ function matchlogEndRound($event,$Ranking,$ChallengeInfo,$GameInfos,$SpecialRest
 			if($pl['FinalTime']>0){
 				//debugPrint('matchlogEndRound - players[$login]',$_players[$login]);
 				$times[] = array('Login'=>$pl['Login'],
-					'NickName'=>$pl['NickName'],
-					'FinalTime'=>$pl['FinalTime'],
-					'TeamId'=>$pl['TeamId']);
+												 'NickName'=>$pl['NickName'],
+												 'FinalTime'=>$pl['FinalTime'],
+												 'TeamId'=>$pl['TeamId']);
 			}
 		}
 		if($_debug>1) debugPrint('matchlogEndRound - times',$times);
 		if(count($times)>0){
 			usort($times,'matchlogRecCompare');
 			$best = $times[0]['FinalTime'];
-			$msg = '$i$s$n$dfdR-'.$_players_round_current.'$cc0>> ';
+ 			$msg = '$i$s$n$dfdR-'.$_players_round_current.'$cc0>> ';
 			$msg2 = 'Round-'.$_players_round_current;
 			$sep = '';
 			$sep2 = ':';
@@ -159,23 +159,23 @@ function matchlogEndRound($event,$Ranking,$ChallengeInfo,$GameInfos,$SpecialRest
 // -----------------------------------
 // compare function for usort, return -1 if $a should be before $b
 function matchlogRecCompare($a, $b){
-	if($a['FinalTime']<=0 && $b['FinalTime']<=0)
-		return strcmp($a['NickName'],$b['NickName']);
-	elseif($b['FinalTime']<=0)
-		return -1;
-	elseif($a['FinalTime']<=0)
-		return 1;
-	// both best ok, so...
-	elseif($a['FinalTime']<$b['FinalTime'])
-		return -1;
-	elseif($a['FinalTime']>$b['FinalTime'])
-		return 1;
-	return -1;
-	// same best, so...
-	//elseif(isset($a['NewBest']) && isset($a['NewBest']))
-	//return ($a['NewBest']<$b['NewBest'])? -1 : 1;
-	//else
-	//return ($a['Rank']<$b['Rank'])? -1 : 1;
+  if($a['FinalTime']<=0 && $b['FinalTime']<=0)
+    return strcmp($a['NickName'],$b['NickName']);
+  elseif($b['FinalTime']<=0)
+    return -1;
+  elseif($a['FinalTime']<=0)
+    return 1;
+  // both best ok, so...
+  elseif($a['FinalTime']<$b['FinalTime'])
+    return -1;
+  elseif($a['FinalTime']>$b['FinalTime'])
+    return 1;
+  return -1;
+  // same best, so...
+  //elseif(isset($a['NewBest']) && isset($a['NewBest']))
+  //return ($a['NewBest']<$b['NewBest'])? -1 : 1;
+  //else
+  //return ($a['Rank']<$b['Rank'])? -1 : 1;
 }
 
 
@@ -187,9 +187,9 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 	global $_debug,$_players,$_PlayerList,$_Ranking,$do_match_log,$_NumberOfChecks,$_players_round_current,$_lapspoints_points,$_lapspoints_finishbonus,$_lapspoints_notfinishmultiplier,$_lapspoints_rule,$_WarmUp,$_FWarmUp,$_GameInfos,$_players_round_time,$_currentTime,$_FGameModes,$_FGameMode;
 	if(!$do_match_log || $_WarmUp || $_FWarmUp > 0)
 		return;
-
+	
 	if(isset($_FGameModes[$_FGameMode]['MatchLogEndRace']) && $_FGameModes[$_FGameMode]['MatchLogEndRace'] != '' &&
-		function_exists($_FGameModes[$_FGameMode]['MatchLogEndRace'])){
+		 function_exists($_FGameModes[$_FGameMode]['MatchLogEndRace'])){
 		// call FGameMode matchlog callback if exists
 		call_user_func($_FGameModes[$_FGameMode]['MatchLogEndRace'],$event,$Ranking,$ChallengeInfo,$GameInfos);
 
@@ -257,7 +257,7 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 		}
 		matchlog($msg1."\n\n");
 
-
+	
 		// rounds match log
 	}elseif($GameInfos['GameMode'] == ROUNDS || $GameInfos['GameMode'] == CUP){ // rounds
 
@@ -297,7 +297,7 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 		}
 		matchlog($msg1."\n\n");
 
-
+		
 		// timeattack match log
 	}elseif($GameInfos['GameMode'] == TA){ // timeattack
 
@@ -315,7 +315,7 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 		}
 		matchlog($msg1."\n\n");
 
-
+		
 	}elseif($GameInfos['GameMode'] == STUNTS){ // stunts
 
 		$cuid = isset($ChallengeInfo['UId']) ? $ChallengeInfo['UId'] : 'UID';
@@ -332,7 +332,7 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 		}
 		matchlog($msg1."\n\n");
 
-
+		
 		// laps match log
 	}elseif($GameInfos['GameMode'] == LAPS){
 		if($_NumberOfChecks > 0){
@@ -349,11 +349,11 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 					if($pl['FinalTime'] > 0)
 						$nbfinished++;
 					$times[] = array('Login'=>$login,'NickName'=>$pl['NickName'],
-						'Check'=>$pl['CheckpointNumber']+1,
-						'Lap'=>$pl['LapNumber'],
-						'Time'=>$pl['LastCpTime'],
-						'BestLap'=>$pl['BestLapTime'],
-						'CPdelay'=>$pl['CPdelay']);
+													 'Check'=>$pl['CheckpointNumber']+1,
+													 'Lap'=>$pl['LapNumber'],
+													 'Time'=>$pl['LastCpTime'],
+													 'BestLap'=>$pl['BestLapTime'],
+													 'CPdelay'=>$pl['CPdelay']);
 					if($pl['LastCpTime'] > $lasttime)
 						$lasttime = $pl['LastCpTime'];
 				}else{
@@ -387,26 +387,26 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 							$bestlapi = $i;
 					}
 				}
-
+				
 				//if($_debug>8) debugPrint("matchlogEndRace - Laps - times",$times);
 				//
 				$cuid = isset($ChallengeInfo['UId']) ? $ChallengeInfo['UId'] : 'UID';
 				$msg = '$i$s$n$dfdRace$cc0>> ';
 				$msg1 = 'LAPS MATCH on ['.stripColors($ChallengeInfo['Name']).'] ('
-					.$ChallengeInfo['Environnement'].','.$cuid.','.stripColors($ChallengeInfo['Author']).')';
+				.$ChallengeInfo['Environnement'].','.$cuid.','.stripColors($ChallengeInfo['Author']).')';
 				$sep = '';
 				for($i = 0; $i < sizeof($times); $i++){
 					if($i==$bestlapi){
 						$msg .= $sep.'$0f0 '.($i+1).'.$ecc'.stripColors($times[$i]['NickName'])
-							.' $aaa('.$times[$i]['Check'].','.MwTimeToString($times[$i]['Time'])
-							.',$ecc'.MwTimeToString($times[$i]['BestLap']).'$aaa)';
+						.' $aaa('.$times[$i]['Check'].','.MwTimeToString($times[$i]['Time'])
+						.',$ecc'.MwTimeToString($times[$i]['BestLap']).'$aaa)';
 					}else{
 						$msg .= $sep.'$0f0 '.($i+1).'.$ddd'.stripColors($times[$i]['NickName'])
-							.' $aaa('.$times[$i]['Check'].','.MwTimeToString($times[$i]['Time']).')';
+						.' $aaa('.$times[$i]['Check'].','.MwTimeToString($times[$i]['Time']).')';
 					}
 					$msg1 .= "\n".($i+1).','.$times[$i]['Lap'].','.$times[$i]['Check'].','
-						.MwTimeToString($times[$i]['Time']).','.MwTimeToString($times[$i]['BestLap']).','
-						.(($times[$i]['CPdelay']-$mincpdelay)/1000).',';
+					.MwTimeToString($times[$i]['Time']).','.MwTimeToString($times[$i]['BestLap']).','
+					.(($times[$i]['CPdelay']-$mincpdelay)/1000).',';
 
 					$lapspoints = 0;
 					// main points
@@ -450,7 +450,7 @@ function matchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 					}
 				}
 				$msg1 .= "\n* BestLap: ".MwTimeToString($times[$bestlapi]['BestLap']).','
-					.stripColors($times[$bestlapi]['Login']).','.stripColors($times[$bestlapi]['NickName']);
+				.stripColors($times[$bestlapi]['Login']).','.stripColors($times[$bestlapi]['NickName']);
 				addCall(null,'ChatSendServerMessage', $msg);
 				matchlog($msg1."\n\n");
 				console("to matchlog: ".$msg1);
@@ -486,8 +486,8 @@ function matchlogEndResult($event){
 			console("Copy fastlog/$htmlmatchfilename ($nb/".strlen($datas).")...");
 
 			if(isset($_matchlog_url))
-				$addcall = array(null,'ChatSendServerMessage',
-					localeText(null,'server_message').'$l['.$_matchlog_url.$htmlmatchfilename.']matchlog copied.');
+				$addcall = array(null,'ChatSendServerMessage', 
+											localeText(null,'server_message').'$l['.$_matchlog_url.$htmlmatchfilename.']matchlog copied.');
 			else
 				$addcall = null;
 
@@ -507,11 +507,11 @@ function matchlogRecCompareLaps($a, $b)
 		return 1;
 	// same number of check, test times
 	elseif($a['Time']<$b['Time'])
-		return -1;
-	elseif($a['Time']>$b['Time'])
-		return 1;
+    return -1;
+  elseif($a['Time']>$b['Time'])
+    return 1;
 	// same times, test bestlap times
-	elseif($a['BestLap']<=0 && $b['BestLap']<=0)
+  elseif($a['BestLap']<=0 && $b['BestLap']<=0)
 		return -1;
 	elseif($b['BestLap']<=0)
 		return -1;
