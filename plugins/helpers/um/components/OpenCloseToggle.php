@@ -29,8 +29,9 @@ class OpenCloseToggle {
         $s = $layout->geometry->closeButtonSize;
 
         $actId = isset($mlAct[UmPanelKeys::ACT_PANEL_OPEN]) ? (int)$mlAct[UmPanelKeys::ACT_PANEL_OPEN] : 0;
-
-        return XmlTag::frame($x, $y, 5, XmlTag::quadIcon64(0, 0, $s, 'Check', $actId));
+        $font = $layout->theme->accentTextColor;
+        $label = XmlTag::label(0.75, -1.25, $s, $s, "\$0f0\$oUM");
+        return XmlTag::frame($x - 1.25, $y - 0.5, 5, $label . "<quad sizen='6 4' posn='0 0 0' style='BgsPlayerCard' substyle='BgPlayerCardSmall' action={$actId}/>");
     }
 }
 
