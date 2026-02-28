@@ -1,8 +1,5 @@
 <?php
 
-require_once(dirname(__FILE__)."/../utils/stringUtils.php");
-require_once "utils/MatchlogUtils.php";
-
 class MatchlogRounds {
     static function create($logState, $challengeInfo, $ranking) {
         switch ($logState) {

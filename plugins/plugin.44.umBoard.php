@@ -25,6 +25,7 @@ require_once "helpers/um/services/QualificationRankingService.php";
 require_once "helpers/um/storage/MatchlogFileParser.php";
 require_once "helpers/um/storage/UmPlayers.php";
 require_once "helpers/um/storage/BestRaces.php";
+require_once "helpers/um/storage/Donations.php";
 require_once "helpers/um/storage/utils/FastFile.php";
 require_once "helpers/um/storage/utils/CsvFile.php";
 
@@ -34,6 +35,7 @@ require_once "helpers/um/domain/UMConfig.php";
 require_once "helpers/um/domain/UmMap.php";
 require_once "helpers/um/domain/UmPanelKeys.php";
 require_once "helpers/um/domain/UmState.php";
+require_once "helpers/um/domain/PrizePool.php";
 
 // General Components
 require_once "helpers/um/components/BoardTitle.php";
@@ -62,6 +64,7 @@ require_once "helpers/um/components/panels/right/LeaderboardPlayersTable.php";
 require_once "helpers/um/components/panels/right/PlayerDetailsTable.php";
 require_once "helpers/um/components/panels/right/EnviLeaderboardPlayerPanel.php";
 require_once "helpers/um/components/panels/right/PlayerEnviDetailsTable.php";
+require_once "helpers/um/components/panels/right/PrizePoolPanel.php";
 
 // Main component
 require_once "helpers/um/components/UmBoard.php";
@@ -170,6 +173,8 @@ function computeRankings() {
     global $umState;
     $umState = (object)$umState;
     $umState->computeRankings();
+    $donations = Donations::loadDonations();
+    $umState->setDonations($donations);
 }
 
 ?>

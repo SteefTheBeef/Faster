@@ -1,7 +1,7 @@
 <?php
 
 class TableBuilder {
-    static function build(Layout $layout, $rows, $reserveRightW, $topOffset, $columns, $preferredRowH = null) {
+    static function build(Layout $layout, $rows, $reserveRightW, $topOffset, $leftOffset, $columns, $preferredRowH = null) {
         $panelW = isset($layout->geometry->panelWidth) ? (float)$layout->geometry->panelWidth : 0.0;
         $topY = isset($layout->geometry->panelBodyTopY) ? (float)$layout->geometry->panelBodyTopY : -5.0;
         $bodyH = isset($layout->geometry->panelHeight) ? (float)$layout->geometry->panelBodyHeight : 0.0;
@@ -13,7 +13,7 @@ class TableBuilder {
         $reserveRightW = (float)$reserveRightW;
         if ($reserveRightW < 0) $reserveRightW = 0;
 
-        $tableX = $contentL;
+        $tableX = $contentL + (float)$leftOffset;
         $tableW = $panelW - $contentL - $contentR - $reserveRightW;
         if ($tableW < 10.0) $tableW = 10.0;
 
@@ -84,7 +84,7 @@ class TableBuilder {
 
         // Rows
         for ($i = 0; $i < $rows; $i++) {
-            $pos = $i;
+            $pos = $i + 1;
 
             $rowY = $headerY - (($i + 1) * $rowH);
             $rowTextY = $rowY - ($rowH / 2.0);
@@ -109,7 +109,7 @@ class TableBuilder {
                     $value = (string)$pos;
                 } elseif (isset($col['data']) && is_array($col['data'])) {
                     $data = $col['data'];
-                    $value = isset($data[$pos]) ? (string)$data[$pos] : '';
+                    $value = isset($data[$i]) ? (string)$data[$i] : '';
                 } elseif ($c === 0) {
                     $value = (string)$pos;
                 }

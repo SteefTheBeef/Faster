@@ -36,11 +36,11 @@ class RulesPanelBuilder {
                 break;
 
             case UmPanelKeys::ACT_SUBTAB_RULES_SEMI_FINAL:
-                $contentXml = self::semiFinalPoints($layout, $umConfig);
+                $contentXml = self::semiFinal($layout, $umConfig);
                 break;
 
             default:
-                $contentXml = UMPanel::textLabel($layout, "Misc rules...\n(Replace this with your real content)");
+                $contentXml = self::grandFinal($layout, $umConfig);
                 break;
         }
 
@@ -93,30 +93,104 @@ class RulesPanelBuilder {
         $xml = UMPanel::textLabel($layout, '$fffPoints Per Map in Qualification', $subHeaderYOffset, true);
 
         $columns = array(
-            array('header' => 'Rank', 'rank' => true, 'halign' => 'left'),
-            array('header' => 'Points Fastest Race', 'data' => $raceDist, 'halign' => 'right'),
+            array('header' => 'Rank', 'data' => array(1,2,3,4,5,6,7,8,9,10,11,12), 'halign' => 'left'),
+            array('header' => 'Best Race', 'data' => $raceDist, 'halign' => 'right'),
+            array('header' => 'Best Lap', 'data' => $lapDist, 'halign' => 'right')
         );
 
-        // Optional 3rd column: only add it if you actually provide data
-        if (is_array($lapDist) && count($lapDist) > 0) {
-            $columns[] = array('header' => 'Points Fastest Lap', 'data' => $lapDist, 'halign' => 'right');
-        }
-
+        $columnsForTable1 = $columns;
+        $columnsForTable1[1]['data'] = array_slice($raceDist, 0, 12);
         $xml .= TableBuilder::build(
             $layout,
-            24,
-            $reservedForSubmenu,
+            12,
+            $layout->geometry->panelWidth / 2 + $reservedForSubmenu / 2,
             $tableTopGap,
-            $columns
+            0.0,
+            $columnsForTable1
+        );
+
+        $columnsForTable2 = $columns;
+        $columnsForTable2[0]['data'] = array(13,14,15,16,17,18,19,20,21,22,23,24);
+        $columnsForTable2[1]['data'] = array_slice($raceDist, 12);
+        $xml .= TableBuilder::build(
+            $layout,
+            12,
+            $layout->geometry->panelWidth / 2 + $reservedForSubmenu / 2,
+            $tableTopGap,
+            $layout->geometry->panelWidth / 2 - $reservedForSubmenu / 2,
+            $columnsForTable2
         );
         $panelTitle = RightPanel::buildTitle($layout, 'Rules: Qualification Points');
         return $panelTitle . $xml;
     }
 
-    static function semiFinalPoints(Layout $layout, UMConfig $umConfig) {
-        $raceDist = is_array($umConfig->um4Semi->pointsDistribution)
-            ? $umConfig->um4QualiBestRace->pointsDistribution
-            : array();
+    static function semiFinal(Layout $layout, UMConfig $umConfig) {
+        $raceDist = $umConfig->um4Semi->pointsDistribution;
+
+        // Keep table out of the submenu area.
+        $reservedForSubmenu = 17.0 + 0.8; // submenuW + breathing gap
+
+        // Add a subheader like in the Qualification panel
+        $subHeaderYOffset = 7.0;
+        $tableTopGap = 13.5; // how far below the subheader the table starts (tweak to taste)
+        $accentColor = $layout->theme->accentTextColor;
+        $p1 = "The top 24 players from the qualification have a spot in the semi-final. "
+            . "Of these, the 12 best players will advance to the grand-final. "
+            . "At this stage, points do {$accentColor}NOT \$fffcarry-over to the grand-final.";
+        $xml = UMPanel::textLabel($layout, $p1);
+
+        $xml .= UMPanel::textLabel($layout, '$fffMaps and Stints', $subHeaderYOffset, true);
+
+        $xml .= TableBuilder::build(
+            $layout,
+            1,
+            $reservedForSubmenu,
+            $subHeaderYOffset + 3,
+            0.0,
+            array(
+                array('header' => 'Maps', 'data' => array(7), 'halign' => 'left'),
+                array('header' => 'Stints Per Map', 'data' => array(2), 'halign' => 'right'),
+                array('header' => 'Laps Per Stint', 'data' => array(6), 'halign' => 'right'),
+            )
+        );
+
+
+        $xml .= UMPanel::textLabel($layout, '$fffPoints Per Stint in Semi-final', $subHeaderYOffset + 9, true);
+
+        $columns = array(
+            array('header' => 'Rank', 'data' => array(1,2,3,4,5,6,7,8,9,10,11,12), 'halign' => 'left'),
+            array('header' => 'Points', 'data' => $raceDist, 'halign' => 'right'),
+        );
+
+
+        $columnsForTable1 = $columns;
+        $columnsForTable1[1]['data'] = array_slice($raceDist, 0, 12);
+        $xml .= TableBuilder::build(
+            $layout,
+            12,
+            $layout->geometry->panelWidth / 2 + $reservedForSubmenu / 2,
+            $subHeaderYOffset + 12,
+            0.0,
+            $columnsForTable1
+        );
+
+        $columnsForTable2 = $columns;
+        $columnsForTable2[0]['data'] = array(13,14,15,16,17,18,19,20,21,22,23,24);
+        $columnsForTable2[1]['data'] = array_slice($raceDist, 12);
+        $xml .= TableBuilder::build(
+            $layout,
+            12,
+            $layout->geometry->panelWidth / 2 + $reservedForSubmenu / 2,
+            $subHeaderYOffset + 12,
+            $layout->geometry->panelWidth / 2 - $reservedForSubmenu / 2,
+            $columnsForTable2
+        );
+
+        $panelTitle = RightPanel::buildTitle($layout, 'Rules: Semi-Final');
+        return $panelTitle . $xml;
+    }
+    static function grandFinal(Layout $layout, UMConfig $umConfig) {
+        $raceDist = $umConfig->um4GF->pointsDistribution;
 
         // Keep table out of the submenu area.
         $reservedForSubmenu = 17.0 + 0.8; // submenuW + breathing gap
@@ -125,27 +199,44 @@ class RulesPanelBuilder {
         $subHeaderYOffset = 7.0;
         $tableTopGap = 10.5; // how far below the subheader the table starts (tweak to taste)
 
-        $p1 = "The top 24 players from the qualification have a spot in the semi-final. "
-            . "Of these, the 12 best players will advance to the grand-final. "
-            . "At this stage, points do {$layout->theme->accentTextColor}NOT \$fffcarry-over to the grand-final.";
-
+        $p1 = "The top 12 players of the semi-final advance to the grand-final. "
+            . "Points do {$layout->theme->accentTextColor}NOT \$fffcarry-over to the grand-final.";
         $xml = UMPanel::textLabel($layout, $p1);
-        $xml .= UMPanel::textLabel($layout, '$fffPoints Per Map in Semi-final', $subHeaderYOffset, true);
+
+        $xml .= UMPanel::textLabel($layout, '$fffMaps and Stints', 5, true);
+
+        $xml .= TableBuilder::build(
+            $layout,
+            1,
+            $reservedForSubmenu,
+            8,
+            0.0,
+            array(
+                array('header' => 'Maps', 'data' => array(7), 'halign' => 'left'),
+                array('header' => 'Stints Per Map', 'data' => array(3), 'halign' => 'right'),
+                array('header' => 'Laps Per Stint', 'data' => array(8), 'halign' => 'right'),
+            )
+        );
+
+        $xml .= UMPanel::textLabel($layout, '$fffPoints Per Stint in Grand-Final', 14, true);
 
         $columns = array(
             array('header' => 'Rank', 'rank' => true, 'halign' => 'left'),
-            array('header' => 'Points Fastest Race', 'data' => $raceDist, 'halign' => 'right'),
+            array('header' => 'Points', 'data' => $raceDist, 'halign' => 'right'),
         );
 
         $xml .= TableBuilder::build(
             $layout,
-            24,
+            12,
             $reservedForSubmenu,
-            $tableTopGap,
+            17,
+            0.0,
             $columns,
             1.4
         );
-        $panelTitle = RightPanel::buildTitle($layout, 'Rules: Semi-Final');
+
+
+        $panelTitle = RightPanel::buildTitle($layout, 'Rules: Grand-Final');
         return $panelTitle . $xml;
     }
 }

@@ -1,7 +1,5 @@
 <?php
 
-require_once "utils/MatchlogUtils.php";
-
 class MatchlogTimeAttack {
     static function create($logState, $challengeInfo, $ranking) {
         switch ($logState) {

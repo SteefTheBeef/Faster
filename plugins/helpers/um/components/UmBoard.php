@@ -66,8 +66,8 @@ class UmBoard {
             case UmPanelKeys::ACT_TAB_QUALIFICATION:
                 return QualificationPanelBuilder::build($ctx);
 
-            case UmPanelKeys::ACT_TAB_PRIZE:
-                return '';
+            case UmPanelKeys::ACT_TAB_PRIZE_POOL:
+                return PrizePoolPanel::render($ctx);
 
             case UmPanelKeys::ACT_TAB_SEMI_FINAL:
             default:

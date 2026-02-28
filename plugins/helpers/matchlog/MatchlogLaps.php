@@ -1,8 +1,5 @@
 <?php
 
-require_once "utils/MatchlogUtils.php";
-require_once "utils/MatchlogConsole.php";
-
 class MatchlogLaps {
     static function create($logState, $challengeInfo, $isMatch) {
         switch ($logState) {

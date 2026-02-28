@@ -55,7 +55,6 @@ function umLiveInfosEndRace($event) {
 function umLiveInfosPlayerConnect($event, $login) {
     global $playersCheckpointsFromFile;
     $playersCheckpointsFromFile[$login] = MatchlogUtils::getCheckpointsFromFileForPlayer($login);
-    console("umLiveInfosPlayerConnect:: " . print_r($playersCheckpointsFromFile, true));
 }
 //--------------------------------------------------------------
 // Function called to handle the manialink drawing
@@ -93,7 +92,7 @@ function umLiveInfosUpdatePlayerCPGapsXml($login, $action = 'show', $speclogin =
         $msg = '$s$i' . $_players[$login]['NickDraw'] . ':  ';
     }
 
-    if ($_GameInfos['GameMode'] != LAPS) {
+    if ($_GameInfos['GameMode'] != 3) {
         return;
     }
 

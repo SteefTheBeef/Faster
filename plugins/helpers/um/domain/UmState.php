@@ -23,11 +23,14 @@ class UmState {
     public $selectedPlayer = array();
     public $boardIsOpen = array();
 
+    public $prizePool;
+
     public function __construct($qualiConfigBestRaces, $qualiConfigBestLaps) {
         $this->qualificationBestRacesRanking = array();
         $this->qualificationBestLapsRanking = array();
         $this->qualiConfigBestRaces = $qualiConfigBestRaces;
         $this->qualiConfigBestLaps = $qualiConfigBestLaps;
+        $this->prizePool = new PrizePool();
     }
 
     public function computeRankings() {
@@ -141,5 +144,15 @@ class UmState {
         //        }
         //$this->selectedPlayer[$login] = $newSelectedPlayer;
             //console("SELECTED PLAYER!!!!: " . print_r($this->selectedPlayer[$login], true));
+    }
+
+    public function setDonations($donations = array()) {
+        foreach ($donations as $login => $donation) {
+            if (isset($this->players[$login]['NickNameWithColor'])) {
+                $donation['NickNameWithColor'] = $this->players[$login]['NickNameWithColor'];
+            }
+        }
+
+        $this->prizePool = new PrizePool($donations);
     }
 }

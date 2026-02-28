@@ -72,6 +72,7 @@ class SchedulePanelBuilder {
             6,
             $reservedForSubmenu,
             $tableTopGap,
+            0.0,
             $columns,
             2.2
         );
@@ -79,14 +80,14 @@ class SchedulePanelBuilder {
         $accentColor = $layout->theme->accentTextColor;
 
         $xml .= UMPanel::textLabel($layout, '$fffMap Order', 20.5, true);
-        $xml .= UMPanel::textLabel($layout, "{$accentColor}Semi-final", 24, true);
-        $xml .= UMPanel::textLabel($layout, "Island, Rally, Desert, Snow, Bay, Coast, Stadium", 26);
+        $xml .= UMPanel::textLabel($layout, "Semi-Final", 24, true);
+        $xml .= UMPanel::textLabel($layout, "{$accentColor}Island, Rally, Desert, Snow, Bay, Coast, Stadium", 26);
 
-        $xml .= UMPanel::textLabel($layout, "{$accentColor}Grand-final Day One", 29, true);
-        $xml .= UMPanel::textLabel($layout, "Island, Desert, Stadium", 31);
+        $xml .= UMPanel::textLabel($layout, "Grand-Final Day One", 29, true);
+        $xml .= UMPanel::textLabel($layout, "{$accentColor}Island, Desert, Stadium", 31);
 
-        $xml .= UMPanel::textLabel($layout, "{$accentColor}Grand-final Day Two", 34, true);
-        $xml .= UMPanel::textLabel($layout, "Rally, Bay, Snow, Coast", 36);
+        $xml .= UMPanel::textLabel($layout, "Grand-Final Day Two", 34, true);
+        $xml .= UMPanel::textLabel($layout, "{$accentColor}Rally, Bay, Snow, Coast", 36);
 
         return RightPanel::buildTitle($layout, 'Schedule') . $xml;
     }

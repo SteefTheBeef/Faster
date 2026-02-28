@@ -1,5 +1,8 @@
 <?php
 require_once "helpers/challenge/challenge.php";
+require_once "helpers/utils/StringUtils.php";
+require_once "helpers/matchlog/utils/MatchlogUtils.php";
+require_once "helpers/matchlog/utils/MatchlogConsole.php";
 require_once "helpers/matchlog/MatchlogTeams.php";
 require_once "helpers/matchlog/MatchlogLaps.php";
 require_once "helpers/matchlog/MatchlogRounds.php";

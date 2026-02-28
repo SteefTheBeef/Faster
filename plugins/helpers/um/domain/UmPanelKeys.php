@@ -31,7 +31,7 @@ class UmPanelKeys {
     const ACT_TAB_QUALIFICATION = 'um.tab.qualification';
     const ACT_TAB_SEMI_FINAL = 'um.tab.semi-final';
     const ACT_TAB_STINTS = 'um.tab.stints';
-    const ACT_TAB_PRIZE = 'um.tab.prize';
+    const ACT_TAB_PRIZE_POOL = 'um.tab.prize-pool';
     const ACT_TAB_SCHEDULE = 'um.tab.schedule';
     const ACT_TAB_RULES = 'um.tab.rules';
     const ACT_TAB_INFORMATION = 'um.tab.information';
@@ -88,7 +88,7 @@ class UmPanelKeys {
             self::ACT_TAB_QUALIFICATION,
             self::ACT_TAB_SEMI_FINAL,
             self::ACT_TAB_STINTS,
-            self::ACT_TAB_PRIZE,
+            self::ACT_TAB_PRIZE_POOL,
             self::ACT_TAB_SCHEDULE,
             self::ACT_TAB_RULES,
             self::ACT_TAB_INFORMATION,
