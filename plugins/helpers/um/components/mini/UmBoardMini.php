@@ -29,9 +29,6 @@ class UmBoardMini {
         $y = 31.5;
         $x = 1;
         $challengeInfo = $ctx->challengeInfo;
-        console("buildTable CHALLENGEINFO::: " . print_r($challengeInfo, true));
-        //console("PLAYERCOLLECTION::: " . print_r($ctx->umState->qualificationRankingsPerEnv, true));
-
         $xml = '';
 
         if (isset($ctx->umState->qualificationRankingsPerEnv[$challengeInfo['Environnement']])) {
@@ -75,10 +72,8 @@ class UmBoardMini {
         // Panel close/open
         if ($action === UmPanelKeys::ACT_BOARD_MINI_TOGGLE) {
             if (!isset($umState->boardMiniIsOpen[$login])) {
-                console("1");
                 $umState->boardMiniIsOpen[$login] = true;
             } else {
-                console("2");
                 $umState->boardMiniIsOpen[$login] = !$umState->boardMiniIsOpen[$login];
             }
 
