@@ -19,8 +19,8 @@ class BestRaces {
      *
      * File: fastlog/um/bestRaces.<env>.<uid>.txt
      */
-    public static function updateBestRacesFile($finishedPlayers, $challengeInfo) {
-        self::updateBestFile(self::FILE_PREFIX_BEST_RACES, $finishedPlayers, $challengeInfo);
+    public static function updateBestRacesFile($finishedPlayers, $challengeInfo, $gameInfo) {
+        self::updateBestFile(self::FILE_PREFIX_BEST_RACES, $finishedPlayers, $challengeInfo, $gameInfo);
     }
 
     /**
@@ -29,14 +29,14 @@ class BestRaces {
      *
      * File: fastlog/um/bestLaps.<env>.<uid>.txt
      */
-    public static function updateBestLapsFile($finishedPlayers, $challengeInfo) {
-        self::updateBestFile(self::FILE_PREFIX_BEST_LAPS, $finishedPlayers, $challengeInfo);
+    public static function updateBestLapsFile($finishedPlayers, $challengeInfo, $gameInfo) {
+        self::updateBestFile(self::FILE_PREFIX_BEST_LAPS, $finishedPlayers, $challengeInfo, $gameInfo);
     }
 
     /**
      * Shared update pipeline for "best races" and "best laps".
      */
-    private static function updateBestFile($kindPrefix, $finishedPlayers, $challengeInfo) {
+    private static function updateBestFile($kindPrefix, $finishedPlayers, $challengeInfo, $gameInfo) {
         if (!is_array($finishedPlayers) || count($finishedPlayers) < 1) {
             return;
         }
@@ -49,7 +49,8 @@ class BestRaces {
             return;
         }
 
-        $filePath = self::DIR_UM . '/' . $kindPrefix . '.' . $envSafe . '.' . $uidSafe . '.txt';
+        $lapsCount = $gameInfo["LapsNbLaps"];
+        $filePath = self::DIR_UM . '/' . $kindPrefix . '.' . $envSafe . '.' . $lapsCount . 'laps.' . $uidSafe . '.txt';
         FastFile::ensureFile($filePath);
 
         $mapId = (string)getChallengeID($challengeInfo);
@@ -478,6 +479,7 @@ class BestRaces {
     public static function buildQualificationScoresAllMapsBestLaps(UMConfigEntry $qualiBestLapsConfig, $nickMap) {
         return self::buildQualificationScoresAllMapsForKind(self::FILE_PREFIX_BEST_LAPS, $qualiBestLapsConfig, $nickMap);
     }
+
     /**
      * Shared implementation for qualification aggregation.
      *
@@ -495,7 +497,7 @@ class BestRaces {
 
             $wantedMapId = self::wantedMapIdFromMapConfig($m);
 
-            $files = self::listBestFilesForUid($kindPrefix, $uidSafe);
+            $files = self::listBestFilesForUid($kindPrefix, $uidSafe, $config->lapsCount);
             if (!is_array($files) || count($files) < 1) continue;
 
             foreach ($files as $filePath) {
@@ -584,8 +586,8 @@ class BestRaces {
         return '';
     }
 
-    private static function listBestFilesForUid($kindPrefix, $uidSafe) {
-        $pattern = self::DIR_UM . '/' . $kindPrefix . '.*.' . $uidSafe . '.txt';
+    private static function listBestFilesForUid($kindPrefix, $uidSafe, $lapsCount) {
+        $pattern = self::DIR_UM . '/' . $kindPrefix . '.*.'. $lapsCount . 'laps.' . $uidSafe . '.txt';
         $files = glob($pattern);
         if ($files === false || !is_array($files)) return array();
         return $files;
@@ -692,5 +694,10 @@ class BestRaces {
  * Backward-compatible global comparators.
  * Keep these if any legacy code calls usort($rows, 'bestRacesCompare') / 'bestLapsCompare'.
  */
-function bestRacesCompare($a, $b) { return BestRaces::compareBestRacesRows($a, $b); }
-function bestLapsCompare($a, $b)  { return BestRaces::compareBestLapsRows($a, $b); }
+function bestRacesCompare($a, $b) {
+    return BestRaces::compareBestRacesRows($a, $b);
+}
+
+function bestLapsCompare($a, $b) {
+    return BestRaces::compareBestLapsRows($a, $b);
+}
