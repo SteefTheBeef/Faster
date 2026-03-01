@@ -9,6 +9,7 @@
 // Main component
 require_once "helpers/um/components/mini/UmBoardMini.php";
 require_once "helpers/um/components/mini/UmBoardMiniRenderContext.php";
+require_once "helpers/um/domain/UmPanelKeys.php";
 
 registerPlugin(UmPanelKeys::ML_ID_BOARD_MINI, 45, 1.0);
 

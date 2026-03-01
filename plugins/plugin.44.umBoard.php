@@ -119,6 +119,7 @@ function umBoardPlayerConnect($event, $login) {
 
     $umState->playerConnect($login);
     umBoardUpdateXml($login, 'show');
+    addCall(null,'SetCallVoteTimeOut',0);
 }
 function umBoardPlayerDisconnect($event,$login){
     global $umState;
