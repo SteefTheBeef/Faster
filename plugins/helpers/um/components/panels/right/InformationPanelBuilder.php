@@ -24,9 +24,9 @@ class InformationPanelBuilder {
         $xml .= UMPanel::textLabel($layout, $pl4, 28 + $addToOffset);
 
 
-        $discordLink = "\$fff\$oJoin us on our discord at \$f09\$lhttps://discord.gg/457Bxpf";
+        $discordLink = "\$fffJoin us on our discord at \$f09\$lhttps://discord.gg/457Bxpf";
 
-        $xml .= UMPanel::textLabel($layout, $discordLink, 39 + $addToOffset);
+        $xml .= UMPanel::textLabel($layout, $discordLink, 39 + $addToOffset, true, array('autonewline' => '0'));
 
         //$xml .= "<label posn='1" . ($panelBodyTopY - 10) . " 0.2' sizen='" . ($panelW/1.5 - 2) . " {$panelBodyH}' halign='left' valign='top' textsize='1' autonewline='1' text='" . safeString($discordLink) . "'/>";
         return RightPanel::buildTitle($layout, "Information") . $xml;
