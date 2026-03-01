@@ -3,6 +3,7 @@
 class UmPanelKeys {
     // Manialink idname
     const ML_ID_PANEL = 'umBoard';
+    const ML_ID_BOARD_MINI = 'umBoardMini';
 
     // Per-player ML state keys
     const ML_PANEL_CLOSED = 'um.panel.closed';
@@ -15,6 +16,7 @@ class UmPanelKeys {
     // Actions (static)
     const ACT_PANEL_CLOSE = 'um.panel.close';
     const ACT_PANEL_OPEN = 'um.panel.open';
+
     const ACT_RACES_PREV = 'races.prev';
     const ACT_RACES_NEXT = 'races.next';
 
@@ -51,6 +53,11 @@ class UmPanelKeys {
     const ACT_SUBTAB_QUALIFICATION_ISLAND = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.island';
     const ACT_SUBTAB_QUALIFICATION_BAY = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.bay';
     const ACT_SUBTAB_QUALIFICATION_STADIUM = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.stadium';
+
+    // Mini Board
+    // Actions (static)
+    const ACT_BOARD_MINI_TOGGLE = 'um.board.mini.toggle';
+
 
     /**
      * Build scoreboard row action name.
