@@ -41,7 +41,7 @@ class LayoutGeometry
         $g = new self();
 
         // constants / tunables
-        $g->backgroundWidth  = 90.0;
+        $g->backgroundWidth  = 84.0;
         $g->backgroundHeight = 60.0;
         $g->rowCount         = 16;
 

@@ -5,6 +5,9 @@ class Layout
     /** @var LayoutGeometry */
     public $geometry;
 
+    /** @var LayoutGeometryMini */
+    public $geometryMini;
+
     /** @var LayoutTheme */
     public $theme;
 
@@ -16,6 +19,7 @@ class Layout
         $layout = new self();
 
         $layout->geometry = LayoutGeometry::buildDefault();
+        $layout->geometryMini = LayoutGeometryMini::buildDefault();
         $layout->theme    = LayoutTheme::buildDefault();
         $layout->markup   = LayoutMarkup::from($layout->geometry, $layout->theme);
 
