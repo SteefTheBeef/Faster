@@ -8,6 +8,7 @@
 
 // Layout
 require_once "helpers/um/layout/LayoutGeometry.php";
+require_once "helpers/um/layout/LayoutGeometryMini.php";
 require_once "helpers/um/layout/LayoutMarkup.php";
 require_once "helpers/um/layout/LayoutTheme.php";
 require_once "helpers/um/layout/Layout.php";
@@ -16,6 +17,7 @@ require_once "helpers/um/layout/Layout.php";
 require_once "helpers/utils/XmlTag.php";
 require_once "helpers/utils/MLState.php";
 require_once "helpers/utils/StringUtils.php";
+require_once "helpers/utils/Arrays.php";
 require_once "helpers/um/UMPanel.php";
 
 // Services
@@ -132,7 +134,7 @@ function umBoardEndRace($event, $Ranking, $ChallengeInfo, $GameInfos, $continuec
         umBoardUpdateXml($login, 'show');
     }
 }
-function umPanelBeginRace($event,$GameInfos,$ChallengeInfo,$newcup,$warmup,$fwarmup){
+function umBoardBeginRace($event,$GameInfos,$ChallengeInfo,$newcup,$warmup,$fwarmup){
    //computeRankings();
 }
 //--------------------------------------------------------------
