@@ -82,7 +82,16 @@ class PrizePoolPanel {
             $columnsDonations
         );
 
+        $xml .= XmlTag::label($layout->geometry->panelWidth * (1 / 2) + 1, -4, 20, 3, "\$fff\$oDonations");
 
+        // TOTAL DONATIONS AND PRIZE POOL
+        $accentColor = $layout->theme->accentTextColor;
+        $xml .= XmlTag::label(1, -40, 20, 3, "\$fff\$oGuaranteed Prize Pool");
+
+        $text = "\$fffA prize pool like this is only possible through the generosity of the listed individuals. "
+            . "The donations and prize pool amounts to \$o" . $accentColor . $cfg['DonationsTotalAmount'];
+
+        $xml .= XmlTag::label(1, -43, 20, 3, $text);
         $panelTitle = RightPanel::buildTitle($layout, 'Prize Pool');
         return $panelTitle . $xml;
     }
