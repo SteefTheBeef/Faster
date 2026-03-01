@@ -62,9 +62,10 @@ class UMPanel {
         return $w;
     }
 
-    static function textLabel(Layout $layout, $text, $yOffset = 0, $bold = false) {
+    static function textLabel(Layout $layout, $text, $yOffset = 0, $bold = false, $opts = array()) {
         $font = $bold ? '$o' : '';
-        return  "<label posn='1 ". ($layout->geometry->panelBodyTopY - $yOffset) . " 0.2' sizen='" . ($layout->geometry->panelWidth/1.5 - 2) . " {$layout->geometry->panelBodyHeight}' halign='left' valign='top' textsize='1' autonewline='1' text='{$font}" . StringUtils::safeString($text) . "'/>";
+        $autonewline = isset($opts['autonewline']) ? $opts['autonewline'] : 1;
+        return  "<label posn='1 ". ($layout->geometry->panelBodyTopY - $yOffset) . " 0.2' sizen='" . ($layout->geometry->panelWidth/1.5 - 2) . " {$layout->geometry->panelBodyHeight}' halign='left' valign='top' textsize='1' autonewline='{$autonewline}' text='{$font}" . StringUtils::safeString($text) . "'/>";
 
     }
 
