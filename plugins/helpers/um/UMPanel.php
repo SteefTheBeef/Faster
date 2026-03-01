@@ -38,6 +38,11 @@ class UMPanel {
         // This is a simple heuristic; adjust if you use more codes.
         return preg_replace('/\$(?:[0-9a-fA-F]{1,3}|[a-zA-Z])/', '', $s);
     }
+    static function mlStripBold($s) {
+        // Remove $xxx color codes, $o/$i/$n style toggles, etc.
+        // This is a simple heuristic; adjust if you use more codes.
+        return str_replace('$o', '', $s);
+    }
 
     static function mlEstimateTextWidth($text, $textsize) {
         $plain = UMPanel::mlStripCodes($text);
