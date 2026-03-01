@@ -38,7 +38,5 @@ class PrizePool {
             $gfRank['Amount'] = round($gfRank['Percent'] * $cfg['GrandFinalOverallRankTotalAmount']);
         }
 
-        console(print_r($this->config, true));
-
     }
 }

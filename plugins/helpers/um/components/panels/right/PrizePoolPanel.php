@@ -20,8 +20,6 @@ class PrizePoolPanel {
         $gfRanks = array_column($cfg['GfRankDistribution'], 'Rank', null);
         $gfAmounts = array_column($cfg['GfRankDistribution'], 'Amount', null);
 
-        console(print_r($gfAmounts, true));
-
         $columns = array(
             array('header' => 'Rank', 'data' => $gfRanks, 'halign' => 'left'),
             array('header' => 'Amount(EUR)', 'data' => $gfAmounts, 'halign' => 'right')
