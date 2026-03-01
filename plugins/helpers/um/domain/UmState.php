@@ -12,7 +12,6 @@ class UmState {
 
     public $selectedPlayerCollection = array();
 
-
     public $players = array();
 
     public $selectedTab = array();
@@ -22,6 +21,7 @@ class UmState {
     public $selectedPlayerIndex = array();
     public $selectedPlayer = array();
     public $boardIsOpen = array();
+    public $boardMiniIsOpen = array();
 
     public $prizePool;
 
@@ -53,6 +53,8 @@ class UmState {
         $this->selectedSubTab[$login] = UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD;
         $this->boardIsOpen[$login] = true;
         $this->selectedPlayerPaginationIndex[$login] = 0;
+
+        $this->boardMiniIsOpen[$login] = true;
 
     }
 
@@ -136,14 +138,6 @@ class UmState {
         $currentIndex = $this->selectedPlayerPaginationIndex[$login];
         $newSelectedPlayer = $this->selectedPlayerCollection[$login][$currentIndex * PLAYERS_PER_PAGE + $rowIndex];
         $this->selectedPlayer[$login] = $newSelectedPlayer;
-        //        if ($newSelectedPlayer === $this->selectedPlayer[$login]) {
-        //            $this->selectedPlayer[$login] = null;
-        //            $this->selectedPlayerIndex[$login] = null;
-        //        } else {
-        //            $this->selectedPlayer[$login] = $newSelectedPlayer;
-        //        }
-        //$this->selectedPlayer[$login] = $newSelectedPlayer;
-            //console("SELECTED PLAYER!!!!: " . print_r($this->selectedPlayer[$login], true));
     }
 
     public function setDonations($donations = array()) {
