@@ -9,10 +9,11 @@ class RightPanel {
     }
 
     static function buildTitle2(Layout $layout, $titleText) {
-        $font = "\$010\$o";
+        $font = "\$fff\$o";
         $panelW = $layout->geometry->panelWidth;
 
-        return XmlTag::label(1, 3, $panelW - 2, 3, $font . $titleText, null, array('textsize' => 1.5));
+        return XmlTag::quad(-0.1, 3.1, $layout->geometry->playerWidth, 3, $layout->theme->tabActiveBackgroundColor)
+            . XmlTag::label(1, 2.25, $layout->geometry->playerWidth, 3, $font . $titleText, null, array('textsize' => 1.5));
     }
 
     private static function build(UmPanelRenderContext $ctx) {
