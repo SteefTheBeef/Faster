@@ -23,6 +23,8 @@ class UmState {
     public $boardIsOpen = array();
     public $boardMiniIsOpen = array();
 
+    public $disconnectedLoginsToUnsetAfterRound = array();
+
     public $prizePool;
 
     public function __construct($qualiConfigBestRaces, $qualiConfigBestLaps) {
@@ -46,27 +48,47 @@ class UmState {
     }
 
     public function playerConnect($login) {
-        $this->selectedPlayerCollection[$login] = $this->qualificationRankings;
+        //$this->selectedPlayerCollection[$login] = $this->qualificationRankings;
         $this->selectedPlayerIndex[$login] = 0;
-        $this->selectedPlayer[$login] = isset($this->selectedPlayerCollection[$login][0]) ? $this->selectedPlayerCollection[$login][0] : null;
+        //$this->selectedPlayer[$login] = isset($this->selectedPlayerCollection[$login][0]) ? $this->selectedPlayerCollection[$login][0] : null;
         $this->selectedTab[$login] = UmPanelKeys::ACT_TAB_QUALIFICATION;
         $this->selectedSubTab[$login] = UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD;
-        $this->boardIsOpen[$login] = true;
+        $this->boardIsOpen[$login] = false;
         $this->selectedPlayerPaginationIndex[$login] = 0;
 
         $this->boardMiniIsOpen[$login] = true;
 
+        // if player was disconnected, but now connected again, unset the previous state
+        if (isset($this->disconnectedLoginsToUnsetAfterRound[$login])) {
+            unset($this->disconnectedLoginsToUnsetAfterRound[$login]);
+        }
+
     }
 
     public function playerDisconnect($login) {
-        unset($this->selectedPlayerCollection[$login]);
-        unset($this->selectedPlayerIndex[$login]);
-        unset($this->selectedPlayer[$login]);
-        unset($this->selectedTab[$login]);
-        unset($this->selectedSubTab[$login]);
-        unset($this->boardIsOpen[$login]);
-        unset($this->selectedPlayerPaginationIndex[$login]);
+        if (!isset($this->disconnectedLoginsToUnsetAfterRound[$login])) {
+            $this->disconnectedLoginsToUnsetAfterRound[$login] = $login;
+        }
     }
+
+    private function unsetDisconnectedPlayers() {
+        foreach ($this->disconnectedLoginsToUnsetAfterRound as $login) {
+            unset($this->selectedPlayerCollection[$login]);
+            unset($this->selectedPlayerIndex[$login]);
+            unset($this->selectedPlayer[$login]);
+            unset($this->selectedTab[$login]);
+            unset($this->selectedSubTab[$login]);
+            unset($this->boardIsOpen[$login]);
+            unset($this->selectedPlayerPaginationIndex[$login]);
+            unset($this->disconnectedLoginsToUnsetAfterRound[$login]);
+        }
+    }
+
+    private function onEndRace() {
+        $this->unsetDisconnectedPlayers();
+    }
+
+
 
     public function setSelectedTab($login, $action, $subTabAction = null) {
         if ($action === UmPanelKeys::ACT_TAB_RULES) {
@@ -108,7 +130,8 @@ class UmState {
     }
 
     public function getSelectedSubTab($login) {
-        return isset($this->selectedSubTab[$login]) ? $this->selectedSubTab[$login] : UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD;
+        return isset($this->selectedSubTab[$login])
+            ? $this->selectedSubTab[$login] : UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD;
     }
 
     public function setSelectedPlayerPaginationIndex($login, $action) {
@@ -126,6 +149,11 @@ class UmState {
     }
 
     public function getSelectedPlayerPaginationIndex($login) {
+        if (!isset($this->selectedPlayerPaginationIndex[$login])) {
+            $this->selectedPlayerPaginationIndex[$login] = 0;
+            return 0;
+        }
+
         return (int)$this->selectedPlayerPaginationIndex[$login];
     }
 
@@ -135,9 +163,14 @@ class UmState {
         $this->selectedPlayerIndex[$login] = $rowIndex;
 
         // set selected player for convenience
-        $currentIndex = $this->selectedPlayerPaginationIndex[$login];
-        $newSelectedPlayer = $this->selectedPlayerCollection[$login][$currentIndex * PLAYERS_PER_PAGE + $rowIndex];
-        $this->selectedPlayer[$login] = $newSelectedPlayer;
+        $currentIndex = $this->getSelectedPlayerPaginationIndex($login);
+        if (isset($this->selectedPlayerCollection[$login])) {
+            if (isset($this->selectedPlayerCollection[$login][$currentIndex * PLAYERS_PER_PAGE + $rowIndex])) {
+                $newSelectedPlayer = $this->selectedPlayerCollection[$login][$currentIndex * PLAYERS_PER_PAGE + $rowIndex];
+                $this->selectedPlayer[$login] = $newSelectedPlayer;
+            }
+        }
+
     }
 
     public function setDonations($donations = array()) {

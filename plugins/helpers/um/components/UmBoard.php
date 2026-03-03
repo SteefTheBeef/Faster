@@ -2,6 +2,10 @@
 
 class UmBoard {
     public static function buildPanelXml(UmPanelRenderContext $ctx) {
+        if (!isset($ctx->umState->boardIsOpen[$ctx->login])) {
+            $ctx->umState->boardIsOpen[$ctx->login] = true;
+        }
+
         if ($ctx->umState->boardIsOpen[$ctx->login] === false) {
             return OpenCloseToggle::render($ctx);
         }
@@ -33,23 +37,12 @@ class UmBoard {
     }
 
     private static function buildLeftPanelXml(UmPanelRenderContext $ctx) {
-        switch ($ctx->activeTabAction) {
-            case UmPanelKeys::ACT_TAB_SEMI_FINAL:
-                $listBuild = PlayerListPlayoffsPanel::build(
-                    $ctx->login,
-                    $ctx->layout,
-                    $ctx->players,
-                    $ctx->selectedRow,
-                    $ctx->actionIds,
-                    $ctx->mlAct
-                );
-                return isset($listBuild['xmlPlayers']) ? $listBuild['xmlPlayers'] : '';
-            case UmPanelKeys::ACT_TAB_QUALIFICATION:
-                return QualiPlayerListPanelBuilder::build($ctx);
-            default:
-                return QualiPlayerListPanelBuilder::build($ctx);
-
-        }
+        return QualiPlayerListPanelBuilder::build($ctx);
+//        switch ($ctx->activeTabAction) {
+//            default:
+//                return QualiPlayerListPanelBuilder::build($ctx);
+//
+//        }
     }
 
     private static function buildRightPanelBodyXml(UmPanelRenderContext $ctx) {
@@ -111,7 +104,7 @@ class UmBoard {
 
         // Paging races for a player
         if ($action === UmPanelKeys::ACT_RACES_PREV || $action === UmPanelKeys::ACT_RACES_NEXT) {
-            if (!isset($selectedPlayer[$login])) {
+            if (!isset($selectedPlayer[$login]) || !isset($selectedPlayer[$login]['Races'])) {
                 return true; // known action, nothing to do
             }
 

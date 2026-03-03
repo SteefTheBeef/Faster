@@ -10,6 +10,19 @@ require_once "helpers/matchlog/MatchlogStunts.php";
 require_once "helpers/matchlog/MatchlogTimeAttack.php";
 require_once "helpers/matchlog/Matchlog.php";
 
+require_once "helpers/utils/XmlTag.php";
+require_once "helpers/utils/MLState.php";
+require_once "helpers/utils/StringUtils.php";
+require_once "helpers/utils/Arrays.php";
+require_once "helpers/um/UMPanel.php";
+
+require_once "helpers/um/storage/MatchlogFileParser.php";
+require_once "helpers/um/storage/UmPlayers.php";
+require_once "helpers/um/storage/BestRaces.php";
+require_once "helpers/um/storage/Donations.php";
+require_once "helpers/um/storage/utils/FastFile.php";
+require_once "helpers/um/storage/utils/CsvFile.php";
+
 ////////////////////////////////////////////////////////////////
 //
 // Date:      02.2026

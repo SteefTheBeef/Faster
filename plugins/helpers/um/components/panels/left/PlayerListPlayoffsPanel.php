@@ -21,9 +21,14 @@ class PlayerListPlayoffsPanel {
         // console("ACTIONS: " . print_r($ctx->selectPlayerActionIds, true));
 
         $xmlPlayers = '';
-        $selectedPlayerIndex = null;
 
         $page = $umState->getSelectedPlayerPaginationIndex($ctx->login);
+        if (!isset($umState->selectedPlayerCollection[$ctx->login])) {
+            return array(
+                'xmlPlayers' => '',
+            );
+        }
+
         $players = $umState->selectedPlayerCollection[$ctx->login];
         $playersToShow = UMPanel::playersSliceForPage($players, $page);
 
@@ -37,14 +42,12 @@ class PlayerListPlayoffsPanel {
             $name = $np['NickNameWithColor'];
             $pointsOrTime = $np['PointsOrTime'];
 
-            $bg = $i === $umState->selectedPlayerIndex[$ctx->login] ? $layout->theme->cardSelectedBackgroundColor : '';
+            $bg = '';
+            if (isset($umState->selectedPlayerIndex[$ctx->login])) {
+                $bg = $i === $umState->selectedPlayerIndex[$ctx->login] ? $layout->theme->cardSelectedBackgroundColor : '';
+            }
+
             $actionId = isset($ctx->selectPlayerActionIds[$i]) ? (int)$ctx->selectPlayerActionIds[$i] : 0;
-
-            //if ($i === (int)$selectedRow && $player !== null) {
-            //    $selectedPlayerIndex = $i;
-            //}
-
-            //console("ACTION:" . $actionId);
 
             $xmlPlayers .= XmlTag::quad(0, $rowY, $playerW, $playerH, $bg, $actionId);
             $xmlPlayers .= XmlTag::labelCenterLeft($padX, $rowY - $padY, $playerW - 1.2, $playerH, "\$fc0" . ($page * PLAYERS_PER_PAGE + $i + 1));
@@ -61,7 +64,6 @@ class PlayerListPlayoffsPanel {
 
         return array(
             'xmlPlayers' => $xmlPlayers,
-            'selectedPlayerIndex' => $selectedPlayerIndex,
         );
     }
 

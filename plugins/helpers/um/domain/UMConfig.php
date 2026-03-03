@@ -52,39 +52,39 @@ class UMConfig {
             ));
 
         $this->um4QualiBestRace = new UMConfigEntry(array(
-            0 => 200,
-            1 => 150,
-            2 => 120,
-            3 => 100,
-            4 => 84,
-            5 => 74,
-            6 => 66,
-            7 => 60,
-            8 => 54,
-            9 => 48,
-            10 => 44,
-            11 => 40,
-            12 => 36,
-            13 => 32,
-            14 => 28,
-            15 => 24,
-            16 => 20,
-            17 => 16,
-            18 => 12,
-            19 => 10,
-            20 => 8,
-            21 => 6,
-            22 => 4,
-            23 => 2,
+            0 => 400,
+            1 => 300,
+            2 => 240,
+            3 => 200,
+            4 => 168,
+            5 => 148,
+            6 => 132,
+            7 => 120,
+            8 => 108,
+            9 => 96,
+            10 => 88,
+            11 => 80,
+            12 => 72,
+            13 => 64,
+            14 => 56,
+            15 => 48,
+            16 => 40,
+            17 => 32,
+            18 => 24,
+            19 => 20,
+            20 => 16,
+            21 => 12,
+            22 => 8,
+            23 => 4,
         ), array(
-            new UmMap("7yMu9T9aAjvWxsE5Kd8CEGJ2Ja1"), // Rally Test Map
-            //new UmMap("rxOudfAAp8TOqTvuPb3ZP4CFFD2"), // Stadium
-            //new UmMap("JQ_Us9p1shVrQdlBoEFA7mhStum"), // Desert
-            //new UmMap("zYqW_6lKUlVQXqxVOKn6y8QNq_k"), // Rally
-            //new UmMap("nGdljXubw46e83kSOxmMgNUaYg4"), // Bay
-            //new UmMap("Qjk_gRmQ2jHMxUhQ6mpo8OETWib"), // Coast
-            //new UmMap("OROjIlKmttKyDLxnvszbkBWp_m0"), // Snow
-            //new UmMap("ntaH70PYsP6ndT_W5s9oK3tLtC6"), // Island
+           // new UmMap("7yMu9T9aAjvWxsE5Kd8CEGJ2Ja1"), // Rally Test Map
+            new UmMap("rxOudfAAp8TOqTvuPb3ZP4CFFD2"), // Stadium
+            new UmMap("soKTEBzpg_iPyw2A4pPgkF_85J"), // Desert
+            new UmMap("zYqW_6lKUlVQXqxVOKn6y8QNq_k"), // Rally
+            new UmMap("nGdljXubw46e83kSOxmMgNUaYg4"), // Bay
+            new UmMap("Qjk_gRmQ2jHMxUhQ6mpo8OETWib"), // Coast
+            new UmMap("OROjIlKmttKyDLxnvszbkBWp_m0"), // Snow
+            new UmMap("ntaH70PYsP6ndT_W5s9oK3tLtC6"), // Island
 
         ), array(), 4);
 
@@ -146,32 +146,31 @@ class UMConfig {
         // Trying to get it similar in scale to how UM3 was
         // Sum of (quali best race and best lap) * 3 for each index then divided by 2 because of 2 stints
         $this->um4Semi = new UMConfigEntry(array(
-            0 => 450,
-            1 => 335,
-            2 => 270,
-            3 => 225,
-            4 => 190,
-            5 => 165,
-            6 => 150,
-            7 => 135,
-            8 => 120,
-            9 => 110,
-            10 => 100,
-            11 => 90,
-            12 => 80,
-            13 => 70,
-            14 => 60,
-            15 => 50,
-            16 => 40,
-            17 => 35,
-            18 => 30,
-            19 => 25,
-            20 => 20,
-            21 => 15,
-            22 => 10,
-            23 => 5,
+            0  => 1500,
+            1  => 1200,
+            2  => 1000,
+            3  => 800,
+            4  => 700,
+            5  => 600,
+            6  => 500,
+            7  => 450,
+            8  => 400,
+            9  => 360,
+            10 => 320,
+            11 => 280,
+            12 => 250,
+            13 => 220,
+            14 => 190,
+            15 => 160,
+            16 => 130,
+            17 => 110,
+            18 => 90,
+            19 => 70,
+            20 => 50,
+            21 => 40,
+            22 => 30,
+            23 => 20,
         ));
-
     }
 
     function generatePointsArray() {

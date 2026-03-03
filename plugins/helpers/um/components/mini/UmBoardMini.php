@@ -5,14 +5,8 @@ class UmBoardMini {
     public static function buildPanelXml(UmBoardMiniRenderContext $ctx) {
         $geometry = $ctx->layout->geometryMini;
 
-        if (!$ctx->umState->boardMiniIsOpen[$ctx->login]) {
-
-            $toggleX = $geometry->width - 6.5;
-            $toggleY = 13;
-            return XmlTag::frame($geometry->mainFrameX, $geometry->mainFrameY, 0,
-                XmlTag::label($toggleX + 0.6, $toggleY-1.25, 5, 3, "\$0f0\$oUM:R")
-                . "<quad sizen='8 4' posn='{$toggleX} {$toggleY} 0' style='BgsPlayerCard' substyle='BgPlayerCardSmall' action={$ctx->mlAct[UmPanelKeys::ACT_BOARD_MINI_TOGGLE]}/>"
-            );
+        if (!isset($ctx->umState->boardMiniIsOpen[$ctx->login]) || !$ctx->umState->boardMiniIsOpen[$ctx->login]) {
+            return self::renderToggleIcon($ctx);
         }
 
         return XmlTag::frame($geometry->mainFrameX, $geometry->mainFrameY, 0,
@@ -25,44 +19,55 @@ class UmBoardMini {
         );
     }
 
+    static function renderToggleIcon(UmBoardMiniRenderContext $ctx) {
+        $geometry = $ctx->layout->geometryMini;
+        $toggleX = $geometry->width - 6.5;
+        $toggleY = 13;
+        return XmlTag::frame($geometry->mainFrameX, $geometry->mainFrameY, 0,
+            XmlTag::label($toggleX + 0.6, $toggleY - 1.25, 5, 3, "\$0f0\$oUM:R")
+            . "<quad sizen='8 4' posn='{$toggleX} {$toggleY} 0' style='BgsPlayerCard' substyle='BgPlayerCardSmall' action={$ctx->mlAct[UmPanelKeys::ACT_BOARD_MINI_TOGGLE]}/>"
+        );
+    }
+
     private static function buildTable(UmBoardMiniRenderContext $ctx) {
         $y = 31.5;
         $x = 1;
         $challengeInfo = $ctx->challengeInfo;
         $xml = '';
 
-        if (isset($ctx->umState->qualificationRankingsPerEnv[$challengeInfo['Environnement']])) {
-            $playerCollectionForCurrentEnv = $ctx->umState->qualificationRankingsPerEnv[$challengeInfo['Environnement']];
+        if (!isset($ctx->umState->qualificationRankingsPerEnv[$challengeInfo['Environnement']])) {
+            return $xml;
+        }
 
-            $rowCount = UMPanel::clampInt(count($playerCollectionForCurrentEnv), 0, 10);
-            for ($i = 0; $i < $rowCount; $i++) {
-                $player = $playerCollectionForCurrentEnv[$i];
+        $playerCollectionForCurrentEnv = $ctx->umState->qualificationRankingsPerEnv[$challengeInfo['Environnement']];
 
-                $rank = $i + 1;
-                $font = $rank <= 3 ? "\$fc0" : "\$fff";
-                $xml .= XmlTag::label($x, $y, 4, 1.5, "Top" . $font . $rank, null);
-                $xml .= XmlTag::label($x + 4, $y, 12, 1.5, UMPanel::mlStripBold($player['NickNameWithColor']), null);
-                $xml .= XmlTag::label($x + 15, $y, 12, 1.5, $font . $player['BestRaceTime'], null);
-                $y = $y - 1.7;
-            }
+        $rowCount = UMPanel::clampInt(count($playerCollectionForCurrentEnv), 0, 10);
+        for ($i = 0; $i < $rowCount; $i++) {
+            $player = $playerCollectionForCurrentEnv[$i];
 
-            $playerForLogin = Arrays::find($playerCollectionForCurrentEnv, 'Login', $ctx->login, true);
-            if ($playerForLogin !== null) {
-                $player = $playerForLogin['item'];
-                $rank = $playerForLogin['index'] + 1;
-                $y = 12.5;
+            $rank = $i + 1;
+            $font = $rank <= 3 ? "\$fc0" : "\$fff";
+            $xml .= XmlTag::label($x, $y, 4, 1.5, "Top" . $font . $rank, null);
+            $xml .= XmlTag::label($x + 4, $y, 10.5, 1.5, UMPanel::mlStripBold(Player::getName($player)), null, array('autonewline' => 0) );
+            $xml .= XmlTag::label($x + 15, $y, 12, 1.5, $font . $player['BestRaceTime'], null);
+            $y = $y - 1.7;
+        }
 
-                $font = $ctx->layout->theme->accentTextColor;
+        $playerForLogin = Arrays::find($playerCollectionForCurrentEnv, 'Login', $ctx->login, true);
+        if ($playerForLogin !== null) {
+            $player = $playerForLogin['item'];
+            $rank = $playerForLogin['index'] + 1;
+            $y = 12.5;
 
-                $xml .= XmlTag::label($x, $y, 12, 1.5, $font . $rank . "/" . count($playerCollectionForCurrentEnv), null);
-                $xml .= XmlTag::label($x + 4, $y, 12, 1.5, UMPanel::mlStripBold($player['NickNameWithColor']), null);
-                $xml .= XmlTag::label($x + 15, $y, 12, 1.5, $font . $player['BestRaceTime'], null);
+            $font = $ctx->layout->theme->accentTextColor;
 
-            }
+            $xml .= XmlTag::label($x, $y, 12, 1.5, $font . $rank . "/" . count($playerCollectionForCurrentEnv), null);
+            $xml .= XmlTag::label($x + 4, $y, 12, 1.5, UMPanel::mlStripBold(Player::getName($player)), null);
+            $xml .= XmlTag::label($x + 15, $y, 12, 1.5, $font . $player['BestRaceTime'], null);
+
         }
 
         return $xml;
-
     }
 
     public static function handleAction($login, $action) {
@@ -71,10 +76,10 @@ class UmBoardMini {
 
         // Panel close/open
         if ($action === UmPanelKeys::ACT_BOARD_MINI_TOGGLE) {
-            if (!isset($umState->boardMiniIsOpen[$login])) {
+            if (!isset($umState->boardMiniIsOpen[$login]) || !$umState->boardMiniIsOpen[$login]) {
                 $umState->boardMiniIsOpen[$login] = true;
             } else {
-                $umState->boardMiniIsOpen[$login] = !$umState->boardMiniIsOpen[$login];
+                $umState->boardMiniIsOpen[$login] = false;
             }
 
             return true;

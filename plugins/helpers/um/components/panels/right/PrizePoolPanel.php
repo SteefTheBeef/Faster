@@ -13,8 +13,6 @@ class PrizePoolPanel {
         $tableTopGap = 3.2; // how far below the subheader the table starts (tweak to taste)
 
         $xml = UMPanel::textLabel($layout, '$fffGrand-Final Overall Rank Rewards', $subHeaderYOffset, true);
-        //$amounts = $umState->donations;
-        //$amountsByLogin = array_column($umState->donations, 'Amount', null);
 
         $cfg = $umState->prizePool->config;
         $gfRanks = array_column($cfg['GfRankDistribution'], 'Rank', null);

@@ -32,6 +32,7 @@ require_once "helpers/um/storage/utils/FastFile.php";
 require_once "helpers/um/storage/utils/CsvFile.php";
 
 // Domain
+require_once "helpers/um/domain/Player.php";
 require_once "helpers/um/domain/UMConfigEntry.php";
 require_once "helpers/um/domain/UMConfig.php";
 require_once "helpers/um/domain/UmMap.php";
@@ -136,7 +137,7 @@ function umBoardEndRace($event, $Ranking, $ChallengeInfo, $GameInfos, $continuec
     }
 }
 function umBoardBeginRace($event,$GameInfos,$ChallengeInfo,$newcup,$warmup,$fwarmup){
-   //computeRankings();
+   computeRankings();
 }
 //--------------------------------------------------------------
 // PlayerShowML : (event from manialink plugin when the player set it on/off)
