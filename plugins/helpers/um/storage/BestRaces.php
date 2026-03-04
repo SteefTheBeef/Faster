@@ -6,6 +6,8 @@ class BestRaces {
     const FILE_PREFIX_BEST_RACES = 'bestRaces';
     const FILE_PREFIX_BEST_LAPS = 'bestLaps';
 
+    const FILE_IMPROVED = 'improved.txt';
+
     // Stored as first CSV column in map meta row.
     // Full row format: ### MAP,<Environment>,<MapId>,<MapName>,<Author>
     const MAP_MARKER = '### MAP';
@@ -18,27 +20,55 @@ class BestRaces {
      * - TimeMs ASC for equal Check (lower is better)
      *
      * File: fastlog/um/bestRaces.<env>.<uid>.txt
+     *
+     * @return string[] lines for players who improved (for improved.txt)
      */
     public static function updateBestRacesFile($finishedPlayers, $challengeInfo, $gameInfo) {
-        self::updateBestFile(self::FILE_PREFIX_BEST_RACES, $finishedPlayers, $challengeInfo, $gameInfo);
+        return self::updateBestFile(self::FILE_PREFIX_BEST_RACES, $finishedPlayers, $challengeInfo, $gameInfo);
     }
-
     /**
-     * Update UM best laps file (per environment), only if improved:
-     * - BestLapMs ASC (lower is better)
+     * Update UM best race progress file (per environment), only if improved:
+     * - Check DESC (more checkpoints is better)
+     * - TimeMs ASC for equal Check (lower is better)
      *
-     * File: fastlog/um/bestLaps.<env>.<uid>.txt
+     * File: fastlog/um/bestRaces.<env>.<uid>.txt
+     *
+     * @return string[] lines for players who improved (for improved.txt)
      */
     public static function updateBestLapsFile($finishedPlayers, $challengeInfo, $gameInfo) {
-        self::updateBestFile(self::FILE_PREFIX_BEST_LAPS, $finishedPlayers, $challengeInfo, $gameInfo);
+        return self::updateBestFile(self::FILE_PREFIX_BEST_LAPS, $finishedPlayers, $challengeInfo, $gameInfo);
     }
 
     /**
+     * Append improved lines to fastlog/um/improved.txt
+     *
+     * @param string[] $lines
+     * @return void
+     */
+    public static function appendImprovedLinesToFile($lines) {
+        if (!is_array($lines) || count($lines) < 1) return;
+
+        $filePath = self::DIR_UM . '/' . self::FILE_IMPROVED;
+        FastFile::ensureFile($filePath);
+
+        $text = '';
+        foreach ($lines as $line) {
+            if (!is_string($line) || $line === '') continue;
+            $text .= $line . "\n";
+        }
+        if ($text === '') return;
+
+        // Append atomically-ish with a lock.
+        file_put_contents($filePath, $text, FILE_APPEND | LOCK_EX);
+    }
+    /**
      * Shared update pipeline for "best races" and "best laps".
+     *
+     * @return string[] improved lines (best races + best laps)
      */
     private static function updateBestFile($kindPrefix, $finishedPlayers, $challengeInfo, $gameInfo) {
         if (!is_array($finishedPlayers) || count($finishedPlayers) < 1) {
-            return;
+            return array();
         }
 
         $env = isset($challengeInfo['Environnement']) ? (string)$challengeInfo['Environnement'] : self::ENV_UNKNOWN;
@@ -46,16 +76,16 @@ class BestRaces {
 
         $uidSafe = self::sanitizeToken(isset($challengeInfo['UId']) ? $challengeInfo['UId'] : '', '');
         if ($uidSafe === '') {
-            return;
+            return array();
         }
 
-        $lapsCount = $gameInfo["LapsNbLaps"];
+        $lapsCount = isset($gameInfo["LapsNbLaps"]) ? (int)$gameInfo["LapsNbLaps"] : 0;
         $filePath = self::DIR_UM . '/' . $kindPrefix . '.' . $envSafe . '.' . $lapsCount . 'laps.' . $uidSafe . '.txt';
         FastFile::ensureFile($filePath);
 
         $mapId = (string)getChallengeID($challengeInfo);
         if ($mapId === '') {
-            return;
+            return array();
         }
 
         $mapName = isset($challengeInfo['Name']) ? stripColors($challengeInfo['Name']) : '';
@@ -74,6 +104,11 @@ class BestRaces {
         $data = self::ensureMapSection($data, $mapId, $meta);
 
         $now = self::now();
+
+        // Track who improved so we can compute TOP rank after sorting.
+        $improvedLogins = array();   // login => true
+        $improvedNick = array();     // login => nickname-with-color or fallback
+
         foreach ($finishedPlayers as $p) {
             if (!is_array($p)) {
                 continue;
@@ -90,8 +125,23 @@ class BestRaces {
             }
 
             $old = isset($data[$mapId]['players'][$login]) ? $data[$mapId]['players'][$login] : null;
-            if ($old === null || call_user_func($spec['isImproved'], $row, $old)) {
+
+            $didImprove = false;
+            if ($old === null) {
+                $didImprove = true;
+            } elseif (call_user_func($spec['isImproved'], $row, $old)) {
+                $didImprove = true;
+            }
+
+            if ($didImprove) {
                 $data[$mapId]['players'][$login] = $row;
+                $improvedLogins[$login] = true;
+
+                $displayName = $login;
+                if (isset($p['NickName']) && (string)$p['NickName'] !== '') {
+                    $displayName = stripColors((string)$p['NickName']);
+                }
+                $improvedNick[$login] = $displayName;
             }
         }
 
@@ -103,7 +153,54 @@ class BestRaces {
         }
 
         CsvFile::writeAtomic($filePath, $data, $spec);
+
+        // Build improved output lines (best races + best laps)
+        $outLines = array();
+        if (isset($data[$mapId]['players']) && is_array($data[$mapId]['players'])) {
+            $rank = 0;
+            foreach ($data[$mapId]['players'] as $login => $row) {
+                $rank++;
+                if (!isset($improvedLogins[$login])) continue;
+
+                $displayName = isset($improvedNick[$login]) ? (string)$improvedNick[$login] : $login;
+
+                if ($kindPrefix === self::FILE_PREFIX_BEST_RACES) {
+                    $outLines[] = self::formatImprovedBestRaceLine($displayName, $rank, $row, $challengeInfo, $gameInfo);
+                } elseif ($kindPrefix === self::FILE_PREFIX_BEST_LAPS) {
+                    $outLines[] = self::formatImprovedBestLapLine($displayName, $rank, $row, $challengeInfo, $gameInfo);
+                }
+            }
+        }
+
+        return $outLines;
     }
+
+    private static function formatImprovedBestRaceLine($displayName, $rank, $row, $challengeInfo, $gameInfo) {
+        return self::formatImprovedLine($displayName, $rank, $row, $challengeInfo, $gameInfo, 'RACE TIME', 'TimeMs');
+    }
+
+    private static function formatImprovedBestLapLine($displayName, $rank, $row, $challengeInfo, $gameInfo) {
+        return self::formatImprovedLine($displayName, $rank, $row, $challengeInfo, $gameInfo, 'LAP TIME', 'BestLapMs');
+    }
+
+    private static function formatImprovedLine($displayName, $rank, $row, $challengeInfo, $gameInfo, $label, $msField) {
+        $ms = (is_array($row) && isset($row[$msField])) ? (int)$row[$msField] : 0;
+        $timeStr = $ms > 0 ? MwTimeToString($ms) : '';
+
+        $env = isset($challengeInfo['Environnement']) ? (string)$challengeInfo['Environnement'] : self::ENV_UNKNOWN;
+        $mapName = isset($challengeInfo['Name']) ? stripColors($challengeInfo['Name']) : '';
+
+        $lapsCount = isset($gameInfo["LapsNbLaps"]) ? (int)$gameInfo["LapsNbLaps"] : 0;
+        $lapsSuffix = ($lapsCount > 0) ? ('[' . $lapsCount . ' laps]') : '';
+
+        return '**' . $displayName . '**'
+            . ' drove *TOP ' . (int)$rank
+            . ' ' . (string)$label . ': ' . $timeStr . '*'
+            . ' on ' . $env
+            . ', ' . $mapName
+            . $lapsSuffix;
+    }
+
 
     /**
      * Per-kind behavior spec (keeps update pipeline generic).

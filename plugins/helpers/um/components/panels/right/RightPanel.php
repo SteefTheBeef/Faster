@@ -13,7 +13,7 @@ class RightPanel {
         $panelW = $layout->geometry->panelWidth;
 
         return XmlTag::quad(-0.1, 3.1, $layout->geometry->playerWidth, 3, $layout->theme->tabActiveBackgroundColor)
-            . XmlTag::label(1, 2.25, $layout->geometry->playerWidth, 3, $font . $titleText, null, array('textsize' => 1.5));
+            . XmlTag::label(1, 2.35, $layout->geometry->playerWidth, 3, $font . $titleText, null, array('textsize' => 1.5));
     }
 
     private static function build(UmPanelRenderContext $ctx) {
