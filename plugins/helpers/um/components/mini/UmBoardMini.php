@@ -39,12 +39,12 @@ class UmBoardMini {
             return $xml;
         }
 
-        $playerCollectionForCurrentEnv = $ctx->umState->qualificationRankingsPerEnv[$challengeInfo['Environnement']];
+        $playerCollectionForCurrentEnv = $ctx->umState->qualificationBestRacesRanking[$challengeInfo['Environnement']];
 
         $rowCount = UMPanel::clampInt(count($playerCollectionForCurrentEnv), 0, 10);
+
         for ($i = 0; $i < $rowCount; $i++) {
             $player = $playerCollectionForCurrentEnv[$i];
-
             $rank = $i + 1;
             $font = $rank <= 3 ? "\$fc0" : "\$fff";
             $xml .= XmlTag::label($x, $y, 4, 1.5, "Top" . $font . $rank, null);
