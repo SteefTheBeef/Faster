@@ -10,7 +10,7 @@ require_once "helpers/replay/ReplayManager.php";
 
 registerPlugin('umReplays',41);
 
-function umEndRace($event,$Ranking,$ChallengeInfo,$GameInfos,$continuecup,$warmup,$fwarmup){
+function umReplaysEndRace($event,$Ranking,$ChallengeInfo,$GameInfos,$continuecup,$warmup,$fwarmup){
 	$replayManager = new ReplayManager("/TMF08347/Tracks/Replays/UM");
 	$replayManager->saveBetterReplay($event, $Ranking, $ChallengeInfo, $GameInfos);
 }
