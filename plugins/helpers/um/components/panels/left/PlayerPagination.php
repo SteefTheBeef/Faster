@@ -20,7 +20,7 @@ class PlayerPagination {
         $nextAct = $canNext ? (int)$ctx->mlAct[UmPanelKeys::ACT_PLAYERS_NEXT] : null;
 
         return $showPager ?
-            XmlTag::quad(-0.1, -$geometry->panelHeight - 0.1, $geometry->backgroundWidth + 0.2, 3, $theme->tabActiveBackgroundColor) .
-            XmlTag::pagerPrevNext64(0, -$geometry->panelHeight - 1, 0.2, $geometry->playerWidth, $page, $pageCount, $prevAct, $nextAct, array('align' => 'right')) : '';
+            XmlTag::quad(-0.1, -$geometry->panelHeight - 0.1, $geometry->backgroundWidth + 0.2, 2.9, $theme->tabBackgroundColor) .
+            XmlTag::pagerPrevNext64(-0.8, -$geometry->panelHeight - 0.8, 0.2, $geometry->playerWidth, $page, $pageCount, $prevAct, $nextAct, array('align' => 'right')) : '';
     }
 }

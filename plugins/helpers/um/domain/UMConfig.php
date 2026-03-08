@@ -1,4 +1,5 @@
 <?php
+
 class UMConfig {
 
     public $um3Semi;
@@ -77,14 +78,52 @@ class UMConfig {
             22 => 8,
             23 => 4,
         ), array(
-           // new UmMap("7yMu9T9aAjvWxsE5Kd8CEGJ2Ja1"), // Rally Test Map
-            new UmMap("rxOudfAAp8TOqTvuPb3ZP4CFFD2"), // Stadium
-            new UmMap("soKTEBzpg_iPyw2A4pPgkF_85J"), // Desert
-            new UmMap("zYqW_6lKUlVQXqxVOKn6y8QNq_k"), // Rally
-            new UmMap("nGdljXubw46e83kSOxmMgNUaYg4"), // Bay
-            new UmMap("Qjk_gRmQ2jHMxUhQ6mpo8OETWib"), // Coast
-            new UmMap("OROjIlKmttKyDLxnvszbkBWp_m0"), // Snow
-            new UmMap("ntaH70PYsP6ndT_W5s9oK3tLtC6"), // Island
+            // Stadium
+            new UmMap(
+                "rxOudfAAp8TOqTvuPb3ZP4CFFD2",
+                'UM4 TA - BUNKERBUSTER',
+                'shorty_88',
+                'Stadium'
+            ), // Speed
+            new UmMap(
+                "soKTEBzpg_iPyw2A4pPgkF_85J",
+                '$i$fffUM4 TA - $000In aeternum',
+                'jea_quilhas',
+                'Speed'
+            ), // Rally
+            new UmMap(
+                "zYqW_6lKUlVQXqxVOKn6y8QNq_k",
+                '$o$000UM4 TA $0f0Deus $0f0Maximus',
+                'blackcat111',
+                'Rally'
+
+            ), // Bay
+            new UmMap(
+                "nGdljXubw46e83kSOxmMgNUaYg4",
+                'UM4 TA Phantom Island',
+                'kybermato',
+                'Bay'
+            ), // Coast
+            new UmMap(
+                "Qjk_gRmQ2jHMxUhQ6mpo8OETWib",
+                '$o$000UM4 TA $fa3Providence',
+                'blackcat111',
+                'Coast'
+            ), // Alpine
+            new UmMap(
+                "OROjIlKmttKyDLxnvszbkBWp_m0",
+                '$fffUM4 TA United Maniacs',
+                'sandder',
+                'Alpine',
+                'Alpine'
+            ), // Island
+            new UmMap(
+                "ntaH70PYsP6ndT_W5s9oK3tLtC6",
+                '$F00UM4 TA $000Wh$222en $444Lan$666g$888ua$999ge $FFFFails',
+                'mi_me',
+                'Island'
+            ),
+
 
         ), array(), 4);
 
@@ -115,7 +154,7 @@ class UMConfig {
             23 => 1,
         ), $this->um4QualiBestRace->maps, array(), 4);
 
-          // Without stints
+        // Without stints
 //        $this->um4Semi = new UMConfigEntry(array(
 //            0 => 900,
 //            1 => 670,
@@ -146,16 +185,16 @@ class UMConfig {
         // Trying to get it similar in scale to how UM3 was
         // Sum of (quali best race and best lap) * 3 for each index then divided by 2 because of 2 stints
         $this->um4Semi = new UMConfigEntry(array(
-            0  => 1500,
-            1  => 1200,
-            2  => 1000,
-            3  => 800,
-            4  => 700,
-            5  => 600,
-            6  => 500,
-            7  => 450,
-            8  => 400,
-            9  => 360,
+            0 => 1500,
+            1 => 1200,
+            2 => 1000,
+            3 => 800,
+            4 => 700,
+            5 => 600,
+            6 => 500,
+            7 => 450,
+            8 => 400,
+            9 => 360,
             10 => 320,
             11 => 280,
             12 => 250,

@@ -2,10 +2,10 @@
 
 class RightPanel {
     static function buildTitle(Layout $layout, $titleText, $textsize = 1.9) {
-        $font = $layout->theme->headerFontStyle;
+        $font = '$fff$o'; //$layout->theme->headerFontStyle;
         $panelW = $layout->geometry->panelWidth;
 
-        return XmlTag::label(1, -1, $panelW - 2, 3, $font . $titleText, null, array('textsize' => $textsize));
+        return XmlTag::label(1, -1, $panelW - 2, 3, $font . $titleText, null, array('textsize' => $textsize, 'z' => 0.5));
     }
 
     static function buildTitle2(Layout $layout, $titleText) {

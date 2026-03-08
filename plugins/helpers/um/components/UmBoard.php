@@ -59,6 +59,9 @@ class UmBoard {
             case UmPanelKeys::ACT_TAB_QUALIFICATION:
                 return QualificationPanelBuilder::build($ctx);
 
+            case UmPanelKeys::ACT_TAB_MAPS:
+                return MapsPanel::build($ctx);
+
             case UmPanelKeys::ACT_TAB_PRIZE_POOL:
                 return PrizePoolPanel::render($ctx);
 
@@ -70,7 +73,7 @@ class UmBoard {
     }
 
     public static function handleAction($login, $action) {
-        global $umState;
+        global $umState, $umConfig;
         $umState = (object)$umState;
 
         // Panel close/open
@@ -127,6 +130,51 @@ class UmBoard {
             return true;
         }
 
+        if (strpos($action, UmPanelKeys::ACT_RATE_MAP_DOWN) === 0) {
+            self::saveMapRatings($login, $action);
+        }
+
+        if (strpos($action, UmPanelKeys::ACT_RATE_MAP_UP) === 0) {
+            //console("MAP UP" . print_r($action, true));
+            self::saveMapRatings($login, $action, UmPanelKeys::ACT_RATE_MAP_UP);
+        }
+
         return false;
+    }
+
+    static function saveMapRatings($login, $action, $actRateMapDownOrUp = UmPanelKeys::ACT_RATE_MAP_DOWN) {
+        global $umState, $umConfig;
+        $index = (int)substr($action, strlen($actRateMapDownOrUp) + 1);
+
+        $ratingsForLogin = MapRatingsService::getRatingForLogin($login, $umState->mapRatingsTA, $umConfig->um4QualiBestRace->maps);
+        $i = 0;
+        foreach ($ratingsForLogin as $mapId => &$mapRating) {
+            $mapRating['Rank'] = $i;
+
+            if ($actRateMapDownOrUp === UmPanelKeys::ACT_RATE_MAP_DOWN) {
+                // this is the actual map that we want to downvote
+                if ($i === $index) {
+                    $mapRating['Rank'] = $i + 1;
+                }
+                // the next map needs to move up one place
+                if ($i === $index + 1) {
+                    $mapRating['Rank'] = $i + -1;
+                }
+            } else {
+                // this is the map that is above, and should move down one place.
+                if ($i === $index - 1) {
+                    $mapRating['Rank'] = $i + 1;
+                }
+                // this is the actual map that we want to upvote
+                if ($i === $index) {
+                    $mapRating['Rank'] = $i + -1;
+                }
+            }
+            $i++;
+        }
+
+        MapRatingsService::sortRatingsForLoginByRank($ratingsForLogin);
+        $umState->mapRatingsTA[$login] = $ratingsForLogin;
+        //console(print_r($ratingsForLogin, true));
     }
 }

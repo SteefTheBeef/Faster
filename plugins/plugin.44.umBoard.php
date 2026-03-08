@@ -22,10 +22,12 @@ require_once "helpers/um/UMPanel.php";
 
 // Services
 require_once "helpers/um/services/QualificationRankingService.php";
+require_once "helpers/um/services/MapRatingsService.php";
 
 // Storage
 require_once "helpers/um/storage/MatchlogFileParser.php";
 require_once "helpers/um/storage/UmPlayers.php";
+require_once "helpers/um/storage/MapRatings.php";
 require_once "helpers/um/storage/BestRaces.php";
 require_once "helpers/um/storage/Donations.php";
 require_once "helpers/um/storage/utils/FastFile.php";
@@ -68,6 +70,7 @@ require_once "helpers/um/components/panels/right/PlayerDetailsTable.php";
 require_once "helpers/um/components/panels/right/EnviLeaderboardPlayerPanel.php";
 require_once "helpers/um/components/panels/right/PlayerEnviDetailsTable.php";
 require_once "helpers/um/components/panels/right/PrizePoolPanel.php";
+require_once "helpers/um/components/panels/right/MapsPanel.php";
 
 // Main component
 require_once "helpers/um/components/UmBoard.php";
@@ -108,6 +111,11 @@ function umBoardInit($event) {
     $count = count($actions);
     for ($i = 0; $i < $count; $i++) {
         manialinksAddAction($actions[$i]);
+    }
+
+    for ($i = 0; $i < 7; $i++) {
+        manialinksAddAction(UmPanelKeys::ACT_RATE_MAP_UP . '.' . $i);
+        manialinksAddAction(UmPanelKeys::ACT_RATE_MAP_DOWN . '.' . $i);
     }
 }
 

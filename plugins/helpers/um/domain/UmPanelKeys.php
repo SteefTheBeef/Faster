@@ -37,6 +37,7 @@ class UmPanelKeys {
     const ACT_TAB_SCHEDULE = 'um.tab.schedule';
     const ACT_TAB_RULES = 'um.tab.rules';
     const ACT_TAB_INFORMATION = 'um.tab.information';
+    const ACT_TAB_MAPS = 'um.tab.maps';
 
     // Subtabs (rules)
     const ACT_SUBTAB_RULES_QUALIFICATION = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.qualification';
@@ -57,6 +58,9 @@ class UmPanelKeys {
     // Mini Board
     // Actions (static)
     const ACT_BOARD_MINI_TOGGLE = 'um.board.mini.toggle';
+
+    const ACT_RATE_MAP_UP = 'um.rate.map.up';
+    const ACT_RATE_MAP_DOWN = 'um.rate.map.down';
 
 
     /**
@@ -99,6 +103,7 @@ class UmPanelKeys {
             self::ACT_TAB_SCHEDULE,
             self::ACT_TAB_RULES,
             self::ACT_TAB_INFORMATION,
+            self::ACT_TAB_MAPS,
 
             self::ACT_SUBTAB_RULES_QUALIFICATION,
             self::ACT_SUBTAB_RULES_QUALIFICATION_POINTS,

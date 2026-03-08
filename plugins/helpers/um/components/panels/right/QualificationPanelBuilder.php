@@ -19,7 +19,7 @@ class QualificationPanelBuilder {
         $sub = SubTabs::bottom($ctx->login, $ctx->layout, UmPanelKeys::ACT_TAB_QUALIFICATION, $items, $selectedSubTab, array(
             'submenuR' => 0.0,
             'rowH' => 2.8,
-            'bottomY' => -53.8,
+            'bottomY' => -56.49,
 
             'autoWidth' => true,
             'fill' => true,   // use the unused space

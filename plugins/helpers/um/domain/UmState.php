@@ -23,6 +23,8 @@ class UmState {
     public $boardIsOpen = array();
     public $boardMiniIsOpen = array();
 
+    public $mapRatingsTA = array();
+
     public $disconnectedLoginsToUnsetAfterRound = array();
 
     public $prizePool;
@@ -45,15 +47,20 @@ class UmState {
         foreach ($this->boardIsOpen as $login => $isOpen) {
             $this->setSelectedTab($login, $this->getSelectedTab($login), $this->getSelectedSubTab($login));
         }
+        if (isset($this->mapRatingsTA) && count($this->mapRatingsTA) > 1) {
+            MapRatings::saveRatingsToFile($this->mapRatingsTA);
+        }
+
+        $this->mapRatingsTA = MapRatings::getTARatings();
     }
 
     public function playerConnect($login) {
         //$this->selectedPlayerCollection[$login] = $this->qualificationRankings;
         $this->selectedPlayerIndex[$login] = 0;
         //$this->selectedPlayer[$login] = isset($this->selectedPlayerCollection[$login][0]) ? $this->selectedPlayerCollection[$login][0] : null;
-        $this->selectedTab[$login] = UmPanelKeys::ACT_TAB_QUALIFICATION;
-        $this->selectedSubTab[$login] = UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD;
-        $this->boardIsOpen[$login] = false;
+        $this->selectedTab[$login] = UmPanelKeys::ACT_TAB_MAPS;
+        $this->setSelectedSubTab($login, UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD);
+        $this->boardIsOpen[$login] = true;
         $this->selectedPlayerPaginationIndex[$login] = 0;
 
         $this->boardMiniIsOpen[$login] = true;
@@ -126,6 +133,10 @@ class UmState {
             if (isset($this->selectedPlayerCollection[$login]) && count($this->selectedPlayerCollection[$login]) > 0) {
                 $this->selectedPlayer[$login] = $this->selectedPlayerCollection[$login][0];
             }
+        }
+
+        if ($action === UmPanelKeys::ACT_TAB_MAPS) {
+
         }
     }
 

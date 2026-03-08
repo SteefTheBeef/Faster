@@ -7,11 +7,21 @@ class UmMap {
     public $author;
     public $environment;
 
-    public function __construct($id, $name = "", $nameWithColor = "", $author = "", $environment = "") {
+    public function __construct($id, $nameWithColor = "", $author = "", $environment = "") {
         $this->id = $id;
-        $this->name = $name;
         $this->nameWithColor = $nameWithColor;
         $this->author = $author;
         $this->environment = $environment;
+    }
+
+    public function toRatingsArray() {
+        return array(
+            "ChallengeID" => $this->id,
+            "Name" => $this->nameWithColor,
+            "Environment" => $this->environment,
+            "Rank" => 1, // default value
+            "TotalRanks" => 0,
+            "RanksCount" => 0,
+        );
     }
 }

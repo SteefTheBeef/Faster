@@ -18,6 +18,8 @@ class LayoutTheme
     public $panelTitleFontStyle;
     public $accentTextColor;
 
+    public $goldColor;
+
     public static function buildDefault()
     {
         $t = new self();
@@ -36,7 +38,8 @@ class LayoutTheme
 
         $t->panelTitleFontStyle = '$fff$o';
         $t->headerFontStyle = '$cf0$o';
-        $t->accentTextColor = '$390';
+        $t->accentTextColor = '$cf0';
+        $t->goldColor = '$fc0';
 
         return $t;
     }
