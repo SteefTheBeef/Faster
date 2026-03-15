@@ -52,32 +52,7 @@ class UMConfig {
                 11 => 5
             ));
 
-        $this->um4QualiBestRace = new UMConfigEntry(array(
-            0 => 400,
-            1 => 300,
-            2 => 240,
-            3 => 200,
-            4 => 168,
-            5 => 148,
-            6 => 132,
-            7 => 120,
-            8 => 108,
-            9 => 96,
-            10 => 88,
-            11 => 80,
-            12 => 72,
-            13 => 64,
-            14 => 56,
-            15 => 48,
-            16 => 40,
-            17 => 32,
-            18 => 24,
-            19 => 20,
-            20 => 16,
-            21 => 12,
-            22 => 8,
-            23 => 4,
-        ), array(
+        $um4MapsTA = array(
             // Stadium
             new UmMap(
                 "rxOudfAAp8TOqTvuPb3ZP4CFFD2",
@@ -123,9 +98,34 @@ class UMConfig {
                 'mi_me',
                 'Island'
             ),
+        );
 
-
-        ), array(), 4);
+        $this->um4QualiBestRace = new UMConfigEntry(array(
+            0 => 400,
+            1 => 300,
+            2 => 240,
+            3 => 200,
+            4 => 168,
+            5 => 148,
+            6 => 132,
+            7 => 120,
+            8 => 108,
+            9 => 96,
+            10 => 88,
+            11 => 80,
+            12 => 72,
+            13 => 64,
+            14 => 56,
+            15 => 48,
+            16 => 40,
+            17 => 32,
+            18 => 24,
+            19 => 20,
+            20 => 16,
+            21 => 12,
+            22 => 8,
+            23 => 4,
+        ), $um4MapsTA, array(), 4);
 
         $this->um4QualiBestLap = new UMConfigEntry(array(
             0 => 100,
@@ -152,7 +152,7 @@ class UMConfig {
             21 => 3,
             22 => 2,
             23 => 1,
-        ), $this->um4QualiBestRace->maps, array(), 4);
+        ), $um4MapsTA, array(), 4);
 
         // Without stints
 //        $this->um4Semi = new UMConfigEntry(array(
@@ -185,33 +185,32 @@ class UMConfig {
         // Trying to get it similar in scale to how UM3 was
         // Sum of (quali best race and best lap) * 3 for each index then divided by 2 because of 2 stints
         $this->um4Semi = new UMConfigEntry(array(
-            0 => 1500,
-            1 => 1200,
-            2 => 1000,
-            3 => 800,
-            4 => 700,
-            5 => 600,
-            6 => 500,
-            7 => 450,
-            8 => 400,
-            9 => 360,
-            10 => 320,
-            11 => 280,
-            12 => 250,
-            13 => 220,
-            14 => 190,
-            15 => 160,
-            16 => 130,
-            17 => 110,
-            18 => 90,
-            19 => 70,
-            20 => 50,
-            21 => 40,
-            22 => 30,
-            23 => 20,
-        ));
+            0 => 750,
+            1 => 600,
+            2 => 500,
+            3 => 400,
+            4 => 350,
+            5 => 300,
+            6 => 250,
+            7 => 225,
+            8 => 200,
+            9 => 180,
+            10 => 160,
+            11 => 140,
+            12 => 125,
+            13 => 110,
+            14 => 95,
+            15 => 80,
+            16 => 65,
+            17 => 55,
+            18 => 45,
+            19 => 35,
+            20 => 25,
+            21 => 20,
+            22 => 15,
+            23 => 10,
+        ), $um4MapsTA, array(), 6, 2);
     }
-
     function generatePointsArray() {
         $first = 500;
         $last = 10;

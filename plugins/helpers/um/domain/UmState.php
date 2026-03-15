@@ -27,23 +27,37 @@ class UmState {
 
     public $disconnectedLoginsToUnsetAfterRound = array();
 
-    public $prizePool;
+    // SEMI-FINAL
+    public $semiFinalRaces = array();
+    public $semiFinalRankings = array();
 
-    public function __construct($qualiConfigBestRaces, $qualiConfigBestLaps) {
+    public $selectedSemiFinalRace = array();
+    public $selectedSemiFinalPlayer = array();
+    public $selectedSemiFinalPlayerPaginationIndex = array();
+    public $selectedSemiFinalPlayerIndex = array();
+
+    public $prevTab = array();
+    public $prevSubTab = array();
+    public $prizePool;
+    public $umConfig;
+
+    public function __construct(UMConfig $umConfig) {
+        $this->umConfig = $umConfig;
         $this->qualificationBestRacesRanking = array();
         $this->qualificationBestLapsRanking = array();
-        $this->qualiConfigBestRaces = $qualiConfigBestRaces;
-        $this->qualiConfigBestLaps = $qualiConfigBestLaps;
         $this->prizePool = new PrizePool();
     }
 
     public function computeRankings() {
         $this->players = UmPlayers::loadPlayersNicknamesMap();
-        $this->qualificationBestRacesRanking = BestRaces::buildQualificationRankingsAllMaps($this->qualiConfigBestRaces, $this->players);
-        $this->qualificationBestLapsRanking = BestRaces::buildQualificationRankingsAllMapsBestLaps($this->qualiConfigBestLaps, $this->players);
+        $this->qualificationBestRacesRanking = BestRaces::buildQualificationRankingsAllMaps($this->umConfig->um4QualiBestRace, $this->players);
+        $this->qualificationBestLapsRanking = BestRaces::buildQualificationRankingsAllMapsBestLaps($this->umConfig->um4QualiBestLap, $this->players);
         $this->qualificationRankingsPerEnv = QualificationRankingService::mergeQualificationScoresByEnv($this->qualificationBestRacesRanking, $this->qualificationBestLapsRanking);
         $this->qualificationRankings = QualificationRankingService::buildQualificationLeaderboardAllEnvs($this->qualificationRankingsPerEnv);
-
+        $this->semiFinalRaces = MatchlogFileParser::parseMatchlogFile('fastlog/um/matchlog.txt');
+        $semiFinalRankingsFromMatchlog = MatchlogFileParser::getScoreboardPlayersFromMatchlog('fastlog/um/matchlog.txt', $this->umConfig->um4Semi->pointsDistribution);
+        $this->semiFinalRankings = SemiFinalRankingService::mergeQualificationScores($semiFinalRankingsFromMatchlog, $this->qualificationRankings);
+        //console(print_r($this->semiFinalRankings, true));
         foreach ($this->boardIsOpen as $login => $isOpen) {
             $this->setSelectedTab($login, $this->getSelectedTab($login), $this->getSelectedSubTab($login));
         }
@@ -55,11 +69,14 @@ class UmState {
     }
 
     public function playerConnect($login) {
-        //$this->selectedPlayerCollection[$login] = $this->qualificationRankings;
         $this->selectedPlayerIndex[$login] = 0;
-        //$this->selectedPlayer[$login] = isset($this->selectedPlayerCollection[$login][0]) ? $this->selectedPlayerCollection[$login][0] : null;
-        $this->selectedTab[$login] = UmPanelKeys::ACT_TAB_MAPS;
-        $this->setSelectedSubTab($login, UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD);
+
+        $this->selectedTab[$login] = UmPanelKeys::ACT_TAB_SEMI_FINAL;
+        $this->setSelectedSubTab($login, UmPanelKeys::ACT_SUBTAB_SEMI_FINAL_PLAYER_DETAILS);
+
+        $this->prevTab[$login] = UmPanelKeys::ACT_TAB_SEMI_FINAL;
+        $this->prevSubTab[$login] = UmPanelKeys::ACT_SUBTAB_SEMI_FINAL_PLAYER_DETAILS;
+
         $this->boardIsOpen[$login] = true;
         $this->selectedPlayerPaginationIndex[$login] = 0;
 
@@ -102,7 +119,12 @@ class UmState {
             $this->setSelectedSubTab($login, $subTabAction ?: UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION);
         }
         if ($action === UmPanelKeys::ACT_TAB_QUALIFICATION) {
+            $this->prevTab[$login] = $action;
             $this->setSelectedSubTab($login, $subTabAction ?: UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD);
+        }
+        if ($action === UmPanelKeys::ACT_TAB_SEMI_FINAL) {
+            $this->prevTab[$login] = $action;
+            $this->setSelectedSubTab($login, $subTabAction ?: UmPanelKeys::ACT_SUBTAB_SEMI_FINAL_PLAYER_DETAILS);
         }
         $this->selectedTab[$login] = $action;
     }
@@ -114,15 +136,37 @@ class UmState {
     public function setSelectedSubTab($login, $action) {
         $this->selectedSubTab[$login] = $action;
         // reset players page if user change subtab
-        $this->selectedPlayerPaginationIndex[$login] = 0;
-        $this->selectedPlayerIndex[$login] = 0;
-        $this->selectedPlayer[$login] = null;
+        //$this->selectedPlayerPaginationIndex[$login] = 0;
+        //$this->selectedPlayerIndex[$login] = 0;
+        //$this->selectedPlayer[$login] = null;
 
         // choose appropriate player collection based on subtab
         if ($action === UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD) {
+            $this->prevSubTab[$login] = $action;
             $this->selectedPlayerCollection[$login] = $this->qualificationRankings;
             if (isset($this->selectedPlayerCollection[$login]) && count($this->selectedPlayerCollection[$login]) > 0)
             $this->selectedPlayer[$login] = $this->selectedPlayerCollection[$login][0];
+            return;
+        }
+
+        // choose appropriate player collection based on subtab
+        if ($action === UmPanelKeys::ACT_SUBTAB_SEMI_FINAL_PLAYER_DETAILS) {
+            $this->prevSubTab[$login] = $action;
+            $this->selectedPlayerCollection[$login] = $this->semiFinalRankings;
+            if (isset($this->selectedPlayerCollection[$login]) && count($this->selectedPlayerCollection[$login]) > 0)
+            $this->selectedPlayer[$login] = $this->selectedPlayerCollection[$login][0];
+            return;
+        }
+
+        // choose appropriate player collection based on subtab
+        if ($action === UmPanelKeys::ACT_SUBTAB_SEMI_FINAL_STINTS) {
+            $this->prevSubTab[$login] = $action;
+            if (isset($this->semiFinalRaces) && count($this->semiFinalRaces) > 0) {
+                if (!isset($this->selectedSemiFinalRace[$login])) {
+                    $this->selectedSemiFinalRace[$login] = $this->semiFinalRaces[0];
+                }
+            }
+            //$this->selectedPlayerCollection[$login] = $this->semiFinalRankings;
             return;
         }
 
@@ -135,9 +179,6 @@ class UmState {
             }
         }
 
-        if ($action === UmPanelKeys::ACT_TAB_MAPS) {
-
-        }
     }
 
     public function getSelectedSubTab($login) {
@@ -173,6 +214,12 @@ class UmState {
         $rowIndex = (int)substr($action, strlen($rowPrefix));
         $this->selectedPlayerIndex[$login] = $rowIndex;
 
+        if ($this->getSelectedSubTab($login) === UmPanelKeys::ACT_SUBTAB_SEMI_FINAL_STINTS) {
+            //$this->selectedSubTab[$login] = UmPanelKeys::ACT_SUBTAB_SEMI_FINAL_PLAYER_DETAILS;
+            $this->selectedSemiFinalRace[$login] = $this->semiFinalRaces[$rowIndex];
+            return;
+        }
+
         // set selected player for convenience
         $currentIndex = $this->getSelectedPlayerPaginationIndex($login);
         if (isset($this->selectedPlayerCollection[$login])) {
@@ -181,6 +228,8 @@ class UmState {
                 $this->selectedPlayer[$login] = $newSelectedPlayer;
             }
         }
+
+
 
     }
 

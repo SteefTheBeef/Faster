@@ -4,6 +4,7 @@ class UmPanelKeys {
     // Manialink idname
     const ML_ID_PANEL = 'umBoard';
     const ML_ID_BOARD_MINI = 'umBoardMini';
+    const ML_ID_MINI_SCOREBOARD = 'umMiniScoreBoard';
 
     // Per-player ML state keys
     const ML_PANEL_CLOSED = 'um.panel.closed';
@@ -25,6 +26,8 @@ class UmPanelKeys {
     const ACT_PLAYERS_SELECT = 'players.select';
     const ML_PLAYER_PAGE = 'players.page';
 
+    const ACT_SEMI_FINAL_SELECT_RACE = 'semi-final.select.race';
+
     // Action prefixes (dynamic groups)
     const ACT_TAB_PREFIX = 'um.tab.';
     const ACT_SUBTAB_IDENTIFIER = '.subtab';
@@ -40,6 +43,8 @@ class UmPanelKeys {
     const ACT_TAB_MAPS = 'um.tab.maps';
 
     // Subtabs (rules)
+    const ACT_SUBTAB_RULES_INFORMATION = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.information';
+    const ACT_SUBTAB_RULES_PRIZE_POOL = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.prize-pool';
     const ACT_SUBTAB_RULES_QUALIFICATION = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.qualification';
     const ACT_SUBTAB_RULES_QUALIFICATION_POINTS = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.qualification-points';
     const ACT_SUBTAB_RULES_SEMI_FINAL = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.semi-final';
@@ -54,6 +59,10 @@ class UmPanelKeys {
     const ACT_SUBTAB_QUALIFICATION_ISLAND = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.island';
     const ACT_SUBTAB_QUALIFICATION_BAY = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.bay';
     const ACT_SUBTAB_QUALIFICATION_STADIUM = self::ACT_TAB_QUALIFICATION . self::ACT_SUBTAB_IDENTIFIER . '.stadium';
+
+    // Subtabs (semi-final)
+    const ACT_SUBTAB_SEMI_FINAL_PLAYER_DETAILS = self::ACT_TAB_SEMI_FINAL . self::ACT_SUBTAB_IDENTIFIER . '.player-details';
+    const ACT_SUBTAB_SEMI_FINAL_STINTS = self::ACT_TAB_SEMI_FINAL . self::ACT_SUBTAB_IDENTIFIER . '.race';
 
     // Mini Board
     // Actions (static)
@@ -71,6 +80,9 @@ class UmPanelKeys {
      */
     public static function createPlayerSelectActionString($rowIndex) {
         return self::ACT_PLAYERS_SELECT . (int)$rowIndex;
+    }
+    public static function createSelectSemiFinalRaceActionString($rowIndex) {
+        return self::ACT_SEMI_FINAL_SELECT_RACE . (int)$rowIndex;
     }
 
     /**
@@ -105,6 +117,8 @@ class UmPanelKeys {
             self::ACT_TAB_INFORMATION,
             self::ACT_TAB_MAPS,
 
+            self::ACT_SUBTAB_RULES_INFORMATION,
+            self::ACT_SUBTAB_RULES_PRIZE_POOL,
             self::ACT_SUBTAB_RULES_QUALIFICATION,
             self::ACT_SUBTAB_RULES_QUALIFICATION_POINTS,
             self::ACT_SUBTAB_RULES_SEMI_FINAL,
@@ -117,7 +131,10 @@ class UmPanelKeys {
             self::ACT_SUBTAB_QUALIFICATION_COAST,
             self::ACT_SUBTAB_QUALIFICATION_ISLAND,
             self::ACT_SUBTAB_QUALIFICATION_BAY,
-            self::ACT_SUBTAB_QUALIFICATION_STADIUM
+            self::ACT_SUBTAB_QUALIFICATION_STADIUM,
+
+            self::ACT_SUBTAB_SEMI_FINAL_PLAYER_DETAILS,
+            self::ACT_SUBTAB_SEMI_FINAL_STINTS,
         );
     }
 

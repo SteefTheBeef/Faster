@@ -1,13 +1,20 @@
 <?php
 
 class RulesPanelBuilder {
-    static function build($login, Layout $layout, UMConfig $umConfig, UmState $umState) {
+    static function build(UmPanelRenderContext $ctx) {
+        $login = $ctx->login;
+        $layout = $ctx->layout;
+        $umConfig = $ctx->umConfig;
+        $umState = $ctx->umState;
+
         $selectedSubTab = $umState->getSelectedSubTab($login);
         $submenuItems = array(
+            array('title' => 'Announcement', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_INFORMATION),
             array('title' => 'Qualification', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION),
             array('title' => 'Qualification Points', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION_POINTS),
             array('title' => 'Semi-Final', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_SEMI_FINAL),
             array('title' => 'Grand-Final', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_MISC),
+            array('title' => 'Prize Pool', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_PRIZE_POOL),
         );
 
         $sub = SubTabs::right(
@@ -22,13 +29,16 @@ class RulesPanelBuilder {
                 'gap' => 0.0,
 
                 // NEW: let the builder validate+default
-                'defaultAction' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION,
+                'defaultAction' => UmPanelKeys::ACT_SUBTAB_RULES_INFORMATION,
             )
         );
 
         switch ($selectedSubTab) {
             case UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION:
                 $contentXml = self::qualification($layout, $umConfig);
+                break;
+            case UmPanelKeys::ACT_SUBTAB_RULES_INFORMATION:
+                $contentXml = self::information($layout);
                 break;
 
             case UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION_POINTS:
@@ -39,12 +49,47 @@ class RulesPanelBuilder {
                 $contentXml = self::semiFinal($layout, $umConfig);
                 break;
 
+            case UmPanelKeys::ACT_SUBTAB_RULES_PRIZE_POOL:
+                $contentXml = PrizePoolPanel::render($ctx);
+                break;
+
             default:
                 $contentXml = self::grandFinal($layout, $umConfig);
                 break;
         }
 
         return $contentXml . $sub['xml'];
+    }
+
+    static function information($layout) {
+        $accentColor = $layout->theme->accentTextColor;
+        $p1 = "\$fffTake on the greatest legends in Trackmania United Forever and claim what's rightfully yours from the {$accentColor}\$o1200 EUR guaranteed prize pool!\$o\$fff"
+            . " This cup is not just a contest of skill, but truly a battle of wills and perseverance."
+            . " Who will claim the right to call themselves a grand master?";
+        $xml = UMPanel::textLabel($layout, $p1);
+        $addToOffset = 1.5;
+        $xml .= UMPanel::textLabel($layout, '$fffWhat is United Masters?', 9 + $addToOffset, true);
+
+        $pl2 = "\$fffUnited Masters is a cup that is driven in {$accentColor}laps mode\$fff."
+            . " To advance to the playoffs you need to compete in the qualification phase.";
+        $xml .= UMPanel::textLabel($layout, $pl2, 12 + $addToOffset);
+
+        $pl3 = "\$fffThe qualification begins {$accentColor}Sunday 20:00 CET March 1st \$fffand ends {$accentColor}Thursday March 12th 23:00 CET."
+            . "\$fff Race for 4 laps on 7 maps, one map for each of the TMUF Environments and the cumulative points of the top 24 players guarantees a spot in playoffs!";
+        $xml .= UMPanel::textLabel($layout, $pl3, 18 + $addToOffset);
+
+        $pl4 = "\$fffPlayoffs will start with the semi-final being played on {$accentColor}Sunday March 15, 20:30 CET. "
+            . "\$fffThis is a live event where you drive against other players in head-to-head battle for the chance to play in the glorious grand-final. "
+            . "The grand-final is played over two Sundays, {$accentColor}March 29 \$fffand {$accentColor}April 5, 20:30 CET.";
+        $xml .= UMPanel::textLabel($layout, $pl4, 28 + $addToOffset);
+
+
+        $discordLink = "\$fffJoin us on our discord at \$f09\$lhttps://discord.gg/457Bxpf";
+
+        $xml .= UMPanel::textLabel($layout, $discordLink, 39 + $addToOffset, true, array('autonewline' => '0'));
+
+        //$xml .= "<label posn='1" . ($panelBodyTopY - 10) . " 0.2' sizen='" . ($panelW/1.5 - 2) . " {$panelBodyH}' halign='left' valign='top' textsize='1' autonewline='1' text='" . safeString($discordLink) . "'/>";
+        return $xml;
     }
 
     static function qualification(Layout $layout, $umConfig) {
@@ -93,7 +138,7 @@ class RulesPanelBuilder {
         $xml = UMPanel::textLabel($layout, '$fffPoints Per Map in Qualification', $subHeaderYOffset, true);
 
         $columns = array(
-            array('header' => 'Rank', 'data' => array(1,2,3,4,5,6,7,8,9,10,11,12), 'halign' => 'left'),
+            array('header' => 'Rank', 'data' => array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), 'halign' => 'left'),
             array('header' => 'Best Race', 'data' => $raceDist, 'halign' => 'right'),
             array('header' => 'Best Lap', 'data' => $lapDist, 'halign' => 'right')
         );
@@ -110,7 +155,7 @@ class RulesPanelBuilder {
         );
 
         $columnsForTable2 = $columns;
-        $columnsForTable2[0]['data'] = array(13,14,15,16,17,18,19,20,21,22,23,24);
+        $columnsForTable2[0]['data'] = array(13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24);
         $columnsForTable2[1]['data'] = array_slice($raceDist, 12);
         $xml .= TableBuilder::build(
             $layout,
@@ -158,7 +203,7 @@ class RulesPanelBuilder {
         $xml .= UMPanel::textLabel($layout, '$fffPoints Per Stint in Semi-final', $subHeaderYOffset + 9, true);
 
         $columns = array(
-            array('header' => 'Rank', 'data' => array(1,2,3,4,5,6,7,8,9,10,11,12), 'halign' => 'left'),
+            array('header' => 'Rank', 'data' => array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), 'halign' => 'left'),
             array('header' => 'Points', 'data' => $raceDist, 'halign' => 'right'),
         );
 
@@ -175,7 +220,7 @@ class RulesPanelBuilder {
         );
 
         $columnsForTable2 = $columns;
-        $columnsForTable2[0]['data'] = array(13,14,15,16,17,18,19,20,21,22,23,24);
+        $columnsForTable2[0]['data'] = array(13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24);
         $columnsForTable2[1]['data'] = array_slice($raceDist, 12);
         $xml .= TableBuilder::build(
             $layout,
@@ -189,6 +234,7 @@ class RulesPanelBuilder {
         $panelTitle = RightPanel::buildTitle($layout, 'Rules: Semi-Final');
         return $panelTitle . $xml;
     }
+
     static function grandFinal(Layout $layout, UMConfig $umConfig) {
         $raceDist = $umConfig->um4GF->pointsDistribution;
 

@@ -37,12 +37,18 @@ class UmBoard {
     }
 
     private static function buildLeftPanelXml(UmPanelRenderContext $ctx) {
-        return QualiPlayerListPanelBuilder::build($ctx);
-//        switch ($ctx->activeTabAction) {
-//            default:
-//                return QualiPlayerListPanelBuilder::build($ctx);
-//
-//        }
+        //console("BUILD LEFT PANEL: " . print_r($ctx->umState->lastLeftPanel, true));
+        switch ((string)$ctx->activeTabAction) {
+            case UmPanelKeys::ACT_TAB_QUALIFICATION:
+                return QualiPlayerListPanelBuilder::build($ctx);
+            case UmPanelKeys::ACT_TAB_SEMI_FINAL:
+                return SemiFinalLeftPanel::build($ctx);
+            default:
+                if ($ctx->umState->prevTab[$ctx->login] === UmPanelKeys::ACT_TAB_SEMI_FINAL) {
+                    return SemiFinalLeftPanel::build($ctx);
+                }
+                return QualiPlayerListPanelBuilder::build($ctx);
+        }
     }
 
     private static function buildRightPanelBodyXml(UmPanelRenderContext $ctx) {
@@ -51,10 +57,7 @@ class UmBoard {
                 return SchedulePanelBuilder::schedule($ctx->layout, $ctx->umConfig);
 
             case UmPanelKeys::ACT_TAB_RULES:
-                return RulesPanelBuilder::build($ctx->login, $ctx->layout, $ctx->umConfig, $ctx->umState);
-
-            case UmPanelKeys::ACT_TAB_INFORMATION:
-                return InformationPanelBuilder::getInformationPanel($ctx->layout);
+                return RulesPanelBuilder::build($ctx);
 
             case UmPanelKeys::ACT_TAB_QUALIFICATION:
                 return QualificationPanelBuilder::build($ctx);
@@ -62,10 +65,8 @@ class UmBoard {
             case UmPanelKeys::ACT_TAB_MAPS:
                 return MapsPanel::build($ctx);
 
-            case UmPanelKeys::ACT_TAB_PRIZE_POOL:
-                return PrizePoolPanel::render($ctx);
-
             case UmPanelKeys::ACT_TAB_SEMI_FINAL:
+                return SemiFinalPanel::build($ctx);
             default:
                 //return 'PlayerRacesPanel::build($ctx->login, $ctx->selectedPlayerForLogin, $ctx->layout, $ctx->mlAct)';
                 return '';

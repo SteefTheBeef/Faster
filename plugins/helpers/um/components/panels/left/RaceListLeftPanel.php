@@ -1,11 +1,11 @@
 <?php
 
-class PlayerListPlayoffsPanel {
+class RaceListLeftPanel {
 
     const DISPLAY_POINTS = 'points';
     const DISPLAY_TIME = 'time';
 
-    static function build($ctx, $display = self::DISPLAY_POINTS) {
+    static function render(UmPanelRenderContext $ctx, $display = self::DISPLAY_POINTS) {
         $layout = $ctx->layout;
         $umState = $ctx->umState;
         $padX = 1.0;
@@ -14,34 +14,18 @@ class PlayerListPlayoffsPanel {
         $playerW = $layout->geometry->playerWidth;
         $playerH = $layout->geometry->playerHeight;
         $pointsW = 6.0;
-        $pointsRightX = $playerW - $padX;
+        $pointsRightX = $playerW - 1;
         $rowSpacing = 0.0;
 
         $actionIds = $ctx->mlAct;
-        // console("ACTIONS: " . print_r($ctx->selectPlayerActionIds, true));
+
+        $races = $umState->semiFinalRaces;
 
         $xmlPlayers = '';
-
-        $page = $umState->getSelectedPlayerPaginationIndex($ctx->login);
-        if (!isset($umState->selectedPlayerCollection[$ctx->login])) {
-            return array(
-                'xmlPlayers' => '',
-            );
-        }
-
-        $players = $umState->selectedPlayerCollection[$ctx->login];
-        $playersToShow = UMPanel::playersSliceForPage($players, $page);
-
         $i = 0;
 
-        foreach ($playersToShow as $player) {
+        foreach ($races as $race) {
             $rowY = -$i * ($playerH + $rowSpacing);
-
-            $np = self::normalizePlayerForList($player, $display);
-
-            $name = $np['NickNameWithColor'];
-            $pointsOrTime = $np['PointsOrTime'];
-            $qualiScore = $np['QualiScore'];
 
             $bg = '';
             if (isset($umState->selectedPlayerIndex[$ctx->login])) {
@@ -51,22 +35,17 @@ class PlayerListPlayoffsPanel {
             $actionId = isset($ctx->selectPlayerActionIds[$i]) ? (int)$ctx->selectPlayerActionIds[$i] : 0;
 
             $xmlPlayers .= XmlTag::quad(0, $rowY, $playerW, $playerH, $bg, $actionId);
-            $xmlPlayers .= XmlTag::labelCenterLeft($padX, $rowY - $padY, $playerW - 1.2, $playerH, "\$fc0" . ($page * PLAYERS_PER_PAGE + $i + 1));
+            $xmlPlayers .= XmlTag::labelCenterLeft($padX, $rowY - $padY, $playerW - 1.2, $playerH, "\$fc0" . ($i + 1));
 
             $nameLeftX = $padX * 3.0;
             $nameW = ($pointsRightX - $pointsW) - $nameLeftX;
             $qualiFont = '$060';
-            $xmlPlayers .= XmlTag::labelCenterLeft($nameLeftX, $rowY - $padY, $nameW, $playerH, $name);
-            if (isset($qualiScore)) {
-                $xmlPlayers .= XmlTag::labelCenterLeft($nameLeftX, $rowY - $padY - 1.3, $nameW, $playerH, $qualiFont . "Quali Score: " . $qualiScore, null, array('textsize' => 0.5));
-            }
-            $xmlPlayers .= XmlTag::labelCenterRight($pointsRightX, $rowY - $padY, $pointsW, $playerH, $pointsOrTime);
+            $xmlPlayers .= XmlTag::labelCenterLeft($nameLeftX, $rowY - $padY, $nameW, $playerH, $race['RaceInfo']['Environment']);
+            $xmlPlayers .= XmlTag::labelCenterRight($pointsRightX, $rowY - $padY, 15, $playerH, $race['RaceInfo']['Date']);
             $i++;
         }
 
-        $xmlPlayers .= isset($players) && count($players) > 0 ? PlayerPagination::render($ctx, $players) : XmlTag::label(1, -1, 30, 10, "\$oNo records yet...");
-
-        return $xmlPlayers;
+        return BottomBar::render($ctx) . $xmlPlayers;
     }
 
     /**

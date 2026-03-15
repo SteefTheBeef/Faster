@@ -7,14 +7,11 @@ class Tabs {
      */
     public static function getTabs() {
         return array(
+            array('title' => 'Semi TEST', 'action' => UmPanelKeys::ACT_TAB_SEMI_FINAL),
             array('title' => 'Qualification', 'action' => UmPanelKeys::ACT_TAB_QUALIFICATION),
-            //array('title' => 'Semi-Final', 'action' => UmPanelKeys::ACT_TAB_SEMI_FINAL),
-            //array('title' => 'Stints', 'action' => UmPanelKeys::ACT_TAB_STINTS),
             array('title' => 'Map Ratings', 'action' => UmPanelKeys::ACT_TAB_MAPS),
-            array('title' => 'Prize Pool', 'action' => UmPanelKeys::ACT_TAB_PRIZE_POOL),
             array('title' => 'Schedule', 'action' => UmPanelKeys::ACT_TAB_SCHEDULE),
-            array('title' => 'Rules', 'action' => UmPanelKeys::ACT_TAB_RULES),
-            array('title' => 'Information', 'action' => UmPanelKeys::ACT_TAB_INFORMATION),
+            array('title' => 'Information', 'action' => UmPanelKeys::ACT_TAB_RULES),
         );
     }
 

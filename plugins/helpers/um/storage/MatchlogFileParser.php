@@ -13,9 +13,9 @@ class MatchlogFileParser {
         $racesByLogin = array(); // store per-player races (multi-dimensional array)
 
         foreach ($races as $raceIndex => $race) {
-            $playersByLogin = isset($race['players']) ? $race['players'] : array();
-            $scoresByLogin  = isset($race['scores']) ? $race['scores'] : array();
-            $raceInfo       = isset($race['raceInfo']) ? $race['raceInfo'] : array();
+            $playersByLogin = isset($race['Players']) ? $race['Players'] : array();
+            $scoresByLogin  = isset($race['Scores']) ? $race['Scores'] : array();
+            $raceInfo       = isset($race['RaceInfo']) ? $race['RaceInfo'] : array();
 
             // Keep player meta (nickname) for output
             foreach ($playersByLogin as $login => $p) {
@@ -38,7 +38,8 @@ class MatchlogFileParser {
                 $award = 0;
 
                 if ($rank >= 1 && is_array($pointsScale) && isset($pointsScale[$rank])) {
-                    $award = (int)$pointsScale[$rank];
+                    // pointsScale starts from index 0
+                    $award = (int)$pointsScale[$rank-1];
                 }
 
                 if (!isset($totalPointsByLogin[$login])) {
@@ -81,7 +82,7 @@ class MatchlogFileParser {
             $merged[] = array(
                 'Login' => $login,
                 'Rank' => 9999, // rank is per-race; total board will be sorted by Points
-                'Points' => (int)$totalPts,
+                'Score' => (int)$totalPts,
                 'NickNameWithColor' => isset($p['NickNameWithColor']) ? $p['NickNameWithColor'] : (isset($p['NickName']) ? $p['NickName'] : $login),
                 'NickName' => isset($p['NickName']) ? $p['NickName'] : $login,
 
@@ -108,7 +109,7 @@ class MatchlogFileParser {
      *     'raceInfo' => array(column => value),
      *   )
      */
-    private static function parseMatchlogFile($filePath) {
+    static function parseMatchlogFile($filePath) {
         if (!is_string($filePath) || $filePath === '' || !file_exists($filePath)) {
             return array();
         }
@@ -129,34 +130,43 @@ class MatchlogFileParser {
         }
 
         $races = array();
+
         foreach ($parts as $part) {
+            $
             $part = trim($part);
             if ($part === '') {
                 continue;
             }
 
             $race = array(
-                'scores' => array(),
-                'players' => array(),
-                'raceInfo' => array(),
+                'Scores' => array(),
+                'Players' => array(),
+                'RaceInfo' => array(),
             );
-
+            $maxNumberOfLaps = 0;
             $scoresBlock = self::extractSectionBlock($part, '* Scores:');
             if ($scoresBlock !== '') {
-                $race['scores'] = self::parseCsvSectionByLogin($scoresBlock);
+                $race['Scores'] = self::parseCsvSectionByLogin($scoresBlock);
+                foreach ($race['Scores'] as $login => $score) {
+                    $maxNumberOfLaps = max($maxNumberOfLaps, $score['Lap']);
+                }
             }
 
             $playersBlock = self::extractSectionBlock($part, '* Players:');
             if ($playersBlock !== '') {
-                $race['players'] = self::parseCsvSectionByLogin($playersBlock);
+                $race['Players'] = self::parseCsvSectionByLogin($playersBlock);
             }
 
             $raceInfoBlock = self::extractSectionBlock($part, '* Race info:');
             if ($raceInfoBlock !== '') {
-                $race['raceInfo'] = self::parseSingleCsvRow($raceInfoBlock);
+                $race['RaceInfo'] = self::parseSingleCsvRow($raceInfoBlock);
             }
 
-            $races[] = $race;
+            // filter out races that don't have any player who finished the race'
+            if ($race['RaceInfo']['NumberOfLaps'] === $maxNumberOfLaps) {
+                $races[] = $race;
+            }
+
         }
 
         return $races;
@@ -286,8 +296,8 @@ class MatchlogFileParser {
  * Sort helper: points DESC, then name ASC
  */
 function sortByPointsDescThenNameAsc($a, $b) {
-    $pa = isset($a['Points']) ? (int)$a['Points'] : 0;
-    $pb = isset($b['Points']) ? (int)$b['Points'] : 0;
+    $pa = isset($a['Score']) ? (int)$a['Score'] : 0;
+    $pb = isset($b['Score']) ? (int)$b['Score'] : 0;
 
     if ($pa !== $pb) {
         return ($pa > $pb) ? -1 : 1;

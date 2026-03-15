@@ -5,7 +5,9 @@ class QualiPlayerListPanelBuilder {
     static function build(UmPanelRenderContext $ctx) {
         $title = '';
         $xml = PlayerListPlayoffsPanel::build($ctx, PlayerListPlayoffsPanel::DISPLAY_TIME);
-        switch ($ctx->activeSubtabAction) {
+
+        $prevSubTab = $ctx->umState->prevSubTab[$ctx->login];
+        switch ($prevSubTab) {
             case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_RALLY:
                 $title = RightPanel::buildTitle2($ctx->layout, 'Qualification: Rally');
                 break;
@@ -35,7 +37,7 @@ class QualiPlayerListPanelBuilder {
                 break;
         }
 
-        return $title . $xml['xmlPlayers'];
+        return $title . $xml;
 
     }
 }
