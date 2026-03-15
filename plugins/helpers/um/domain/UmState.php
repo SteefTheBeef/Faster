@@ -23,6 +23,8 @@ class UmState {
     public $boardIsOpen = array();
     public $boardMiniIsOpen = array();
 
+    public $miniScoreBoardIsOpen = false;
+
     public $mapRatingsTA = array();
 
     public $disconnectedLoginsToUnsetAfterRound = array();
