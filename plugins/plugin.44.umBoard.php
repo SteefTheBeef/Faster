@@ -22,6 +22,7 @@ require_once "helpers/um/UMPanel.php";
 
 // Services
 require_once "helpers/um/services/QualificationRankingService.php";
+require_once "helpers/um/services/SemiFinalRankingService.php";
 require_once "helpers/um/services/MapRatingsService.php";
 
 // Storage
@@ -53,8 +54,11 @@ require_once "helpers/um/components/Table.php";
 
 // Left panel components
 require_once "helpers/um/components/panels/left/PlayerListPlayoffsPanel.php";
+require_once "helpers/um/components/panels/left/RaceListLeftPanel.php";
 require_once "helpers/um/components/panels/left/QualiPlayerListPanelBuilder.php";
+require_once "helpers/um/components/panels/left/SemiFinalLeftPanel.php";
 require_once "helpers/um/components/panels/left/PlayerPagination.php";
+require_once "helpers/um/components/panels/left/BottomBar.php";
 
 // Right panel components
 require_once "helpers/um/components/panels/right/TableBuilder.php";
@@ -71,6 +75,9 @@ require_once "helpers/um/components/panels/right/EnviLeaderboardPlayerPanel.php"
 require_once "helpers/um/components/panels/right/PlayerEnviDetailsTable.php";
 require_once "helpers/um/components/panels/right/PrizePoolPanel.php";
 require_once "helpers/um/components/panels/right/MapsPanel.php";
+require_once "helpers/um/components/panels/right/semiFinal/SemiFinalPanel.php";
+require_once "helpers/um/components/panels/right/semiFinal/SemiFinalPlayerDetails.php";
+require_once "helpers/um/components/panels/right/semiFinal/SemiFinalRaces.php";
 
 // Main component
 require_once "helpers/um/components/UmBoard.php";
@@ -83,13 +90,13 @@ registerPlugin(UmPanelKeys::ML_ID_PANEL, 44, 1.0);
 // Init : (plugin init)
 //--------------------------------------------------------------
 function umBoardInit($event) {
-    global $_ml_act, $umConfig, $qualiBestRacesConfig, $qualiBestLapsConfig, $umState, $selectPlayerActionIds, $layout;
+    global $_ml_act, $umConfig, $qualiBestRacesConfig, $qualiBestLapsConfig, $umState, $selectPlayerActionIds, $selectSemiFinalRaceActionIds, $layout;
 
     $layout = Layout::build();
     $umConfig = new UMConfig();
     $qualiBestRacesConfig = $umConfig->um4QualiBestRace;
     $qualiBestLapsConfig = $umConfig->um4QualiBestLap;
-    $umState = new UmState($qualiBestRacesConfig, $qualiBestLapsConfig);
+    $umState = new UmState($umConfig);
 
     console("Init umBoard");
     computeRankings();
@@ -104,6 +111,14 @@ function umBoardInit($event) {
         manialinksAddAction($actionName);                 // creates a unique action id
         $selectPlayerActionIds[$i] = $_ml_act[$actionName]; // numeric action id stored by manialinks plugin
     }
+
+    $selectSemiFinalRaceActionIds = array();
+    for ($i = 0; $i < 14; $i++) {
+        $actionName = UmPanelKeys::createSelectSemiFinalRaceActionString($i);
+        manialinksAddAction($actionName);                 // creates a unique action id
+        $selectSemiFinalRaceActionIds[$i] = $_ml_act[$actionName]; // numeric action id stored by manialinks plugin
+    }
+
 
    // $umScoreBoardPlayers = MatchlogFileParser::getScoreboardPlayersFromMatchlog('fastlog/um3_semi.txt', $umConfig->um3Semi->pointsDistribution);
 
@@ -169,13 +184,13 @@ function umBoardPlayerManialinkPageAnswer($event, $login, $answer, $action) {
 // action can be 'show', 'refresh', 'hide', 'remove'
 //--------------------------------------------------------------
 function umBoardUpdateXml($login, $action = 'show') {
-    global $_players, $selectPlayerActionIds, $_ml_act, $umConfig, $umState, $layout;
+    global $_players, $selectPlayerActionIds, $selectSemiFinalRaceActionIds, $_ml_act, $umConfig, $umState, $layout;
 
     // if the players disabled manialinks then do nothing
     if (!isset($_players[$login]['ML']['ShowML']) || $_players[$login]['ML']['ShowML'] <= 0)
         return;
 
-    $ctx = new UmPanelRenderContext($login, $layout, $selectPlayerActionIds, $_ml_act, $umConfig, $umState);
+    $ctx = new UmPanelRenderContext($login, $layout, $selectPlayerActionIds, $selectSemiFinalRaceActionIds, $_ml_act, $umConfig, $umState);
     $xml = UmBoard::buildPanelXml($ctx);
 
     manialinksSet($login, UmPanelKeys::ML_ID_PANEL, $action, $xml);
