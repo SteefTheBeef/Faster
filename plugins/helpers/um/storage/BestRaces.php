@@ -1,7 +1,7 @@
 <?php
 
 class BestRaces {
-    const DIR_UM = 'fastlog/um';
+    const DIR_UM = 'fastlog/um/quali';
 
     const FILE_PREFIX_BEST_RACES = 'bestRaces';
     const FILE_PREFIX_BEST_LAPS = 'bestLaps';
