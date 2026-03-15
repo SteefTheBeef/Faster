@@ -3,7 +3,7 @@
 class MapRatings {
 
     static function getTARatings() {
-        return self::parseRatingTAFile('fastlog/um/ratingTA.txt');
+        return self::parseRatingTAFile('fastlog/um/quali/ratingTA.txt');
     }
     static function parseRatingTAFile($filePath) {
         $result = array();
