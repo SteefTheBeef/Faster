@@ -2016,10 +2016,14 @@ function matchServerSetup($login=true,$startmatch=false,$startdelay=0){
 		$_CallVoteTimeOut = 0;
 		addCall($login,'SetCallVoteTimeOut',0);
 
+		$challengeListByEnvi = array();
+		foreach($_ChallengeList as $challenge){
+			$challengeListByEnvi[$challenge['Environnement']] = $challenge;
+		}
+
 		// map list
 		if(count($_match_conf['MapsMode']) == 1){
 			$ident = $_match_conf['MapsMode'][0]['Ident'];
-			console("MatchMode ident: {$ident}");
 
 			if($ident === 'current'){
 				$ident = $_CurrentChallengeIndex;
@@ -2059,36 +2063,25 @@ function matchServerSetup($login=true,$startmatch=false,$startdelay=0){
 			}
 
 		}elseif(count($_match_conf['MapsMode']) > 0){
+			//console("MatchMode: ".print_r($_match_conf['MapsMode'],true));
 			// make map list
-			$max = count($_ChallengeList);
+			$max = count($_match_conf['MapsMode']);
 			$ind = $_NextChallengeIndex;
 			$clist = array();
 			$list = array();
-			foreach($_match_conf['MapsMode'] as $map){
-				$envir = false;
-				$ident = $map['Ident'];
-				if(isset($_envirs[strtolower($ident)])){
-					$envir = true;
-					$ident = $_envirs[strtolower($ident)];
-					$map['Ident'] = $ident;
-				}
 
+			foreach($_match_conf['MapsMode'] as $map){
+				$ident = ucfirst($map['Ident']);
+				$challenge = isset($challengeListByEnvi[$ident]) ? $challengeListByEnvi[$ident] : null;
+				if (!isset($challenge))
+					continue;
+
+				$clist[] = $challenge['FileName'];
 				// search map in list
-				for($ind2=$ind; $ind2 < $ind+$max; $ind2++){
-					$ind3 = $ind2 % $max;
-					if(!isset($list[$ind3])){
-						if(($envir && $_ChallengeList[$ind3]['Environnement'] == $ident) ||
-							 (!$envir && $_ChallengeList[$ind3]['UId'] == $ident) ||
-							 (!$envir && stristr(stripColors($_ChallengeList[$ind3]['Name']),$ident) !== false)){
-							$clist[] = $_ChallengeList[$ind3]['FileName'];
-							$list[$ind3] = $ind3;
-							if(count($map) > 1)
-								$_match_conf['MapsConf'][$map['UId']] = $map;
-							break;
-						}
-					}
-				}
+
 			}
+
+			console("matchServerSetup:: started the match ! (maps: ".print_r($clist,true).")");
 			// set list
 			if(count($clist) > 0){
 				console("matchServerSetup:: started the match ! (".implode(',',$clist).")");
@@ -2246,6 +2239,8 @@ function matchStart($login, $params, $startdelay=0){
 	$_match_startit = false;
 	matchReadConfigs('plugins/match.configs.xml.txt');
 	matchReadConfigs('custom/match.configs.custom.xml.txt');
+
+	//console(print_r($_match_config, true));
 
 	$author = ($login === true) ? $_ServerInfos['Login'] : $login;
 
