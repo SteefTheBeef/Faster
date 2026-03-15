@@ -110,14 +110,14 @@ class MatchlogLaps {
         // Update UM best scores file (per environment), only if improved:
         // Check DESC (higher is better), then Time ASC (lower is better).
         //BestRaces::updateBestRacesFile($finishedPlayers, $challengeInfo, $_GameInfos);
-        BestRaces::appendImprovedLinesToFile(
-            BestRaces::updateBestRacesFile($finishedPlayers, $challengeInfo, $_GameInfos)
-        );
+        //BestRaces::appendImprovedLinesToFile(
+        //    BestRaces::updateBestRacesFile($finishedPlayers, $challengeInfo, $_GameInfos)
+        //);
         // Update UM best laps file (per environment), only if improved:
         // BestLapMs ASC (lower is better).
-        BestRaces::appendImprovedLinesToFile(
-            BestRaces::updateBestLapsFile($finishedPlayers, $challengeInfo, $_GameInfos)
-        );
+        //BestRaces::appendImprovedLinesToFile(
+        //    BestRaces::updateBestLapsFile($finishedPlayers, $challengeInfo, $_GameInfos)
+        //);
 
         // Update UM players file (per environment), keyed by Login, sorted by Login.
         UmPlayers::updatePlayersFile($playerList);
