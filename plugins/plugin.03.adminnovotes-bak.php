@@ -1,5 +1,5 @@
 <?php
-////////////////////////////////////////////////////////////////
+/*////////////////////////////////////////////////////////////////
 //¤
 // File:      FAST 3.2 (First Automatic Server for Trackmania)
 // Web:       
@@ -12,7 +12,7 @@
 // Test is done at begin round, player connect and player disconnect
 // if no more admin or if no admin active for long time, then active votes again
 
-registerPlugin('adminnovotes',4);
+//registerPlugin('adminnovotes',4);
 
 
 // Don't change values here ! Do it in fast.php !
@@ -33,17 +33,18 @@ registerPlugin('adminnovotes',4);
 //--------------------------------------------------------------
 function adminnovotesInit($event){
 	global $_debug,$_CallVoteTimeOut,$_adminnovotes_delay;
+	addCall(null,'SetCallVoteTimeOut',0);
 
-	if(!isset($_CallVoteTimeOut))
-		$_CallVoteTimeOut = -60000;
-
-	else{
-		$vtime = $_CallVoteTimeOut<0 ? 0 : $_CallVoteTimeOut;
-		addCall(null,'SetCallVoteTimeOut',$vtime);
-	}
-
-	if(!isset($_adminnovotes_delay))
-		$_adminnovotes_delay = 600000; // 10min
+//	if(!isset($_CallVoteTimeOut))
+//		$_CallVoteTimeOut = -60000;
+//
+//	else{
+//		$vtime = $_CallVoteTimeOut<0 ? 0 : $_CallVoteTimeOut;
+//		addCall(null,'SetCallVoteTimeOut',$vtime);
+//	}
+//
+//	if(!isset($_adminnovotes_delay))
+//		$_adminnovotes_delay = 600000; // 10min
 }
 
 
@@ -58,8 +59,8 @@ function adminnovotesVerifyAdmins(){
 		foreach($_players as $login => &$pl){
 			if($pl['Active'] && !$pl['Relayed'] && verifyAdmin(''.$login) && ($_currentTime - $pl['PlayerActionTime'] < $_adminnovotes_delay/2)){
 				addCall(null,'SetCallVoteTimeOut',0);
-				console("Active admin : disable callvotes !");
-				ChatSendServerMessageToAdmins(localeText(null,'server_message').'CallVotes are now disabled (active admins).');
+				//console("Active admin : disable callvotes !");
+				//ChatSendServerMessageToAdmins(localeText(null,'server_message').'CallVotes are now disabled (active admins).');
 				break;
 			}
 		}
@@ -72,9 +73,9 @@ function adminnovotesVerifyAdmins(){
 				$nbadmin++;
 		}
 		if($nbadmin<=0){
-			addCall(null,'SetCallVoteTimeOut',-$_CallVoteTimeOut);
-			console("No active admin : enable callvotes !");
-			ChatSendServerMessageToAdmins(localeText(null,'server_message').'CallVotes are now enabled (no active admin).');
+			//addCall(null,'SetCallVoteTimeOut',-$_CallVoteTimeOut);
+			//console("No active admin : enable callvotes !");
+			//ChatSendServerMessageToAdmins(localeText(null,'server_message').'CallVotes are now enabled (no active admin).');
 		}
 	}
 }
@@ -89,7 +90,7 @@ function adminnovotesPlayerConnect($event,$login){
 	if($_CallVoteTimeOut<0 && verifyAdmin(''.$login)){
 		if($_ServerOptions['NextCallVoteTimeOut']>0){
 			addCall(null,'SetCallVoteTimeOut',0);
-			ChatSendServerMessageToAdmins(localeText(null,'server_message').'CallVotes are now disabled (active admin).');
+			//ChatSendServerMessageToAdmins(localeText(null,'server_message').'CallVotes are now disabled (active admin).');
 		}
 	}
 }
@@ -121,7 +122,7 @@ function adminnovotesBeginRound($event){
 
 
 //--------------------------------------------------------------
-//
+// 
 //--------------------------------------------------------------
 function adminnovotesEvery5seconds($event){
 	global $_debug,$_CallVoteTimeOut;
@@ -132,7 +133,7 @@ function adminnovotesEvery5seconds($event){
 
 
 //--------------------------------------------------------------
-//
+// 
 //--------------------------------------------------------------
 function adminnovotesEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 	global $_debug,$_CallVoteTimeOut;
@@ -141,4 +142,4 @@ function adminnovotesEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
 		adminnovotesVerifyAdmins();
 }
 
-?>
+*/?>
