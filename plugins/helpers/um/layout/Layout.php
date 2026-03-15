@@ -1,5 +1,11 @@
 <?php
 
+require_once "LayoutTheme.php";
+require_once "LayoutMarkup.php";
+require_once "LayoutGeometry.php";
+require_once "LayoutGeometryMini.php";
+require_once "LayoutGeometryMiniScoreBoard.php";
+
 class Layout
 {
     /** @var LayoutGeometry */
@@ -7,6 +13,9 @@ class Layout
 
     /** @var LayoutGeometryMini */
     public $geometryMini;
+
+    /** @var LayoutGeometryMiniScoreBoard */
+    public $geometryMiniScoreBoard;
 
     /** @var LayoutTheme */
     public $theme;
@@ -20,6 +29,7 @@ class Layout
 
         $layout->geometry = LayoutGeometry::buildDefault();
         $layout->geometryMini = LayoutGeometryMini::buildDefault();
+        $layout->geometryMiniScoreBoard = LayoutGeometryMiniScoreBoard::buildDefault();
         $layout->theme    = LayoutTheme::buildDefault();
         $layout->markup   = LayoutMarkup::from($layout->geometry, $layout->theme);
 
