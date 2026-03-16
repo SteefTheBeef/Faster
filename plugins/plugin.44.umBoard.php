@@ -47,6 +47,7 @@ require_once "helpers/um/domain/PrizePool.php";
 require_once "helpers/um/components/BoardTitle.php";
 require_once "helpers/um/components/BoardBorders.php";
 require_once "helpers/um/components/OpenCloseToggle.php";
+require_once "helpers/um/components/CloseIcon.php";
 require_once "helpers/um/components/BackgroundPanel.php";
 require_once "helpers/um/components/Tabs.php";
 require_once "helpers/um/components/SubTabs.php";
