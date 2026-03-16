@@ -43,6 +43,8 @@ class UmState {
     public $prizePool;
     public $umConfig;
 
+    public $raceIsEnding = false;
+
     public function __construct(UMConfig $umConfig) {
         $this->umConfig = $umConfig;
         $this->qualificationBestRacesRanking = array();

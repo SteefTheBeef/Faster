@@ -68,6 +68,8 @@ class UmPanelKeys {
     // Mini Board
     // Actions (static)
     const ACT_BOARD_MINI_TOGGLE = 'um.board.mini.toggle';
+    const ACT_MINI_SCOREBOARD_CLOSE = 'um.mini.scoreboard.close';
+    const ACT_MINI_SCOREBOARD_OPEN = 'um.mini.scoreboard.open';
 
     const ACT_RATE_MAP_UP = 'um.rate.map.up';
     const ACT_RATE_MAP_DOWN = 'um.rate.map.down';

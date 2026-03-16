@@ -5,15 +5,28 @@ class UmMiniScoreBoard {
     public static function buildPanelXml(UmMiniScoreBoardRenderContext $ctx) {
         $geometry = $ctx->layout->geometryMiniScoreBoard;
         $y = -1;
-        console("BAJS");
+
+        if (!isset($ctx->umState->miniScoreBoardIsOpen[$ctx->login]) || !$ctx->umState->miniScoreBoardIsOpen[$ctx->login]) {
+            return self::renderToggleIcon($ctx);
+        }
+
         return XmlTag::frame($geometry->mainFrameX, $geometry->mainFrameY, 1,
             "<quad sizen='22 50' posn='0 0' style='BgsPlayerCard' substyle='BgCardSystem'/>"
+            . CloseIcon::render(1, -0.5, $ctx->mlAct[UmPanelKeys::ACT_MINI_SCOREBOARD_CLOSE])
             //. XmlTag::label(-5, 29, 15, 2, "\$0f0\$oUM4 Current Score", array(), array('textsize' => 1.0))
             . XmlTag::label(3.1, $y, 20, 2, "\$l[https://umts.vercel.app/um4/semi-final/leaderboard]\$0f0\$oUM4 Semi-Final Score\$l")
             . self::buildTable($ctx, $y)
         );
     }
-
+    static function renderToggleIcon(UmMiniScoreBoardRenderContext $ctx) {
+        $geometry = $ctx->layout->geometryMiniScoreBoard;
+        $toggleX = $geometry->width - 6.5;
+        $toggleY = 13;
+        return XmlTag::frame($geometry->mainFrameX, $geometry->mainFrameY, 0,
+            XmlTag::label(1.5, -1.25, 5, 3, "\$0f0\$oUM:S")
+            . "<quad sizen='6.5 4' posn='{0} {0} 0' style='BgsPlayerCard' substyle='BgPlayerCardSmall' action={$ctx->mlAct[UmPanelKeys::ACT_MINI_SCOREBOARD_OPEN]}/>"
+        );
+    }
     private static function buildTable(UmMiniScoreBoardRenderContext $ctx, $y) {
         $x = 2;
         $challengeInfo = $ctx->challengeInfo;
