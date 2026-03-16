@@ -10,6 +10,7 @@ class RulesPanelBuilder {
         $selectedSubTab = $umState->getSelectedSubTab($login);
         $submenuItems = array(
             array('title' => 'Announcement', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_INFORMATION),
+            array('title' => 'Schedule', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_SCHEDULE),
             array('title' => 'Qualification', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION),
             array('title' => 'Qualification Points', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION_POINTS),
             array('title' => 'Semi-Final', 'action' => UmPanelKeys::ACT_SUBTAB_RULES_SEMI_FINAL),
@@ -37,6 +38,9 @@ class RulesPanelBuilder {
             case UmPanelKeys::ACT_SUBTAB_RULES_QUALIFICATION:
                 $contentXml = self::qualification($layout, $umConfig);
                 break;
+            case UmPanelKeys::ACT_SUBTAB_RULES_SCHEDULE:
+                $contentXml = SchedulePanelBuilder::render($layout, $umConfig);
+                break;
             case UmPanelKeys::ACT_SUBTAB_RULES_INFORMATION:
                 $contentXml = self::information($layout);
                 break;
@@ -60,6 +64,7 @@ class RulesPanelBuilder {
 
         return $contentXml . $sub['xml'];
     }
+
 
     static function information($layout) {
         $accentColor = $layout->theme->accentTextColor;

@@ -1,13 +1,13 @@
 <?php
 
 class SchedulePanelBuilder {
-    static function schedule(Layout $layout, UMConfig $umConfig) {
+    static function render(Layout $layout, UMConfig $umConfig) {
         $raceDist = is_array($umConfig->um4Semi->pointsDistribution)
             ? $umConfig->um4QualiBestRace->pointsDistribution
             : array();
 
         // Keep table out of the submenu area.
-        $reservedForSubmenu = 0; // submenuW + breathing gap
+        $reservedForSubmenu = 17; // submenuW + breathing gap
 
         // Add a subheader like in the Qualification panel
         $subHeaderYOffset = 7.0;
@@ -62,7 +62,6 @@ class SchedulePanelBuilder {
         $columns = array(
             array('header' => 'Date', 'data' => $dates),
             array('header' => 'Event', 'data' => $eventTypes),
-            array('header' => 'Map Pack', 'data' => $mapPacks),
             array('header' => 'Map Count', 'data' => $mapCounts),
             array('header' => 'Laps x Stints', 'data' => $lapCounts),
         );

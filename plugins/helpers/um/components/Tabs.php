@@ -7,10 +7,9 @@ class Tabs {
      */
     public static function getTabs() {
         return array(
-            array('title' => 'Semi TEST', 'action' => UmPanelKeys::ACT_TAB_SEMI_FINAL),
+            array('title' => 'Semi-Final', 'action' => UmPanelKeys::ACT_TAB_SEMI_FINAL),
             array('title' => 'Qualification', 'action' => UmPanelKeys::ACT_TAB_QUALIFICATION),
             array('title' => 'Map Ratings', 'action' => UmPanelKeys::ACT_TAB_MAPS),
-            array('title' => 'Schedule', 'action' => UmPanelKeys::ACT_TAB_SCHEDULE),
             array('title' => 'Information', 'action' => UmPanelKeys::ACT_TAB_RULES),
         );
     }

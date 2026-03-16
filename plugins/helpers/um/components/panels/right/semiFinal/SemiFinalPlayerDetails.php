@@ -22,7 +22,7 @@ class SemiFinalPlayerDetails {
 
         //console(print_r($selectedPlayer, true));
 
-        $xml = UMPanel::textLabel($layout, '$fffSemi-Final Score TEST', $subHeaderYOffset, true);
+        $xml = UMPanel::textLabel($layout, '$fffSemi-Final Score', $subHeaderYOffset, true);
 
         $races = $selectedPlayer['Races'];
         $envis = array('');

@@ -44,6 +44,7 @@ class UmPanelKeys {
 
     // Subtabs (rules)
     const ACT_SUBTAB_RULES_INFORMATION = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.information';
+    const ACT_SUBTAB_RULES_SCHEDULE = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.schedule';
     const ACT_SUBTAB_RULES_PRIZE_POOL = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.prize-pool';
     const ACT_SUBTAB_RULES_QUALIFICATION = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.qualification';
     const ACT_SUBTAB_RULES_QUALIFICATION_POINTS = self::ACT_TAB_RULES . self::ACT_SUBTAB_IDENTIFIER . '.qualification-points';
@@ -118,6 +119,7 @@ class UmPanelKeys {
             self::ACT_TAB_MAPS,
 
             self::ACT_SUBTAB_RULES_INFORMATION,
+            self::ACT_SUBTAB_RULES_SCHEDULE,
             self::ACT_SUBTAB_RULES_PRIZE_POOL,
             self::ACT_SUBTAB_RULES_QUALIFICATION,
             self::ACT_SUBTAB_RULES_QUALIFICATION_POINTS,

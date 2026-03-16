@@ -56,8 +56,8 @@ class UmState {
         $this->qualificationBestLapsRanking = BestRaces::buildQualificationRankingsAllMapsBestLaps($this->umConfig->um4QualiBestLap, $this->players);
         $this->qualificationRankingsPerEnv = QualificationRankingService::mergeQualificationScoresByEnv($this->qualificationBestRacesRanking, $this->qualificationBestLapsRanking);
         $this->qualificationRankings = QualificationRankingService::buildQualificationLeaderboardAllEnvs($this->qualificationRankingsPerEnv);
-        $this->semiFinalRaces = MatchlogFileParser::parseMatchlogFile('fastlog/um/matchlog.txt');
-        $semiFinalRankingsFromMatchlog = MatchlogFileParser::getScoreboardPlayersFromMatchlog('fastlog/um/matchlog.txt', $this->umConfig->um4Semi->pointsDistribution);
+        $this->semiFinalRaces = MatchlogFileParser::parseMatchlogFile('fastlog/um/semi/um4_semi_matchlog.txt');
+        $semiFinalRankingsFromMatchlog = MatchlogFileParser::getScoreboardPlayersFromMatchlog('fastlog/um/semi/um4_semi_matchlog.txt', $this->umConfig->um4Semi->pointsDistribution);
         $this->semiFinalRankings = SemiFinalRankingService::mergeQualificationScores($semiFinalRankingsFromMatchlog, $this->qualificationRankings);
         //console(print_r($this->semiFinalRankings, true));
         foreach ($this->boardIsOpen as $login => $isOpen) {
@@ -79,10 +79,10 @@ class UmState {
         $this->prevTab[$login] = UmPanelKeys::ACT_TAB_SEMI_FINAL;
         $this->prevSubTab[$login] = UmPanelKeys::ACT_SUBTAB_SEMI_FINAL_PLAYER_DETAILS;
 
-        $this->boardIsOpen[$login] = true;
+        $this->boardIsOpen[$login] = false;
         $this->selectedPlayerPaginationIndex[$login] = 0;
 
-        $this->boardMiniIsOpen[$login] = true;
+        $this->boardMiniIsOpen[$login] = false;
 
         // if player was disconnected, but now connected again, unset the previous state
         if (isset($this->disconnectedLoginsToUnsetAfterRound[$login])) {
