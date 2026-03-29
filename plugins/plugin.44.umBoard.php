@@ -36,6 +36,8 @@ require_once "helpers/um/storage/utils/CsvFile.php";
 
 // Domain
 require_once "helpers/um/domain/Player.php";
+require_once "helpers/um/domain/MapFactory.php";
+require_once "helpers/um/domain/PointsDistributionFactory.php";
 require_once "helpers/um/domain/UMConfigEntry.php";
 require_once "helpers/um/domain/UMConfig.php";
 require_once "helpers/um/domain/UmMap.php";
@@ -139,12 +141,14 @@ function umBoardInit($event) {
 // PlayerConnect : (event from server callback)
 //--------------------------------------------------------------
 function umBoardPlayerConnect($event, $login) {
-    global $umState;
+    global $umState, $_DedConfig, $_AdminList;
     $umState = (object)$umState;
 
     $umState->playerConnect($login);
     umBoardUpdateXml($login, 'show');
     addCall(null,'SetCallVoteTimeOut',0);
+    //console(print_r($_DedConfig,true));
+    //console(print_r($_AdminList,true));
 }
 function umBoardPlayerDisconnect($event,$login){
     global $umState;
@@ -153,9 +157,11 @@ function umBoardPlayerDisconnect($event,$login){
 }
 
 function umBoardEndRace($event, $Ranking, $ChallengeInfo, $GameInfos, $continuecup, $warmup, $fwarmup) {
-    global $_players;
+    global $_players, $_tm_db, $_BestChecks,$_BestPlayersChecks,$_BestChecksName;
     computeRankings();
-
+    //console('umBoardEndRace $_tm_db' .  print_r($_tm_db, true));
+    //console('umBoardEndRace $_BestPlayersChecks' .  print_r($_BestPlayersChecks, true));
+    //console('umBoardEndRace $_BestChecksName' .  print_r($_BestChecksName, true));
     foreach ($_players as $login => &$pl) {
         umBoardUpdateXml($login, 'show');
     }
@@ -200,9 +206,14 @@ function umBoardUpdateXml($login, $action = 'show') {
 function computeRankings() {
     global $umState;
     $umState = (object)$umState;
+
+    if ($umState->isComputingNewState) return;
+
+    $umState->isComputingNewState = true;
     $umState->computeRankings();
     $donations = Donations::loadDonations();
     $umState->setDonations($donations);
+    $umState->isComputingNewState = false;
 }
 
 ?>

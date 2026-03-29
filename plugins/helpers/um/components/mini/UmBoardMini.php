@@ -35,11 +35,11 @@ class UmBoardMini {
         $challengeInfo = $ctx->challengeInfo;
         $xml = '';
 
-        if (!isset($ctx->umState->qualificationRankingsPerEnv[$challengeInfo['Environnement']])) {
+        if (!isset($ctx->raceCollection[$challengeInfo['Environnement']])) {
             return $xml;
         }
 
-        $playerCollectionForCurrentEnv = $ctx->umState->qualificationBestRacesRanking[$challengeInfo['Environnement']];
+        $playerCollectionForCurrentEnv = $ctx->raceCollection[$challengeInfo['Environnement']];
 
         $rowCount = UMPanel::clampInt(count($playerCollectionForCurrentEnv), 0, 10);
 

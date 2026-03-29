@@ -18,7 +18,7 @@ require_once "helpers/um/domain/UmPanelKeys.php";
 // Init : (plugin init)
 //--------------------------------------------------------------
 function umBoardMiniInit($event) {
-    global $_ml_act, $umConfig, $umState, $layout;
+    global $_ml_act, $umConfig, $umState, $layout, $raceCollection;
     manialinksAddId(UmPanelKeys::ML_ID_BOARD_MINI);
 
     if (!($layout instanceof Layout)) {
@@ -32,6 +32,9 @@ function umBoardMiniInit($event) {
     if (!($umState instanceof UmState)) {
         $umState = new UmState($umConfig->um4QualiBestRace, $umConfig->um4QualiBestLap);
     }
+
+    // TODO: would be nice to do this from an in-game admin interface.
+    $raceCollection = $umState->grandFinalBestRacesRanking;
 
     manialinksAddAction(UmPanelKeys::ACT_BOARD_MINI_TOGGLE);
 }
@@ -83,13 +86,15 @@ function umBoardMiniPlayerManialinkPageAnswer($event, $login, $answer, $action) 
 // action can be 'show', 'refresh', 'hide', 'remove'
 //--------------------------------------------------------------
 function umBoardMiniUpdateXml($login, $action = 'show') {
-    global $_players, $selectPlayerActionIds, $_ml_act, $umConfig, $umState, $layout;
+    global $_players, $selectPlayerActionIds, $_ml_act, $umConfig, $umState, $layout, $raceCollection;
 
     // if the players disabled manialinks then do nothing
     if (!isset($_players[$login]['ML']['ShowML']) || $_players[$login]['ML']['ShowML'] <= 0)
         return;
 
-    $ctx = new UmBoardMiniRenderContext($login, $layout, $_ml_act, $umConfig, $umState);
+    $raceCollection = $umState->grandFinalBestRacesRanking;
+
+    $ctx = new UmBoardMiniRenderContext($login, $layout, $_ml_act, $umConfig, $umState, $raceCollection);
     $xml = UmBoardMini::buildPanelXml($ctx);
 
     manialinksSet($login, UmPanelKeys::ML_ID_BOARD_MINI, $action, $xml);

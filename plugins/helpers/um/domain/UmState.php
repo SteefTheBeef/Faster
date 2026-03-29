@@ -38,12 +38,20 @@ class UmState {
     public $selectedSemiFinalPlayerPaginationIndex = array();
     public $selectedSemiFinalPlayerIndex = array();
 
+    public $grandFinalBestRacesRanking = array();
+    public $grandFinalRankingsPerEnv = array();
+    public $grandFinalRankings = array();
+
+    // these are used to keep track of the previous tab and subtab,
+    // so that we can keep the left panel unchanged even if the current tab doesn't have any left panel data
+    // we only set these when a tab is clicked, and it has content that should be displayed in the left panel.
     public $prevTab = array();
     public $prevSubTab = array();
     public $prizePool;
     public $umConfig;
 
     public $raceIsEnding = false;
+    public $isComputingNewState = false;
 
     public function __construct(UMConfig $umConfig) {
         $this->umConfig = $umConfig;
@@ -58,9 +66,16 @@ class UmState {
         $this->qualificationBestLapsRanking = BestRaces::buildQualificationRankingsAllMapsBestLaps($this->umConfig->um4QualiBestLap, $this->players);
         $this->qualificationRankingsPerEnv = QualificationRankingService::mergeQualificationScoresByEnv($this->qualificationBestRacesRanking, $this->qualificationBestLapsRanking);
         $this->qualificationRankings = QualificationRankingService::buildQualificationLeaderboardAllEnvs($this->qualificationRankingsPerEnv);
+
         $this->semiFinalRaces = MatchlogFileParser::parseMatchlogFile('fastlog/um/semi/um4_semi_matchlog.txt');
         $semiFinalRankingsFromMatchlog = MatchlogFileParser::getScoreboardPlayersFromMatchlog('fastlog/um/semi/um4_semi_matchlog.txt', $this->umConfig->um4Semi->pointsDistribution);
         $this->semiFinalRankings = SemiFinalRankingService::mergeQualificationScores($semiFinalRankingsFromMatchlog, $this->qualificationRankings);
+
+
+        $this->grandFinalBestRacesRanking = BestRaces::buildQualificationRankingsAllMaps($this->umConfig->um4GF, $this->players);
+        $grandFinalRankingsFromMatchlog = BestRaces::buildQualificationRankingsAllMaps($this->umConfig->um4GF, $this->players);
+        $this->grandFinalRankings = SemiFinalRankingService::mergeQualificationScores($semiFinalRankingsFromMatchlog, $this->qualificationRankings);
+
         //console(print_r($this->semiFinalRankings, true));
         foreach ($this->boardIsOpen as $login => $isOpen) {
             $this->setSelectedTab($login, $this->getSelectedTab($login), $this->getSelectedSubTab($login));

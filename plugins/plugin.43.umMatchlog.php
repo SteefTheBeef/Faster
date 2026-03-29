@@ -31,35 +31,46 @@ require_once "helpers/um/storage/utils/CsvFile.php";
 ////////////////////////////////////////////////////////////////
 
 registerPlugin('umMatchlog',43,1.0);
+function umMatchlogInit($event) {
+	global $umConfig;
+
+	if (!($umConfig instanceof UMConfig)) {
+		$umConfig = new UMConfig();
+	}
+}
 
 //--------------------------------------------------------------
 // BeginRace :
 //--------------------------------------------------------------
 function umMatchlogBeginRace($event,$GameInfos){
-	global $_GameInfos, $_Ranking;
-    Matchlog::create("BEGIN_RACE", $_GameInfos['GameMode'], null, $_Ranking);
+	global $_GameInfos, $_Ranking, $umConfig, $_BestPlayersChecks;
+	//console('umMatchlogBeginRace $_BestPlayersChecks' .  print_r($_BestPlayersChecks, true));
+    Matchlog::create("BEGIN_RACE", $_GameInfos['GameMode'], null, $_Ranking, $umConfig->um4GF);
 }
 
 //------------------------------------------
 // EndRound :
 //------------------------------------------
 function umMatchlogEndRound($event,$Ranking,$ChallengeInfo,$GameInfos,$SpecialRestarting){
+	global $umConfig;
 	if($SpecialRestarting || isMatchlogDisabled()){
 		return;
 	}
 
-	Matchlog::create("END_ROUND", $GameInfos["GameMode"], $ChallengeInfo, $Ranking);
+	Matchlog::create("END_ROUND", $GameInfos["GameMode"], $ChallengeInfo, $Ranking, $umConfig->um4GF);
 }
 
 //------------------------------------------
 // RaceFinish
 //------------------------------------------
 function umMatchlogEndRace($event,$Ranking,$ChallengeInfo,$GameInfos){
+	global $umConfig, $_BestPlayersChecks;
+	//console('umMatchlogEndRace $_BestPlayersChecks' .  print_r($_BestPlayersChecks, true));
 	if(isMatchlogDisabled()) {
 		return;
 	}
 
-	Matchlog::create("END_RACE", $GameInfos["GameMode"], $ChallengeInfo, $Ranking);
+	Matchlog::create("END_RACE", $GameInfos["GameMode"], $ChallengeInfo, $Ranking, $umConfig->um4GF);
 }
 
 //------------------------------------------
@@ -71,15 +82,4 @@ function isMatchlogDisabled() {
 	return $_WarmUp || $_FWarmUp > 0;
 }
 
-/**
- * Not sure what this function does.
- *
- * @param $fGameModeIndex
- * @param $event
- * @param $Ranking
- * @param $ChallengeInfo
- * @param $GameInfos
- * @param $SpecialRestarting
- * @return boolean
- */
 ?>

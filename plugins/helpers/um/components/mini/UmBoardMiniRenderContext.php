@@ -9,16 +9,18 @@ class UmBoardMiniRenderContext {
     public $mlAct;
     public $umConfig;
     public $umState;
+    public $raceCollection;
     public $gameInfos;
     public $challengeInfo;
 
-    public function __construct($login, Layout $layout, array $mlAct, UMConfig $umConfig, UmState $umState) {
+    public function __construct($login, Layout $layout, array $mlAct, UMConfig $umConfig, UmState $umState, $raceCollection) {
         global $_GameInfos, $_ChallengeInfo;
         $this->login = $login;
         $this->layout = $layout;
         $this->mlAct = $mlAct;
         $this->umConfig = $umConfig;
         $this->umState = $umState;
+        $this->raceCollection = $raceCollection;
         $this->gameInfos = &$_GameInfos;
         $this->challengeInfo = $_ChallengeInfo;
     }

@@ -44,10 +44,11 @@ function umMiniScoreBoardEndRace($event, $Ranking, $ChallengeInfo, $GameInfos, $
 }
 
 function umMiniScoreBoardBeginRace($event, $GameInfos, $ChallengeInfo, $newcup, $warmup, $fwarmup) {
-    global $_players, $umState;
+    global $_players, $umState, $_ml_times_default_mod;
     $umState->raceIsEnding = false;
 
     foreach ($_players as $login => &$pl) {
+        $pl['ML']['ml_times.mod'] = $_ml_times_default_mod;
         // Hide for all active player, but not spectators.
         if ($pl['IsSpectator'] != 1) {
             $umState->miniScoreBoardIsOpen[$login] = false;
