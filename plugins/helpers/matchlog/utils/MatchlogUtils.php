@@ -3,9 +3,9 @@
 class MatchlogUtils {
 
     // TODO: use atomic write in the future
-    static function writeToFIle($text){
-        $fileName = "fastlog/um/matchlog.txt";
-
+    static function writeToFile($text, $fileName){
+        //$fileName = "fastlog/um/matchlog.txt";
+        //FastFile::atomicWrite($fileName, "###\n[".date("Y-m-d, H:i:s")."] $text\n", false);
         $myfile = fopen($fileName, "a");
         fwrite($myfile,"###\n[".date("Y-m-d, H:i:s")."] $text\n");
         fclose($myfile);

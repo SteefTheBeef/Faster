@@ -1,10 +1,10 @@
 <?php
 
 class MatchlogLaps {
-    static function create($logState, $challengeInfo, $isMatch) {
+    static function create($logState, $challengeInfo, UMConfigEntry $configEntry) {
         switch ($logState) {
             case "END_RACE":
-                self::endRace($challengeInfo, $isMatch);
+                self::endRace($challengeInfo, $configEntry);
                 break;
             case "BEGIN_ROUND":
                 self::beginRound();
@@ -15,7 +15,7 @@ class MatchlogLaps {
     private static function beginRound() {
     }
 
-    private static function endRace($challengeInfo, $isMatch) {
+    private static function endRace($challengeInfo, UMConfigEntry $configEntry) {
         global $_players, $_PlayerList, $_NumberOfChecks, $_GameInfos, $_players_round_time, $_currentTime;
 
         $numberOfCheckpoints = $_NumberOfChecks;
@@ -86,22 +86,19 @@ class MatchlogLaps {
         usort($finishedPlayers, 'compareLaps');
         $date = date("Y-m-d H:i:s");
 
-        $matchlogMessage = MatchlogUtils::getMatchlogTitle($challengeInfo, $isMatch ? 'MULTIMAP LAPS' : 'LAPS', '', $isMatch);
+        $matchlogMessage = MatchlogUtils::getMatchlogTitle($challengeInfo, 'LAPS');
         $matchlogMessage .= self::writeAllPlayersScore($finishedPlayers, $minCPdelay);
         $matchlogMessage .= MatchlogUtils::writeSpectators($playerList);
         $matchlogMessage .= self::writePlayerLaps($lapsGroupedByLogin);
         $matchlogMessage .= self::writePlayerCheckpoints($checkpointsPerLapGroupedByPlayer);
         $matchlogMessage .= self::writeBestLaps($lapsList, $gameInfo);
         $matchlogMessage .= MatchlogUtils::writePlayers($playerList);
-        $matchlogMessage .= self::writeRaceInfo($challengeInfo, $date, $_GameInfos, $isMatch);
-        if (!$isMatch) {
-            // to prevent this being sent two times in a row.
-            // TODO: prevent this in a better way.
-            self::chatMessageBestLaps($lapsList, $gameInfo);
-        }
+        $matchlogMessage .= self::writeRaceInfo($challengeInfo, $date, $_GameInfos);
 
+        // TODO: prevent this in a better way.
+        self::chatMessageBestLaps($lapsList, $gameInfo);
 
-        MatchlogUtils::writeToFIle($matchlogMessage . "\n\n");
+        MatchlogUtils::writeToFile($matchlogMessage . "\n\n", $configEntry->filePath . '/matchlog.txt');
         console("to matchlog: " . $matchlogMessage);
 
         //Write checkpoints to local files
@@ -110,14 +107,14 @@ class MatchlogLaps {
         // Update UM best scores file (per environment), only if improved:
         // Check DESC (higher is better), then Time ASC (lower is better).
         //BestRaces::updateBestRacesFile($finishedPlayers, $challengeInfo, $_GameInfos);
-        //BestRaces::appendImprovedLinesToFile(
-        //    BestRaces::updateBestRacesFile($finishedPlayers, $challengeInfo, $_GameInfos)
-        //);
+        BestRaces::appendImprovedLinesToFile(
+            BestRaces::updateBestRacesFile($finishedPlayers, $challengeInfo, $_GameInfos, $configEntry), $configEntry
+        );
         // Update UM best laps file (per environment), only if improved:
         // BestLapMs ASC (lower is better).
-        //BestRaces::appendImprovedLinesToFile(
-        //    BestRaces::updateBestLapsFile($finishedPlayers, $challengeInfo, $_GameInfos)
-        //);
+        BestRaces::appendImprovedLinesToFile(
+            BestRaces::updateBestLapsFile($finishedPlayers, $challengeInfo, $_GameInfos, $configEntry), $configEntry
+        );
 
         // Update UM players file (per environment), keyed by Login, sorted by Login.
         UmPlayers::updatePlayersFile($playerList);
@@ -167,16 +164,13 @@ class MatchlogLaps {
         }
     }
 
-    private static function writeRaceInfo($challengeInfo, $date, $gameInfo, $isMatch) {
-        global $_match_conf, $_match_map;
-
-        $matchMapNumber = $isMatch ? "{$_match_map}/{$_match_conf['NumberOfMaps']}" : "";
+    private static function writeRaceInfo($challengeInfo, $date, $gameInfo) {
 
         $result = "\n* Race info:";
-        $result .= "\nDate, ChallengeName, ChallengeNameWithColor, ChallengeID, ChallengeAuthor, Environment, GameMode, NumberOfLaps, IsMatch, MatchMapNumber";
+        $result .= "\nDate, ChallengeName, ChallengeNameWithColor, ChallengeID, ChallengeAuthor, Environment, GameMode, NumberOfLaps";
         $result .= "\n" . $date . "," . stripColors($challengeInfo["Name"]) . "," .
             $challengeInfo["Name"] . "," . getChallengeID($challengeInfo) . "," .
-            $challengeInfo["Author"] . "," . $challengeInfo['Environnement'] . ",LAPS," . $gameInfo["LapsNbLaps"] . "," . $isMatch . "," . $matchMapNumber;
+            $challengeInfo["Author"] . "," . $challengeInfo['Environnement'] . ",LAPS," . $gameInfo["LapsNbLaps"];
 
         return $result . MatchlogUtils::writeSectionDelimiter();
     }
