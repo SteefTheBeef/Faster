@@ -1,7 +1,6 @@
 <?php
 
 class BestRaces {
-    const DIR_UM = 'fastlog/um/quali';
 
     const FILE_PREFIX_BEST_RACES = 'bestRaces';
     const FILE_PREFIX_BEST_LAPS = 'bestLaps';
@@ -23,8 +22,8 @@ class BestRaces {
      *
      * @return string[] lines for players who improved (for improved.txt)
      */
-    public static function updateBestRacesFile($finishedPlayers, $challengeInfo, $gameInfo) {
-        return self::updateBestFile(self::FILE_PREFIX_BEST_RACES, $finishedPlayers, $challengeInfo, $gameInfo);
+    public static function updateBestRacesFile($finishedPlayers, $challengeInfo, $gameInfo, UMConfigEntry $configEntry) {
+        return self::updateBestFile(self::FILE_PREFIX_BEST_RACES, $finishedPlayers, $challengeInfo, $gameInfo, $configEntry);
     }
     /**
      * Update UM best race progress file (per environment), only if improved:
@@ -35,8 +34,8 @@ class BestRaces {
      *
      * @return string[] lines for players who improved (for improved.txt)
      */
-    public static function updateBestLapsFile($finishedPlayers, $challengeInfo, $gameInfo) {
-        return self::updateBestFile(self::FILE_PREFIX_BEST_LAPS, $finishedPlayers, $challengeInfo, $gameInfo);
+    public static function updateBestLapsFile($finishedPlayers, $challengeInfo, $gameInfo, UMConfigEntry $configEntry) {
+        return self::updateBestFile(self::FILE_PREFIX_BEST_LAPS, $finishedPlayers, $challengeInfo, $gameInfo, $configEntry);
     }
 
     /**
@@ -45,10 +44,10 @@ class BestRaces {
      * @param string[] $lines
      * @return void
      */
-    public static function appendImprovedLinesToFile($lines) {
+    public static function appendImprovedLinesToFile($lines, UMConfigEntry $configEntry) {
         if (!is_array($lines) || count($lines) < 1) return;
 
-        $filePath = self::DIR_UM . '/' . self::FILE_IMPROVED;
+        $filePath = $configEntry->filePath . '/' . self::FILE_IMPROVED;
         FastFile::ensureFile($filePath);
 
         $text = '';
@@ -66,7 +65,7 @@ class BestRaces {
      *
      * @return string[] improved lines (best races + best laps)
      */
-    private static function updateBestFile($kindPrefix, $finishedPlayers, $challengeInfo, $gameInfo) {
+    private static function updateBestFile($kindPrefix, $finishedPlayers, $challengeInfo, $gameInfo, UMConfigEntry $configEntry) {
         if (!is_array($finishedPlayers) || count($finishedPlayers) < 1) {
             return array();
         }
@@ -80,7 +79,7 @@ class BestRaces {
         }
 
         $lapsCount = isset($gameInfo["LapsNbLaps"]) ? (int)$gameInfo["LapsNbLaps"] : 0;
-        $filePath = self::DIR_UM . '/' . $kindPrefix . '.' . $envSafe . '.' . $lapsCount . 'laps.' . $uidSafe . '.txt';
+        $filePath = $configEntry->filePath . '/' . $kindPrefix . '.' . $envSafe . '.' . $lapsCount . 'laps.' . $uidSafe . '.txt';
         FastFile::ensureFile($filePath);
 
         $mapId = (string)getChallengeID($challengeInfo);
@@ -594,7 +593,7 @@ class BestRaces {
 
             $wantedMapId = self::wantedMapIdFromMapConfig($m);
 
-            $files = self::listBestFilesForUid($kindPrefix, $uidSafe, $config->lapsCount);
+            $files = self::listBestFilesForUid($kindPrefix, $uidSafe, $config);
             if (!is_array($files) || count($files) < 1) continue;
 
             foreach ($files as $filePath) {
@@ -683,8 +682,8 @@ class BestRaces {
         return '';
     }
 
-    private static function listBestFilesForUid($kindPrefix, $uidSafe, $lapsCount) {
-        $pattern = self::DIR_UM . '/' . $kindPrefix . '.*.'. $lapsCount . 'laps.' . $uidSafe . '.txt';
+    private static function listBestFilesForUid($kindPrefix, $uidSafe, UMConfigEntry $config) {
+        $pattern = $config->filePath . '/' . $kindPrefix . '.*.'. $config->lapsCount . 'laps.' . $uidSafe . '.txt';
         $files = glob($pattern);
         if ($files === false || !is_array($files)) return array();
         return $files;
