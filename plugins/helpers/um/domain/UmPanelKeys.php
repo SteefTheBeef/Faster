@@ -35,6 +35,7 @@ class UmPanelKeys {
     // Known tab actions used in init (and by UmPanelTabs)
     const ACT_TAB_QUALIFICATION = 'um.tab.qualification';
     const ACT_TAB_SEMI_FINAL = 'um.tab.semi-final';
+    const ACT_TAB_GRAND_FINAL = 'um.tab.grand-final';
     const ACT_TAB_STINTS = 'um.tab.stints';
     const ACT_TAB_PRIZE_POOL = 'um.tab.prize-pool';
     const ACT_TAB_SCHEDULE = 'um.tab.schedule';
@@ -64,6 +65,10 @@ class UmPanelKeys {
     // Subtabs (semi-final)
     const ACT_SUBTAB_SEMI_FINAL_PLAYER_DETAILS = self::ACT_TAB_SEMI_FINAL . self::ACT_SUBTAB_IDENTIFIER . '.player-details';
     const ACT_SUBTAB_SEMI_FINAL_STINTS = self::ACT_TAB_SEMI_FINAL . self::ACT_SUBTAB_IDENTIFIER . '.race';
+
+    // Subtabs (grand-final)
+    const ACT_SUBTAB_GRAND_FINAL_PLAYER_DETAILS = self::ACT_TAB_GRAND_FINAL . self::ACT_SUBTAB_IDENTIFIER . '.player-details';
+    const ACT_SUBTAB_GRAND_FINAL_STINTS = self::ACT_TAB_GRAND_FINAL . self::ACT_SUBTAB_IDENTIFIER . '.race';
 
     // Mini Board
     // Actions (static)
@@ -113,6 +118,7 @@ class UmPanelKeys {
 
             self::ACT_TAB_QUALIFICATION,
             self::ACT_TAB_SEMI_FINAL,
+            self::ACT_TAB_GRAND_FINAL,
             self::ACT_TAB_STINTS,
             self::ACT_TAB_PRIZE_POOL,
             self::ACT_TAB_SCHEDULE,
@@ -139,6 +145,9 @@ class UmPanelKeys {
 
             self::ACT_SUBTAB_SEMI_FINAL_PLAYER_DETAILS,
             self::ACT_SUBTAB_SEMI_FINAL_STINTS,
+
+            self::ACT_SUBTAB_GRAND_FINAL_PLAYER_DETAILS,
+            self::ACT_SUBTAB_GRAND_FINAL_STINTS
         );
     }
 

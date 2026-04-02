@@ -60,6 +60,7 @@ require_once "helpers/um/components/panels/left/PlayerListPlayoffsPanel.php";
 require_once "helpers/um/components/panels/left/RaceListLeftPanel.php";
 require_once "helpers/um/components/panels/left/QualiPlayerListPanelBuilder.php";
 require_once "helpers/um/components/panels/left/SemiFinalLeftPanel.php";
+require_once "helpers/um/components/panels/left/GrandFinalLeftPanel.php";
 require_once "helpers/um/components/panels/left/PlayerPagination.php";
 require_once "helpers/um/components/panels/left/BottomBar.php";
 
@@ -81,6 +82,9 @@ require_once "helpers/um/components/panels/right/MapsPanel.php";
 require_once "helpers/um/components/panels/right/semiFinal/SemiFinalPanel.php";
 require_once "helpers/um/components/panels/right/semiFinal/SemiFinalPlayerDetails.php";
 require_once "helpers/um/components/panels/right/semiFinal/SemiFinalRaces.php";
+require_once "helpers/um/components/panels/right/grandFinal/GrandFinalPanel.php";
+require_once "helpers/um/components/panels/right/grandFinal/GrandFinalPlayerDetails.php";
+require_once "helpers/um/components/panels/right/grandFinal/GrandFinalRaces.php";
 
 // Main component
 require_once "helpers/um/components/UmBoard.php";

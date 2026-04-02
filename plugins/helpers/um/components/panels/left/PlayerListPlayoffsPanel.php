@@ -57,7 +57,7 @@ class PlayerListPlayoffsPanel {
             $nameW = ($pointsRightX - $pointsW) - $nameLeftX;
             $qualiFont = '$060';
             $xmlPlayers .= XmlTag::labelCenterLeft($nameLeftX, $rowY - $padY, $nameW, $playerH, $name);
-            if (isset($qualiScore)) {
+            if (isset($qualiScore) && $qualiScore !== '') {
                 $xmlPlayers .= XmlTag::labelCenterLeft($nameLeftX, $rowY - $padY - 1.3, $nameW, $playerH, $qualiFont . "Quali Score: " . $qualiScore, null, array('textsize' => 0.5));
             }
             $xmlPlayers .= XmlTag::labelCenterRight($pointsRightX, $rowY - $padY, $pointsW, $playerH, $pointsOrTime);

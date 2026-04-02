@@ -46,5 +46,6 @@ class UMConfig {
         $this->um4QualiBestLap = new UMConfigEntry(PointsDistributionFactory::um4QualiBestLap(), $um4MapsTA, array(), 4, 1, 'fastlog/um/quali');
         $this->um4Semi = new UMConfigEntry(PointsDistributionFactory::um4Semi(), $um4MapsTA, array(), 6, 2, 'fastlog/um/semi');
         $this->um4GF = new UMConfigEntry(PointsDistributionFactory::um4GF(), $um4MapsPO, array(), 8, 3, 'fastlog/um/gf' );
+        $this->um4GFPractice = new UMConfigEntry(PointsDistributionFactory::um4GF(), $um4MapsPO, array(), 8, 3, 'fastlog/um/gf-practice' );
     }
 }

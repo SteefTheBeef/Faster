@@ -5,27 +5,30 @@ class RaceListLeftPanel {
     const DISPLAY_POINTS = 'points';
     const DISPLAY_TIME = 'time';
 
-    static function render(UmPanelRenderContext $ctx, $display = self::DISPLAY_POINTS) {
+    static function render(UmPanelRenderContext $ctx, $races = array(), $display = self::DISPLAY_POINTS) {
         $layout = $ctx->layout;
         $umState = $ctx->umState;
         $padX = 1.0;
         $padY = 1.8;
         //$rowCount = UMPanel::clampInt(count($players), 0, $layout->geometry->rowCount);
         $playerW = $layout->geometry->playerWidth;
-        $playerH = $layout->geometry->playerHeight;
+
         $pointsW = 6.0;
         $pointsRightX = $playerW - 1;
         $rowSpacing = 0.0;
+        $raceCount = count($races);
+        $maxRowHeight = $layout->geometry->playerHeight;
+        $dynamicRowHeight = $layout->geometry->backgroundHeight / $raceCount;
+        $rowHeight = min($dynamicRowHeight, $maxRowHeight);
 
         $actionIds = $ctx->mlAct;
-
-        $races = $umState->semiFinalRaces;
 
         $xmlPlayers = '';
         $i = 0;
 
+
         foreach ($races as $race) {
-            $rowY = -$i * ($playerH + $rowSpacing);
+            $rowY = -$i * ($rowHeight + $rowSpacing);
 
             $bg = '';
             if (isset($umState->selectedPlayerIndex[$ctx->login])) {
@@ -34,18 +37,18 @@ class RaceListLeftPanel {
 
             $actionId = isset($ctx->selectPlayerActionIds[$i]) ? (int)$ctx->selectPlayerActionIds[$i] : 0;
 
-            $xmlPlayers .= XmlTag::quad(0, $rowY, $playerW, $playerH, $bg, $actionId);
-            $xmlPlayers .= XmlTag::labelCenterLeft($padX, $rowY - $padY, $playerW - 1.2, $playerH, "\$fc0" . ($i + 1));
+            $xmlPlayers .= XmlTag::quad(0, $rowY, $playerW, $rowHeight, $bg, $actionId);
+            $xmlPlayers .= XmlTag::labelCenterLeft($padX, $rowY - $padY, $playerW - 1.2, $rowHeight, "\$fc0" . ($i + 1));
 
             $nameLeftX = $padX * 3.0;
             $nameW = ($pointsRightX - $pointsW) - $nameLeftX;
             $qualiFont = '$060';
-            $xmlPlayers .= XmlTag::labelCenterLeft($nameLeftX, $rowY - $padY, $nameW, $playerH, $race['RaceInfo']['Environment']);
-            $xmlPlayers .= XmlTag::labelCenterRight($pointsRightX, $rowY - $padY, 15, $playerH, $race['RaceInfo']['Date']);
+            $xmlPlayers .= XmlTag::labelCenterLeft($nameLeftX, $rowY - $padY, $nameW, $rowHeight, $race['RaceInfo']['Environment']);
+            $xmlPlayers .= XmlTag::labelCenterRight($pointsRightX, $rowY - $padY, 15, $rowHeight, $race['RaceInfo']['Date']);
             $i++;
         }
 
-        return BottomBar::render($ctx) . $xmlPlayers;
+        return $xmlPlayers;
     }
 
     /**

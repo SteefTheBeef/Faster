@@ -7,6 +7,7 @@ class Tabs {
      */
     public static function getTabs() {
         return array(
+            array('title' => 'Grand-Final', 'action' => UmPanelKeys::ACT_TAB_GRAND_FINAL),
             array('title' => 'Semi-Final', 'action' => UmPanelKeys::ACT_TAB_SEMI_FINAL),
             array('title' => 'Qualification', 'action' => UmPanelKeys::ACT_TAB_QUALIFICATION),
             array('title' => 'Map Ratings', 'action' => UmPanelKeys::ACT_TAB_MAPS),

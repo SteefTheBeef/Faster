@@ -43,9 +43,14 @@ class UmBoard {
                 return QualiPlayerListPanelBuilder::build($ctx);
             case UmPanelKeys::ACT_TAB_SEMI_FINAL:
                 return SemiFinalLeftPanel::build($ctx);
+            case UmPanelKeys::ACT_TAB_GRAND_FINAL:
+                return GrandFinalLeftPanel::build($ctx);
             default:
                 if ($ctx->umState->prevTab[$ctx->login] === UmPanelKeys::ACT_TAB_SEMI_FINAL) {
                     return SemiFinalLeftPanel::build($ctx);
+                }
+                if ($ctx->umState->prevTab[$ctx->login] === UmPanelKeys::ACT_TAB_GRAND_FINAL) {
+                    return GrandFinalLeftPanel::build($ctx);
                 }
                 return QualiPlayerListPanelBuilder::build($ctx);
         }
@@ -67,6 +72,8 @@ class UmBoard {
 
             case UmPanelKeys::ACT_TAB_SEMI_FINAL:
                 return SemiFinalPanel::build($ctx);
+            case UmPanelKeys::ACT_TAB_GRAND_FINAL:
+                return GrandFinalPanel::build($ctx);
             default:
                 //return 'PlayerRacesPanel::build($ctx->login, $ctx->selectedPlayerForLogin, $ctx->layout, $ctx->mlAct)';
                 return '';

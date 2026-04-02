@@ -1,7 +1,7 @@
 <?php
 
 
-class SemiFinalRaces {
+class GrandFinalRaces {
     static function render(UmPanelRenderContext $ctx) {
         $layout = $ctx->layout;
         $umState = $ctx->umState;
@@ -13,19 +13,19 @@ class SemiFinalRaces {
         $selectedPlayer = $ctx->umState->selectedPlayer[$ctx->login];
         // Keep table out of the submenu area.
 
-        $xml = UMPanel::textLabel($layout, '$fffSemi-Final Score', $subHeaderYOffset, true);
+        $xml = UMPanel::textLabel($layout, '$fffGrand-Final Score', $subHeaderYOffset, true);
 
-        $races = $umState->semiFinalRaces;
+        //$races = $umState->semiFinalRaces;
 
         //console(print_r($umState->semiFinalRaces, true));
 
-        if (!isset($umState->selectedSemiFinalRace[$ctx->login])) {
+        if (!isset($umState->selectedGrandFinalRace[$ctx->login])) {
             BottomBar::render($ctx);
         }
 
-        $selectedRace = $umState->selectedSemiFinalRace[$ctx->login];
+        $selectedRace = $umState->selectedGrandFinalRace[$ctx->login];
         $rankings = $selectedRace['Scores'];
-        $stintPrizeAmount = $umState->prizePool->config['Stints']['SemiFinal'];
+        $stintPrizeAmount = $umState->prizePool->config['Stints']['GrandFinal'];
 
         $playerNames = array();
         $ranks = array();
@@ -36,7 +36,7 @@ class SemiFinalRaces {
         $bestRaceTimes = array();
         $prizes = array();
 
-        $pd = $ctx->umConfig->um4Semi->pointsDistribution;
+        $pd = $ctx->umConfig->um4GF->pointsDistribution;
         $i = 0;
         foreach ($rankings as $index => $ranking) {
 

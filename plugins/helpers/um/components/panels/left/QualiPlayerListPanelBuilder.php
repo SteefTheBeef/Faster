@@ -31,7 +31,7 @@ class QualiPlayerListPanelBuilder {
                 break;
             case UmPanelKeys::ACT_SUBTAB_QUALIFICATION_LEADERBOARD:
                 $title = RightPanel::buildTitle2($ctx->layout, 'Qualification: Leaderboard');
-                $xml = PlayerListPlayoffsPanel::build($ctx);
+                $xml = PlayerListPlayoffsPanel::build($ctx, $ctx->umState->selectedPlayerCollection[$ctx->login], PlayerListPlayoffsPanel::DISPLAY_POINTS);
                 break;
             default:
                 break;
